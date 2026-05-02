@@ -8,10 +8,11 @@ const queryClient = new QueryClient();
 
 function Home() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen w-full flex items-center justify-center bg-background">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Replit Agent is building...</h1>
-        <p className="mt-2 text-sm text-gray-600">Your app will appear here once it's ready.</p>
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-14 w-auto mx-auto mb-6" />
+        <h1 className="text-2xl font-bold text-foreground">MWRD</h1>
+        <p className="mt-2 text-sm text-muted-foreground">B2B Procurement Platform</p>
       </div>
     </div>
   );
