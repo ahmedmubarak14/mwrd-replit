@@ -27,7 +27,7 @@ export default function CatalogPage() {
 
   const { data: categories, isLoading: categoriesLoading } = useListCategories({
     query: {
-      queryKey: getListCategoriesQueryKey({}),
+      queryKey: getListCategoriesQueryKey(),
     }
   });
 

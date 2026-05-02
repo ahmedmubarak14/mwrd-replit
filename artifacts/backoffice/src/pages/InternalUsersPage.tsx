@@ -165,7 +165,7 @@ export default function InternalUsersPage() {
                     </TableRow>
                   ))
                 ) : (
-                  users?.data.map((user) => (
+                  users?.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="font-medium">{user.real_name}</div>

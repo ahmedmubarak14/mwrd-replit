@@ -9,7 +9,7 @@ import { qs, pp } from "../lib/qs.js";
 
 const router = Router();
 
-router.get("/dashboard/stats", requirePublicAuth, async (_req, res) => {
+router.get("/account/dashboard-stats", requirePublicAuth, async (_req, res) => {
   try {
     const auth = res.locals.auth!;
     const stats = await getDashboardStats(auth.companyId, auth.role);

@@ -62,6 +62,7 @@ export default function OrderDetailPage() {
     const dnId = "placeholder-dn-id";
 
     createGRN.mutate({ 
+      id: dnId,
       data: { 
         dn_id: dnId,
         items: grnItems 

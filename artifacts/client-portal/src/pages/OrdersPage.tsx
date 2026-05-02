@@ -1,115 +1,90 @@
 import { useLocation } from "wouter";
-import { 
-  useListOrders, 
-  getListOrdersQueryKey 
-} from "@workspace/api-client-react";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useListOrders, getListOrdersQueryKey } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Package } from "@untitledui/icons";
+
+const STATUS_PILL: Record<string, string> = {
+  pending:    "bg-[rgb(255,249,235)] text-[rgb(181,71,8)]   border-[rgb(254,223,137)]",
+  approved:   "bg-[rgb(239,248,255)] text-[rgb(21,112,239)]  border-[rgb(209,236,255)]",
+  processing: "bg-[rgb(239,248,255)] text-[rgb(21,112,239)]  border-[rgb(209,236,255)]",
+  shipped:    "bg-[rgb(245,243,255)] text-[rgb(105,65,198)]  border-[rgb(214,205,254)]",
+  in_transit: "bg-[rgb(245,243,255)] text-[rgb(105,65,198)]  border-[rgb(214,205,254)]",
+  delivered:  "bg-[rgb(236,253,243)] text-[rgb(7,148,85)]   border-[rgb(167,243,208)]",
+  completed:  "bg-[rgb(236,253,243)] text-[rgb(7,148,85)]   border-[rgb(167,243,208)]",
+  cancelled:  "bg-[rgb(255,243,242)] text-[rgb(217,45,32)]  border-[rgb(255,196,191)]",
+};
 
 export default function OrdersPage() {
   const [, setLocation] = useLocation();
   const { data: orders, isLoading } = useListOrders({}, {
-    query: {
-      queryKey: getListOrdersQueryKey({}),
-    }
+    query: { queryKey: getListOrdersQueryKey({}) },
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'approved': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'shipped': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
-      case 'delivered': return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'cancelled': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
-    }
-  };
+  const rows = orders ?? [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
-        <p className="text-muted-foreground">Track your purchase orders and deliveries.</p>
+        <h1 className="text-xl font-semibold text-[rgb(16,24,40)]">Orders</h1>
+        <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">Track your purchase orders and deliveries</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Purchase Orders</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order #</TableHead>
-                  <TableHead>Supplier</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Total Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders?.orders?.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium" data-testid={`text-order-id-${order.id}`}>
-                      {order.po_number || order.id.slice(0, 8)}
-                    </TableCell>
-                    <TableCell data-testid={`text-order-supplier-${order.id}`}>{order.supplier_name}</TableCell>
-                    <TableCell data-testid={`text-order-date-${order.id}`}>
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell data-testid={`text-order-amount-${order.id}`}>
-                      SAR {order.total_amount?.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(order.status)} data-testid={`status-order-${order.id}`}>
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setLocation(`/orders/${order.id}`)}
-                        data-testid={`button-view-order-${order.id}`}
-                      >
-                        View PO
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!orders?.orders || orders.orders.length === 0) && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                      No orders found. Award an RFQ to create a purchase order.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+        {isLoading ? (
+          <div className="p-5 space-y-3">
+            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="py-16 text-center">
+            <Package className="mx-auto h-8 w-8 text-[rgb(208,213,221)] mb-3" />
+            <p className="text-sm text-[rgb(152,162,179)]">No orders yet. Award an RFQ to create a purchase order.</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[rgb(228,231,236)]">
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Order #</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide hidden sm:table-cell">Supplier</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide hidden md:table-cell">Amount (SAR)</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Status</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[rgb(242,244,247)]">
+              {rows.map((order) => (
+                <tr key={order.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
+                  <td className="px-5 py-3.5 font-medium text-[rgb(16,24,40)]" data-testid={`text-order-id-${order.id}`}>
+                    #{order.po_number || order.id.slice(0, 8)}
+                  </td>
+                  <td className="px-5 py-3.5 text-[rgb(102,112,133)] hidden sm:table-cell" data-testid={`text-order-supplier-${order.id}`}>
+                    {order.supplier_company_id || "—"}
+                  </td>
+                  <td className="px-5 py-3.5 text-[rgb(102,112,133)] hidden md:table-cell" data-testid={`text-order-amount-${order.id}`}>
+                    {order.total_sar?.toLocaleString("en-SA", { minimumFractionDigits: 2 }) ?? "—"}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${STATUS_PILL[order.status] ?? "bg-[rgb(242,244,247)] text-[rgb(102,112,133)] border-[rgb(228,231,236)]"}`}
+                      data-testid={`status-order-${order.id}`}
+                    >
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right">
+                    <button
+                      onClick={() => setLocation(`/orders/${order.id}`)}
+                      className="text-xs font-medium text-[rgb(102,112,133)] hover:text-[rgb(16,24,40)] transition-colors"
+                      data-testid={`button-view-order-${order.id}`}
+                    >
+                      View →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }

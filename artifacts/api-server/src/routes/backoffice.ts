@@ -20,7 +20,7 @@ import { qs, qn, pp } from "../lib/qs.js";
 
 const router = Router();
 
-router.get("/backoffice/dashboard/stats", requireBackofficeAuth, async (_req, res) => {
+router.get("/backoffice/dashboard-stats", requireBackofficeAuth, async (_req, res) => {
   try {
     const auth = res.locals.auth!;
     const stats = await getDashboardStats(auth.companyId, "admin");

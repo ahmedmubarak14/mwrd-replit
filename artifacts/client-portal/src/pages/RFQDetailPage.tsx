@@ -141,7 +141,7 @@ export default function RFQDetailPage() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {quotesData?.data?.map((quote) => (
+            {quotesData?.map((quote) => (
               <Card key={quote.id} className="flex flex-col" data-testid={`card-quote-${quote.id}`}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
@@ -176,7 +176,7 @@ export default function RFQDetailPage() {
                 </CardFooter>
               </Card>
             ))}
-            {(!quotesData?.data || quotesData.data.length === 0) && (
+            {(!quotesData || quotesData.length === 0) && (
               <div className="col-span-full py-12 flex flex-col items-center text-muted-foreground bg-muted/20 border rounded-lg">
                 <AlertCircle className="h-10 w-10 mb-2 opacity-20" />
                 <p>No quotes received yet from suppliers.</p>

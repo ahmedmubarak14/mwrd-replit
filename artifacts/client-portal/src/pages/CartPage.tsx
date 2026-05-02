@@ -136,8 +136,7 @@ export default function CartPage() {
                     <div className="flex items-center border rounded">
                       <Button 
                         variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8" 
+                        className="h-8 w-8 p-0" 
                         onClick={() => handleUpdateQty(item.id, item.qty, -1)}
                         disabled={item.qty <= 1 || updateItem.isPending}
                         data-testid={`button-qty-minus-${item.id}`}
@@ -147,8 +146,7 @@ export default function CartPage() {
                       <span className="w-10 text-center text-sm" data-testid={`text-item-qty-${item.id}`}>{item.qty}</span>
                       <Button 
                         variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8" 
+                        className="h-8 w-8 p-0" 
                         onClick={() => handleUpdateQty(item.id, item.qty, 1)}
                         disabled={updateItem.isPending}
                         data-testid={`button-qty-plus-${item.id}`}
@@ -158,8 +156,7 @@ export default function CartPage() {
                     </div>
                     <Button 
                       variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => handleRemove(item.id)}
                       disabled={removeItem.isPending}
                       data-testid={`button-remove-item-${item.id}`}
