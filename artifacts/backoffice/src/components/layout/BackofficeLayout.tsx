@@ -81,8 +81,8 @@ function NavLeafItem({
         className={cx(
           "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
           isActive
-            ? "bg-white/[0.08] text-[#FF6D43]"
-            : "text-[rgb(160,152,138)] hover:bg-white/[0.05] hover:text-[rgb(220,210,190)]",
+            ? "bg-[rgb(249,250,251)] text-[rgb(16,24,40)]"
+            : "text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] hover:text-[rgb(52,64,84)]",
         )}
         data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
       >
@@ -90,14 +90,14 @@ function NavLeafItem({
           className={cx(
             "w-[18px] h-[18px] shrink-0 transition-colors",
             isActive
-              ? "text-[#FF6D43]"
-              : "text-[rgb(120,112,98)] group-hover:text-[rgb(180,170,150)]",
+              ? "text-[rgb(255,109,67)]"
+              : "text-[rgb(152,162,179)] group-hover:text-[rgb(102,112,133)]",
           )}
           aria-hidden
         />
         <span className="flex-1">{item.label}</span>
         {item.badge !== undefined && (
-          <span className="ml-auto text-xs font-medium bg-white/[0.08] text-[rgb(140,132,118)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+          <span className="ml-auto text-xs font-medium bg-[rgb(242,244,247)] text-[rgb(102,112,133)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
             {item.badge}
           </span>
         )}
@@ -125,30 +125,30 @@ function NavGroupItem({
         className={cx(
           "group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
           isAnyChildActive
-            ? "text-[rgb(220,210,190)]"
-            : "text-[rgb(160,152,138)] hover:bg-white/[0.05] hover:text-[rgb(220,210,190)]",
+            ? "text-[rgb(16,24,40)]"
+            : "text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] hover:text-[rgb(52,64,84)]",
         )}
       >
         <item.icon
           className={cx(
             "w-[18px] h-[18px] shrink-0 transition-colors",
             isAnyChildActive
-              ? "text-[rgb(200,190,170)]"
-              : "text-[rgb(120,112,98)] group-hover:text-[rgb(180,170,150)]",
+              ? "text-[rgb(255,109,67)]"
+              : "text-[rgb(152,162,179)] group-hover:text-[rgb(102,112,133)]",
           )}
           aria-hidden
         />
         <span className="flex-1 text-left">{item.label}</span>
         <ChevronDown
           className={cx(
-            "w-4 h-4 text-[rgb(100,92,78)] transition-transform duration-200",
+            "w-4 h-4 text-[rgb(152,162,179)] transition-transform duration-200",
             open ? "rotate-180" : "",
           )}
           aria-hidden
         />
       </button>
       {open && (
-        <div className="mt-0.5 ml-[30px] space-y-0.5 border-l border-[rgb(44,44,44)] pl-3">
+        <div className="mt-0.5 ml-[30px] space-y-0.5 border-l border-[rgb(228,231,236)] pl-3">
           {item.items.map((child) => {
             const isActive = location === child.href;
             return (
@@ -158,13 +158,13 @@ function NavGroupItem({
                   className={cx(
                     "flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-all duration-150",
                     isActive
-                      ? "text-[#FF6D43] font-medium"
-                      : "text-[rgb(140,132,118)] hover:text-[rgb(200,190,170)]",
+                      ? "text-[rgb(255,109,67)] font-medium"
+                      : "text-[rgb(102,112,133)] hover:text-[rgb(52,64,84)]",
                   )}
                 >
                   <span>{child.label}</span>
                   {child.badge !== undefined && (
-                    <span className="text-xs font-medium bg-white/[0.08] text-[rgb(120,112,98)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+                    <span className="text-xs font-medium bg-[rgb(242,244,247)] text-[rgb(102,112,133)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
                       {child.badge}
                     </span>
                   )}
@@ -191,12 +191,13 @@ function SidebarNav({
         if (isDivider(item)) {
           return (
             <div key={`divider-${i}`} className="pt-4 pb-1">
-              {item.label && (
-                <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-[rgb(80,74,62)]">
+              {item.label ? (
+                <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-[rgb(152,162,179)]">
                   {item.label}
                 </p>
+              ) : (
+                <div className="border-t border-[rgb(228,231,236)]" />
               )}
-              {!item.label && <div className="border-t border-[rgb(38,38,38)]" />}
             </div>
           );
         }
@@ -256,43 +257,43 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
 
   if (isLoading && location !== "/login") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[rgb(12,12,12)]">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#FF6D43] border-t-transparent" />
+      <div className="min-h-screen flex items-center justify-center bg-[rgb(249,250,251)]">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(255,109,67)] border-t-transparent" />
       </div>
     );
   }
 
   const sidebarFooter = (
-    <div className="border-t border-[rgb(38,38,38)] p-3 space-y-0.5">
+    <div className="border-t border-[rgb(228,231,236)] p-3 space-y-0.5">
       {user && (
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="w-8 h-8 rounded-full bg-[#FF6D43] flex items-center justify-center text-white font-semibold text-sm shrink-0">
+          <div className="w-8 h-8 rounded-full bg-[rgb(255,109,67)] flex items-center justify-center text-white font-semibold text-sm shrink-0">
             {user.user?.email?.charAt(0).toUpperCase() || "A"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate text-[rgb(210,200,180)]">
+            <p className="text-sm font-medium truncate text-[rgb(16,24,40)]">
               {user.user?.email}
             </p>
-            <p className="text-xs text-[rgb(100,92,78)] capitalize">{user.user?.role}</p>
+            <p className="text-xs text-[rgb(152,162,179)] capitalize">{user.user?.role}</p>
           </div>
         </div>
       )}
       <button
         onClick={handleLogout}
-        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[rgb(130,122,108)] hover:bg-white/[0.05] hover:text-[rgb(200,190,170)] transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] hover:text-[rgb(52,64,84)] transition-colors"
         data-testid="button-logout"
       >
-        <LogOut01 className="w-[18px] h-[18px] shrink-0" aria-hidden />
+        <LogOut01 className="w-[18px] h-[18px] shrink-0 text-[rgb(152,162,179)]" aria-hidden />
         <span>Log out</span>
       </button>
     </div>
   );
 
   return (
-    <div className="flex min-h-screen w-full bg-[rgb(12,12,12)]">
+    <div className="flex min-h-screen w-full bg-[rgb(249,250,251)]">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[rgb(18,18,18)] border-r border-[rgb(38,38,38)]">
-        <div className="flex h-16 items-center px-5 border-b border-[rgb(38,38,38)]">
+      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-white border-r border-[rgb(228,231,236)]">
+        <div className="flex h-16 items-center px-5 border-b border-[rgb(228,231,236)]">
           <button
             onClick={handleLogoClick}
             className="flex items-center cursor-pointer focus:outline-none"
@@ -313,11 +314,11 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-black/40"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex flex-col w-72 bg-[rgb(18,18,18)] border-r border-[rgb(38,38,38)] z-50">
-            <div className="flex h-16 items-center px-5 border-b border-[rgb(38,38,38)]">
+          <aside className="absolute inset-y-0 left-0 flex flex-col w-72 bg-white border-r border-[rgb(228,231,236)] z-50">
+            <div className="flex h-16 items-center px-5 border-b border-[rgb(228,231,236)]">
               <button
                 onClick={handleLogoClick}
                 className="flex items-center cursor-pointer focus:outline-none"
@@ -339,7 +340,7 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Mobile header */}
-        <header className="h-16 border-b border-[rgb(38,38,38)] flex items-center px-4 justify-between md:hidden bg-[rgb(18,18,18)]">
+        <header className="h-16 border-b border-[rgb(228,231,236)] flex items-center px-4 justify-between md:hidden bg-white">
           <button
             onClick={handleLogoClick}
             className="focus:outline-none"
@@ -353,7 +354,7 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
           </button>
           <button
             onClick={() => setMobileOpen(true)}
-            className="p-2 rounded-lg text-[rgb(140,132,118)] hover:bg-white/[0.05] transition-colors"
+            className="p-2 rounded-lg text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] transition-colors"
           >
             <Menu01 className="h-6 w-6" aria-hidden />
           </button>

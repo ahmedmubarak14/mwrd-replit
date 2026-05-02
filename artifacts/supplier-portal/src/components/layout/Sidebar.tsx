@@ -64,21 +64,23 @@ function NavLeafItem({ item, location }: { item: NavLeaf; location: string }) {
         className={cx(
           "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
           isActive
-            ? "bg-white/[0.08] text-[#FF6D43]"
-            : "text-[rgb(160,152,138)] hover:bg-white/[0.05] hover:text-[rgb(220,210,190)]",
+            ? "bg-[rgb(249,250,251)] text-[rgb(16,24,40)]"
+            : "text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] hover:text-[rgb(52,64,84)]",
         )}
         data-testid={`link-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
       >
         <item.icon
           className={cx(
             "w-[18px] h-[18px] shrink-0 transition-colors",
-            isActive ? "text-[#FF6D43]" : "text-[rgb(120,112,98)] group-hover:text-[rgb(180,170,150)]",
+            isActive
+              ? "text-[rgb(255,109,67)]"
+              : "text-[rgb(152,162,179)] group-hover:text-[rgb(102,112,133)]",
           )}
           aria-hidden
         />
         <span className="flex-1">{item.label}</span>
         {item.badge !== undefined && (
-          <span className="ml-auto text-xs font-medium bg-white/[0.08] text-[rgb(140,132,118)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+          <span className="ml-auto text-xs font-medium bg-[rgb(242,244,247)] text-[rgb(102,112,133)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
             {item.badge}
           </span>
         )}
@@ -98,28 +100,30 @@ function NavGroupItem({ item, location }: { item: NavGroup; location: string }) 
         className={cx(
           "group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
           isAnyChildActive
-            ? "text-[rgb(220,210,190)]"
-            : "text-[rgb(160,152,138)] hover:bg-white/[0.05] hover:text-[rgb(220,210,190)]",
+            ? "text-[rgb(16,24,40)]"
+            : "text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] hover:text-[rgb(52,64,84)]",
         )}
       >
         <item.icon
           className={cx(
             "w-[18px] h-[18px] shrink-0 transition-colors",
-            isAnyChildActive ? "text-[rgb(200,190,170)]" : "text-[rgb(120,112,98)] group-hover:text-[rgb(180,170,150)]",
+            isAnyChildActive
+              ? "text-[rgb(255,109,67)]"
+              : "text-[rgb(152,162,179)] group-hover:text-[rgb(102,112,133)]",
           )}
           aria-hidden
         />
         <span className="flex-1 text-left">{item.label}</span>
         <ChevronDown
           className={cx(
-            "w-4 h-4 text-[rgb(100,92,78)] transition-transform duration-200",
+            "w-4 h-4 text-[rgb(152,162,179)] transition-transform duration-200",
             open ? "rotate-180" : "",
           )}
           aria-hidden
         />
       </button>
       {open && (
-        <div className="mt-0.5 ml-[30px] space-y-0.5 border-l border-[rgb(44,44,44)] pl-3">
+        <div className="mt-0.5 ml-[30px] space-y-0.5 border-l border-[rgb(228,231,236)] pl-3">
           {item.items.map((child) => {
             const isActive = location === child.href;
             return (
@@ -128,13 +132,13 @@ function NavGroupItem({ item, location }: { item: NavGroup; location: string }) 
                   className={cx(
                     "flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-all duration-150",
                     isActive
-                      ? "text-[#FF6D43] font-medium"
-                      : "text-[rgb(140,132,118)] hover:text-[rgb(200,190,170)]",
+                      ? "text-[rgb(255,109,67)] font-medium"
+                      : "text-[rgb(102,112,133)] hover:text-[rgb(52,64,84)]",
                   )}
                 >
                   <span>{child.label}</span>
                   {child.badge !== undefined && (
-                    <span className="text-xs font-medium bg-white/[0.08] text-[rgb(120,112,98)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+                    <span className="text-xs font-medium bg-[rgb(242,244,247)] text-[rgb(102,112,133)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
                       {child.badge}
                     </span>
                   )}
@@ -171,15 +175,15 @@ export function Sidebar() {
     logout.mutate(undefined, {
       onSuccess: () => {
         localStorage.removeItem("mwrd_supplier_token");
-        window.location.replace("/supplier/login");
+        window.location.replace("/login");
       },
     });
   };
 
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col bg-[rgb(18,18,18)] border-r border-[rgb(38,38,38)]">
+    <aside className="flex h-full w-64 shrink-0 flex-col bg-white border-r border-[rgb(228,231,236)]">
       {/* Logo */}
-      <div className="flex h-16 items-center px-5 border-b border-[rgb(38,38,38)]">
+      <div className="flex h-16 items-center px-5 border-b border-[rgb(228,231,236)]">
         <button
           onClick={handleLogoClick}
           className="flex items-center cursor-pointer focus:outline-none"
@@ -193,7 +197,7 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
         {navConfig.map((item, i) => {
           if (isDivider(item)) {
-            return <div key={`divider-${i}`} className="my-2 border-t border-[rgb(38,38,38)]" />;
+            return <div key={`divider-${i}`} className="my-2 border-t border-[rgb(228,231,236)]" />;
           }
           if (isGroup(item)) {
             return <NavGroupItem key={item.label} item={item} location={location} />;
@@ -203,24 +207,26 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-[rgb(38,38,38)] p-3 space-y-0.5">
+      <div className="border-t border-[rgb(228,231,236)] p-3 space-y-0.5">
         {user && (
           <div className="flex items-center gap-3 px-3 py-2 mb-1">
-            <div className="w-8 h-8 rounded-full bg-[#FF6D43] flex items-center justify-center text-white font-semibold text-sm shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[rgb(255,109,67)] flex items-center justify-center text-white font-semibold text-sm shrink-0">
               {(user.user as any)?.real_name?.charAt(0) || "S"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate text-[rgb(210,200,180)]">{(user.user as any)?.real_name}</p>
-              <p className="text-xs text-[rgb(100,92,78)] truncate">{user.user?.email}</p>
+              <p className="text-sm font-medium truncate text-[rgb(16,24,40)]">
+                {(user.user as any)?.real_name}
+              </p>
+              <p className="text-xs text-[rgb(152,162,179)] truncate">{user.user?.email}</p>
             </div>
           </div>
         )}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[rgb(130,122,108)] hover:bg-white/[0.05] hover:text-[rgb(200,190,170)] transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] hover:text-[rgb(52,64,84)] transition-colors"
           data-testid="button-logout"
         >
-          <LogOut01 className="w-[18px] h-[18px] shrink-0" aria-hidden />
+          <LogOut01 className="w-[18px] h-[18px] shrink-0 text-[rgb(152,162,179)]" aria-hidden />
           <span>Log out</span>
         </button>
       </div>
