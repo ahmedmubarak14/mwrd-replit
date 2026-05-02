@@ -4235,8 +4235,8 @@ figure {
 .tab-01-image {
   z-index: 1;
   border-radius: var(--_sizes---general--xs) 0rem 0rem;
-  background-image: url("../images/bg/68a492d1b6570b95dd597824_Customer-Card.png");
-  background-position: 0 0;
+  background-image: url("../images/portal-supplier.jpg");
+  background-position: right center;
   background-repeat: no-repeat;
   background-size: cover;
   width: 100%;
@@ -4249,8 +4249,8 @@ figure {
 .tab-02-image {
   z-index: 3;
   border-radius: var(--_sizes---general--xs);
-  background-image: url("../images/bg/68a4af6379634f53e60e3f1b_Revenue-Card.png");
-  background-position: 0 0;
+  background-image: url("../images/portal-client.jpg");
+  background-position: right center;
   background-repeat: no-repeat;
   background-size: cover;
   position: absolute;
@@ -4273,8 +4273,8 @@ figure {
 .tab-04-image {
   z-index: 1;
   border-radius: var(--_sizes---general--xs) var(--_sizes---general--xs) 0rem 0rem;
-  background-image: url("../images/bg/68a4af8269dc1ef2ce14b1f9_Welcome-Card.png");
-  background-position: 50% 0;
+  background-image: url("../images/dashboard.jpg");
+  background-position: right center;
   background-repeat: no-repeat;
   background-size: cover;
   justify-content: center;
@@ -4307,10 +4307,10 @@ figure {
 }
 
 .tab-03-image {
-  background-image: url("../images/bg/68a4af6f92cfc6de1cfe10dc_Task-Card.png");
-  background-position: 50%;
+  background-image: url("../images/portal-backoffice.jpg");
+  background-position: right center;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
   transition: transform .5s;
   position: absolute;
   inset: 0%;
@@ -4594,19 +4594,19 @@ figure {
 }
 
 .process-image._1 {
-  background-image: url("../images/bg/68a4af78b97a579a98e7e732_Step-Card-1.png");
+  background-image: url("../images/bg/Step-Card-1.svg");
   background-position: 0 0;
   background-size: cover;
 }
 
 .process-image._2 {
-  background-image: url("../images/bg/68a4af7b655f604c2a0e92ee_Step-Card-2.png");
+  background-image: url("../images/bg/Step-Card-2.svg");
   background-position: 0 0;
   background-size: cover;
 }
 
 .process-image._3 {
-  background-image: url("../images/bg/68a4af7baceacb3162500e92_Step-Card-3.png");
+  background-image: url("../images/bg/Step-Card-3.svg");
   background-position: 0 0;
   background-size: cover;
 }
