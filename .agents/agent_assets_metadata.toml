@@ -1,5 +1,46 @@
 uploads = []
-generated = []
+
+[[generated]]
+id = "1uFNgPXGpRYc5dMoesPiT"
+uri = "file://artifacts/landing-page/public/images/testimonial-card-1.png"
+type = "image"
+title = "testimonial-1"
+
+[[generated]]
+id = "y5mk4fex8K6BZ_9M1RNy4"
+uri = "file://artifacts/landing-page/public/images/testimonial-card-2.png"
+type = "image"
+title = "testimonial-2"
+
+[[generated]]
+id = "NQRsZGqjtBo-X1LYgCIcu"
+uri = "file://artifacts/landing-page/public/images/testimonial-card-3.png"
+type = "image"
+title = "testimonial-3-v2"
+
+[[generated]]
+id = "8dcUlJ7l0loyBU8lPLWeB"
+uri = "file://artifacts/landing-page/public/images/testimonial-card-4.png"
+type = "image"
+title = "testimonial-4"
+
+[[generated]]
+id = "V2v9J_giT16eIRBZ0Gm3V"
+uri = "file://artifacts/landing-page/public/images/step-1.png"
+type = "image"
+title = "step-1-send"
+
+[[generated]]
+id = "FvgaxrY_rhQopROxMIoOu"
+uri = "file://artifacts/landing-page/public/images/step-2.png"
+type = "image"
+title = "step-2-bids"
+
+[[generated]]
+id = "s6eq_p_QjgiINZd35EIVS"
+uri = "file://artifacts/landing-page/public/images/step-3.png"
+type = "image"
+title = "step-3-deliver"
 
 [[outputs]]
 id = "T9yvCLr1TYarAURRWpYEj"

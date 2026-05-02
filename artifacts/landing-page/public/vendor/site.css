@@ -4594,19 +4594,19 @@ figure {
 }
 
 .process-image._1 {
-  background-image: url("../images/bg/Step-Card-1.svg");
+  background-image: url("../images/step-1.png");
   background-position: 0 0;
   background-size: cover;
 }
 
 .process-image._2 {
-  background-image: url("../images/bg/Step-Card-2.svg");
+  background-image: url("../images/step-2.png");
   background-position: 0 0;
   background-size: cover;
 }
 
 .process-image._3 {
-  background-image: url("../images/bg/Step-Card-3.svg");
+  background-image: url("../images/step-3.png");
   background-position: 0 0;
   background-size: cover;
 }
