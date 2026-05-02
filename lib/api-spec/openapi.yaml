@@ -1471,7 +1471,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
 
-  /backoffice/catalog/products:
+  /backoffice/products:
     get:
       operationId: adminListProducts
       tags: [backoffice]
@@ -1518,7 +1518,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/MasterProduct"
 
-  /backoffice/catalog/products/{id}:
+  /backoffice/products/{id}:
     patch:
       operationId: adminUpdateProduct
       tags: [backoffice]
@@ -1542,9 +1542,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MasterProduct"
-
-  /backoffice/catalog/products/{id}/deprecate:
-    post:
+    delete:
       operationId: adminDeprecateProduct
       tags: [backoffice]
       summary: Deprecate a master product

@@ -109,7 +109,27 @@ export default function OrderDetailPage() {
               Receive Goods (GRN)
             </Button>
           )}
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => {
+              const dn = (order as any)?.delivery_notes?.[0];
+              if (dn?.tracking_number) {
+                toast({
+                  title: `${dn.courier ?? "Courier"} — ${dn.tracking_number}`,
+                  description: dn.expected_delivery_date
+                    ? `Expected delivery: ${new Date(dn.expected_delivery_date).toLocaleDateString()}`
+                    : "Tracking number copied to clipboard.",
+                });
+                if (navigator?.clipboard) navigator.clipboard.writeText(dn.tracking_number);
+              } else {
+                toast({
+                  title: "No shipment yet",
+                  description: "The supplier hasn't dispatched this order. We'll notify you when it ships.",
+                });
+              }
+            }}
+            data-testid="button-track-shipment"
+          >
             <Truck01 className="mr-2 h-4 w-4" />
             Track Shipment
           </Button>

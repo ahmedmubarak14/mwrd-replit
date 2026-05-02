@@ -6428,8 +6428,8 @@ export const getAdminListProductsUrl = (params?: AdminListProductsParams) => {
   const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0
-    ? `/api/backoffice/catalog/products?${stringifiedParams}`
-    : `/api/backoffice/catalog/products`;
+    ? `/api/backoffice/products?${stringifiedParams}`
+    : `/api/backoffice/products`;
 };
 
 export const adminListProducts = async (
@@ -6448,10 +6448,7 @@ export const adminListProducts = async (
 export const getAdminListProductsQueryKey = (
   params?: AdminListProductsParams,
 ) => {
-  return [
-    `/api/backoffice/catalog/products`,
-    ...(params ? [params] : []),
-  ] as const;
+  return [`/api/backoffice/products`, ...(params ? [params] : [])] as const;
 };
 
 export const getAdminListProductsQueryOptions = <
@@ -6520,7 +6517,7 @@ export function useAdminListProducts<
  * @summary Create a new master product
  */
 export const getAdminCreateProductUrl = () => {
-  return `/api/backoffice/catalog/products`;
+  return `/api/backoffice/products`;
 };
 
 export const adminCreateProduct = async (
@@ -6606,7 +6603,7 @@ export const useAdminCreateProduct = <
  * @summary Update a master product
  */
 export const getAdminUpdateProductUrl = (id: string) => {
-  return `/api/backoffice/catalog/products/${id}`;
+  return `/api/backoffice/products/${id}`;
 };
 
 export const adminUpdateProduct = async (
@@ -6693,7 +6690,7 @@ export const useAdminUpdateProduct = <
  * @summary Deprecate a master product
  */
 export const getAdminDeprecateProductUrl = (id: string) => {
-  return `/api/backoffice/catalog/products/${id}/deprecate`;
+  return `/api/backoffice/products/${id}`;
 };
 
 export const adminDeprecateProduct = async (
@@ -6702,7 +6699,7 @@ export const adminDeprecateProduct = async (
 ): Promise<MasterProduct> => {
   return customFetch<MasterProduct>(getAdminDeprecateProductUrl(id), {
     ...options,
-    method: "POST",
+    method: "DELETE",
   });
 };
 

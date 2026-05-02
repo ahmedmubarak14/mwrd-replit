@@ -1,0 +1,3008 @@
+
+
+
+
+MWRD
+Strategic MVP Build Brief
+v3 -- Quote-only model with master catalog and supplier offers
+Prepared for Ahmed Mubarak
+Co-founder, Bayan Technical Company
+May 2026
+
+Contents
+Part 1 -- Strategic context. Read once.
+	•	Scope. What's in MVP, what's deferred, what's stubbed.
+	•	Competitive positioning. MWRD vs Lawazem vs Brkz.
+	•	Core model. The four locked product decisions.
+	•	Architecture. Monorepo, tech stack, three-phase build.
+	•	Data model. Every entity, every rule that must never be violated.
+	•	Screen map. Every page across all four apps.
+
+Part 2 -- Build prompts. Live in this part.
+	•	Master prompt -- paste as CLAUDE.md at repo root.
+	•	Prompt 1 -- Monorepo and four apps scaffold.
+	•	Prompt 2 -- Shared package: types, schemas, utils, mock data layer.
+	•	Prompt 3 -- Public auth package (client + supplier shared).
+	•	Prompt 4 -- Client portal.
+	•	Prompt 5 -- Supplier portal.
+	•	Prompt 6 -- Backoffice (separate auth, separate everything).
+	•	Prompt 7 -- Mobile app (Expo, single codebase).
+	•	Prompt 8 -- Wire Supabase (Phase 2).
+	•	Prompt 9 -- ZATCA Phase 2 + Tap Payments (Phase 3).
+
+Scope
+Strategic MVP. Quote-driven model with master catalog. No public prices anywhere. Suppliers attach offers to admin-curated master products. Auto-quote engine with supplier review window. Line-item comparison with split awards. Account Management. Bundles. Saved Carts and Company Catalogs. Everything else is v2.
+In scope
+Apps and platforms
+	•	Three web apps: client.mwrd.io, supplier.mwrd.io, backoffice.mwrd.io
+	•	One Expo mobile app serving both client and supplier roles (single codebase)
+	•	English and Arabic with full RTL
+	•	SAR currency throughout, 15% VAT line items shown explicitly
+Auth
+	•	Public shared auth (client + supplier) via packages/auth-public, mounted on both client and supplier domains
+	•	Backoffice auth fully separate, lives only in apps/backoffice, no public registration
+	•	Minimal registration form: name, email, account type, phone, company name
+	•	Callback activation flow: signup -> 'we'll call within 24 hours' -> ops calls -> activation email -> password set
+	•	Onboarding wizard on first login captures the rest of company info
+Catalog architecture
+	•	Two-tier: admin-owned Master Catalog + supplier-owned Offers
+	•	Master Products: name, specs, images, pack types, all admin-curated (single source of truth)
+	•	Offers: per-supplier price-and-availability records attached to master products
+	•	Product Addition Requests: suppliers can submit new product proposals to admin
+	•	Pre-launch seeding: 200 to 300 master products across the strongest 3 categories
+Quote engine (Model B with auto-quote)
+	•	RFQ is the only client entry point. No public catalog prices, ever.
+	•	Per-offer auto-quote toggle (supplier opts in per product)
+	•	Auto-quote review window: instant / 30 min / 2 hr (per-supplier setting)
+	•	Supplier can edit any line, decline any line, or send immediately
+	•	Margin engine: server-side, per category and per client, never visible to either party
+	•	Auto-quotes above SAR threshold hold for admin Quote Manager review
+	•	Suppliers operate fully blind -- no competitor pricing signals
+Client experience
+	•	Browse master catalog by category (no prices, just product info)
+	•	RFQ builder: add master products with qty and pack type, or submit Custom Request for off-catalog items
+	•	Line-item comparison view: each RFQ item compared across all responding suppliers
+	•	Per-item award (split CPOs across suppliers) OR full-basket award (single supplier)
+	•	Bundles: pre-built multi-item kits, one-click add to RFQ
+	•	Saved Carts (RFQ drafts) with 7-day expiry, multiple parked baskets
+	•	Company Catalogs: curated approved-product lists for repeat ordering
+	•	Account Management: Users, Roles, Approval Tree, Addresses
+	•	Approval Tree gates every order through a configurable approver chain
+Supplier experience
+	•	Browse master catalog with 'Sell this product' CTA
+	•	Offer management: per-pack-type cost prices, lead time, min order qty, auto-quote toggle
+	•	Product Addition Request flow for items not in master catalog
+	•	Auto-quote review queue: edit before send, or accept the auto-draft
+	•	Order management with anonymized client codes (Client-XXXX format)
+	•	Delivery Note creation flow
+Backoffice
+	•	Master Catalog Management: create/edit/deprecate master products, manage categories
+	•	Product Addition Request queue: review, approve (creates master product), or reject
+	•	Offer Approval Queue: first-time supplier offer verification
+	•	Quote Manager: margin slider per quote, threshold-based hold logic, send to client
+	•	Leads Queue: pending callbacks from new signups
+	•	KYC Queue: post-callback document verification
+	•	Three-Way Match: PO x GRN x Invoice variance review
+	•	Internal users management (superadmin only): invite ops, finance, cs
+	•	Audit log of every backoffice action
+Documents and operations
+	•	Dual PO system (CPO + SPO linked by transaction_ref)
+	•	Delivery Notes (DN), Goods Receipt Notes (GRN), Invoices (INV)
+	•	Three-way matching within 2% variance tolerance
+	•	ZATCA Phase 2 stub (TLV generator returns null in MVP, real impl in Phase 3)
+	•	Tap Payments stub (mock payment intent in MVP, real impl in Phase 3)
+	•	Mock data layer with single swap point for Supabase (Phase 1 -> Phase 2)
+Deferred to v2
+	•	Wallet and Transaction History
+	•	Reports module (Spendings Report, Product Invoicing Summary)
+	•	Subscriptions (recurring orders monthly/quarterly)
+	•	Company Contracts (frame agreements with locked pricing)
+	•	Analytics Tags (cost-center coding at checkout)
+	•	Bulk Orders
+	•	Customer Service ticketing
+	•	Push notifications (function stubbed, not wired)
+	•	BNPL or credit facilitation
+	•	WhatsApp intake channel
+	•	Tiered pricing (qty break-points)
+	•	Tag-based fuzzy matching for auto-quote
+	•	CSV bulk upload for supplier offers
+	•	Aggregate competitor pricing signals to suppliers
+	•	Client-driven product addition requests
+	•	Supplier rating and review system
+	•	AI features (auto-categorisation, quote summarisation, predictive pricing)
+	•	2FA for backoffice (mandatory) and public auth (optional)
+Defer-but-prepare
+These are not built in MVP, but the data model, function stubs, and UI placeholders ARE created so that turning them on later is a configuration change, not a refactor:
+	•	ZATCA submission to Fatoora (TLV generator function exists, returns null)
+	•	Tap Payments capture (createPaymentIntent function exists, returns mock id)
+	•	Email and SMS notifications (sendNotification function exists, console.logs)
+	•	File uploads to cloud storage (mock base64 in Phase 1, swap to Supabase Storage in Phase 2)
+	•	Push notifications (sendPushNotification function exists, console.logs)
+
+Competitive positioning
+Lawazem and Brkz, briefly
+Lawazem is the dominant Saudi B2B operational procurement platform, founded 2020, with about USD 9.3M raised and 100+ enterprise clients. They run a curated catalog with 10,000+ SKUs, serve 15 categories, and ship in two modes: Express (24hr) and Marketplace (72hr). Their differentiator is enterprise depth: multi-user company accounts with roles, approval trees, billing addresses, wallets, reports, contracts, subscriptions, analytics tags, and ZATCA-compliant invoicing.
+Brkz is a vertical play in construction materials, founded 2022, with about USD 22.5M equity plus a USD 30M growth debt facility from Stride Ventures (Oct 2025). They run a managed marketplace with embedded BNPL aligned to construction cash flow cycles (60 to 180 days). They process about USD 837M in cumulative RFQ volume across 850+ contractors. They explicitly walked back MENA expansion to go deeper into KSA construction.
+Where MWRD wins
+Both incumbents operate transparent marketplaces where buyer and supplier identities are visible to each other. That is the structural weakness: once buyer and supplier know each other, the second order goes around the platform. MWRD's anonymity layer eliminates this disintermediation risk entirely. Aliases on both sides, real identities only at backoffice.
+MWRD's quote-only model with master catalog is a sharper architecture than either incumbent. Lawazem leads with public-priced catalog, which means suppliers and competitors can reverse-engineer margins. Brkz leads with RFQ but has no master catalog, which means every quote is a custom one and auto-quote logic is impossible at scale. MWRD combines both: a master catalog suppliers attach offers to (so auto-quote matching is trivial), with a quote-only client experience (so margin protection is total).
+Third moat: Custom Request mode. When a client needs something not in the master catalog, they describe it in free text and suppliers manually quote. Lawazem cannot do this -- they only sell what is in their catalog. Brkz does this but has no catalog fallback. MWRD does both, smoothly.
+Fourth moat: workflow depth. Dual PO system (CPO and SPO linked by transaction_ref), three-way matching (PO x GRN x Invoice within 2% variance), Approval Tree gating every order. This is the procurement plumbing finance directors need to adopt the platform. No incumbent has it as a default flow.
+Side-by-side
+Dimension
+Lawazem
+Brkz
+MWRD
+Client entry point
+Public catalog with prices
+RFQ form, no catalog
+Master catalog (no prices) plus RFQ plus Custom Request
+Public prices
+Yes, all SKUs
+None
+None. Quote-only.
+Catalog ownership
+Supplier-listed (curated)
+No catalog
+Admin-owned master catalog, suppliers attach offers
+Auto-quote
+Catalog price = instant
+20-min auto-quote (custom)
+Per-offer toggle, supplier review window, threshold-based admin hold
+Anonymity
+None
+None
+Full. Aliases both sides, real identities only at backoffice.
+Margin model
+Marketplace markup, suppliers can reverse-engineer
+Transaction fee plus financing margin
+Per category, per client, server-side only. Invisible to both parties.
+Document depth
+Standard PO and invoice
+Standard PO and invoice
+Dual PO (CPO + SPO), DN, GRN, three-way match, ZATCA invoice
+Approval workflow
+Approval Tree, multi-level
+Not visible
+Approval Tree, multi-level (in MVP)
+Multi-supplier basket
+No (single-cart checkout)
+No (one-quote-at-a-time)
+Yes. Line-item comparison, split awards across suppliers.
+Funding
+USD 9.3M equity
+USD 22.5M equity + USD 30M debt
+Bootstrapped pre-launch
+
+Core model
+Four product decisions that shape the entire platform. Every screen, every API endpoint, every database row exists in service of these four.
+Decision 1 -- Auth split
+Public auth is shared between clients and suppliers. They sign up on the same page, log in on the same page, the only difference is the account type they pick at registration. Backoffice auth is completely separate, lives only in apps/backoffice, has no public registration, and uses different session policies.
+Why
+	•	Clients and suppliers have similar trust requirements. Both go through callback verification, both have KYC, both use the same activation email mechanism. Sharing the auth surface reduces code duplication and gives both sides a consistent UX.
+	•	Backoffice has fundamentally different threat model. Internal users have access to real identities, margin data, and approval overrides. They need stricter session policies (15-min idle vs 24-hour for public), no public registration (invite-only), and isolated audit logs. Sharing auth with public users would compromise this.
+	•	From a security questionnaire standpoint (relevant when raising capital), separate backoffice auth is the table-stakes answer to 'how do you control admin access'.
+Implementation
+	•	packages/auth-public exports shared login, register, register/thank-you, activate pages
+	•	Mounted on both client.mwrd.io and supplier.mwrd.io at the same paths
+	•	After login: role-based redirect. Client -> client portal. Supplier -> supplier portal. Backoffice roles -> 403 (no helpful redirect to backoffice URL).
+	•	apps/backoffice has its own /login at backoffice.mwrd.io/login. Public roles -> 403.
+	•	Different Supabase Auth aud claims for public vs backoffice tokens
+Decision 2 -- Quote-only client experience
+No public prices anywhere. Clients browse the master catalog to see what's available (names, specs, images) but never see prices. Every interaction starts as an RFQ. The system either auto-quotes (if suppliers have matching offers with auto-quote on) or waits for manual quotes (if not). The client then compares incoming quotes line-by-line and awards per-item or per-basket.
+Why
+	•	Margin protection. Without public prices, suppliers cannot reverse-engineer MWRD's markup.
+	•	Per-client pricing flexibility. Different clients can legitimately see different prices for the same product. No 'public price' constraint.
+	•	Anonymity preservation. Public prices would let suppliers scrape the catalog as fake clients. Quote-only blocks this.
+	•	Premium positioning. 'Custom-quoted for you' reads as enterprise-grade, not retail.
+	•	Auto-quote from rate cards keeps speed comparable to a public catalog for matched items.
+Implementation
+	•	Client browses /catalog: shows master products with name, image, specs, pack types. NO PRICE FIELD.
+	•	Client clicks 'Add to RFQ': product added to a draft RFQ basket with chosen pack type and qty
+	•	Submit RFQ: system fans out to all suppliers serving the relevant categories
+	•	For each supplier, system checks: do they have an Offer on this master product with auto_quote_enabled? If yes, generate auto-quote draft. If no, supplier gets manual quote task.
+	•	Supplier review window applies (instant / 30 min / 2 hr). Auto-quote sends to MWRD margin engine when window expires or supplier clicks Send.
+	•	Margin applied server-side. If quote total > SAR 25,000 threshold, holds for admin Quote Manager review. Else auto-forwarded to client.
+	•	Client sees comparison view: each line item across all responding suppliers, sortable by price/lead time/best value
+	•	Client awards per-item (creates split CPOs, one per supplier with their selected lines) or per-basket (single CPO to one supplier)
+Decision 3 -- Master catalog with supplier offers
+MWRD admin owns the master catalog: categories, subcategories, master products with canonical names, specs, images, and pack types. Suppliers do not create products. Suppliers create Offers -- price-and-availability records attached to master products. If a supplier wants to sell something not in the master catalog, they submit a Product Addition Request that admin reviews.
+Why
+	•	Auto-quote matching becomes trivial. Two suppliers with offers on master_product_id=4521 are matchable instantly. No fuzzy logic.
+	•	Line-item comparison view becomes clean. Same product, same specs, just different supplier prices.
+	•	Quality control happens once. Admin curates specs and images. Suppliers attach prices, not content.
+	•	Supplier onboarding is faster. They tick boxes and enter prices, don't write descriptions.
+	•	Search and filtering actually work. Consistent specs (chair material: mesh/leather/fabric) means clients can filter properly.
+Implementation
+	•	Master catalog seeded pre-launch: 200 to 300 master products across 3 strongest categories (Office Supplies, IT and Electronics, Furniture). Use AI generation, then admin curation.
+	•	Other 5 categories start sparse, grow via Product Addition Requests.
+	•	Supplier 'Products' page = browse master catalog with 'Sell this product' CTA per item
+	•	Supplier 'Rate Card' page = list of their active offers with prices, edit and toggle auto-quote per offer
+	•	Supplier 'Add Product' page = Product Addition Request form (proposed name, category, description, specs, sample images, reason for addition)
+	•	Backoffice 'Master Catalog Management' page = CRUD on master products and categories
+	•	Backoffice 'Product Addition Requests' queue = approve (creates master product, notifies supplier) or reject (with reason)
+Decision 4 -- Suppliers operate fully blind
+Suppliers see only their own offers, their own quotes, their own orders. They do not see other suppliers' prices, do not see aggregate price ranges, do not see how many other suppliers are quoting on the same RFQ.
+Why
+	•	Maximum margin flexibility for MWRD. Suppliers can't price-coordinate or undercut deliberately.
+	•	Forces suppliers to compete on quality and lead time, not just price.
+	•	Maintains anonymity model: no signal that could leak supplier identities or relationships.
+	•	Simpler MVP: no aggregation logic, no comparison UI on supplier side.
+Implementation
+	•	Supplier 'Sell this product' modal: form for cost price, lead time, min order qty, pack types. NO competitor data shown.
+	•	Supplier RFQ list: shows RFQs they've been matched to with line items and qty. NO indication of how many other suppliers got the same RFQ.
+	•	Supplier dashboard 'Quotes Submitted' count: their own only.
+	•	Supplier 'Won Orders' panel: theirs only.
+	•	Win/loss feedback: when a quote is rejected because client picked another supplier, supplier sees 'Quote not accepted' with no reason or comparison.
+
+Architecture
+Build philosophy
+Three principles drive every architectural decision.
+First: working prototype before database. Phase 1 builds every screen and every flow against an in-memory mock data layer. The data layer lives in one file (packages/shared/src/data/index.ts) and exports the full data API. Replace that one file with Supabase calls in Phase 2; nothing else changes.
+Second: ZATCA and Tap as drop-in stubs. The invoice module accepts an optional ZATCA TLV; today the function returns null and the PDF renders without a QR code. The order module accepts an optional payment intent; today it returns a mock paid status. Phase 3 changes the implementation behind the interface, not the call sites.
+Third: shared code via packages, not copy-paste. Auth, types, utilities, validation schemas all live in packages/. Apps import from packages and stay thin.
+Tech stack
+Web (3 apps)
+	•	Next.js 15 with App Router, TypeScript strict mode
+	•	Tailwind CSS plus shadcn/ui
+	•	next-intl for English and Arabic with RTL
+	•	React Hook Form plus Zod for forms and validation
+	•	TanStack Query for server state
+	•	@react-pdf/renderer for PDF generation (CPO, SPO, DN, GRN, INV)
+Mobile (1 app)
+	•	Expo SDK 51+ with EAS Build
+	•	Expo Router (file-based, like Next.js App Router)
+	•	NativeWind (Tailwind for React Native)
+	•	Same TypeScript types and Zod schemas reused from packages/shared
+	•	Same TanStack Query for data fetching
+	•	Single codebase serves both client and supplier roles, role detected at sign-in
+Backend (Phase 2)
+	•	Supabase: PostgreSQL plus Auth plus Storage plus Realtime
+	•	Region: Bahrain (me-south-1) for SDAIA data residency
+	•	Row Level Security on every table
+	•	Edge Functions for ZATCA submission and Tap webhooks (Phase 3)
+	•	Separate aud claims for public vs backoffice auth tokens
+Hosting
+	•	Web: Vercel, one project per app
+	•	Mobile: EAS Build to App Store and Play Store
+	•	Database: Supabase managed (Bahrain)
+	•	Domains: client.mwrd.io, supplier.mwrd.io, backoffice.mwrd.io
+
+Monorepo layout
+mwrd-platform/
+├── apps/
+│  ├── client/       -> client.mwrd.io (Next.js 15)
+│  ├── supplier/      -> supplier.mwrd.io (Next.js 15)
+│  ├── backoffice/     -> backoffice.mwrd.io (Next.js 15)
+│  └── mobile/       -> Expo (iOS + Android, single codebase)
+├── packages/
+│  ├── shared/       -> types, schemas, utils, MOCK DATA LAYER
+│  │  ├── src/types/    -> User, Company, MasterProduct, Offer,
+│  │  │            RFQ, Quote, PO, GRN, Invoice,
+│  │  │            Bundle, Cart, Catalog, Approval
+│  │  ├── src/validations/ -> zod schemas for every entity
+│  │  ├── src/utils/    -> aliases, margins, numbers, ZATCA stub,
+│  │  │            three-way-match, payments stub,
+│  │  │            approval-chain, auto-quote engine
+│  │  └── src/data/    -> THE SWAP POINT. Mock today, Supabase later.
+│  ├── auth-public/     -> shared login/register for client+supplier
+│  │              (NOT used by backoffice)
+│  ├── ui-web/       -> shared shadcn components for web apps
+│  ├── ui-mobile/      -> shared NativeWind components
+│  └── config/       -> eslint, tsconfig, tailwind base
+├── turbo.json
+└── package.json
+
+packages/shared/src/data/index.ts is the swap point. Today it exports mock functions backed by in-memory Maps. Tomorrow you replace that one file with Supabase client calls. Every app keeps working without a single line changed in any other file.
+packages/auth-public is NOT imported by apps/backoffice. The backoffice has its own auth implementation entirely. This is intentional and not negotiable.
+
+Phased build
+Phase 1 -- working prototype (week 1 to 3)
+	•	Scaffold the monorepo, four apps, four packages
+	•	Build the mock data layer with three seed users (client@mwrd.com, supplier@mwrd.com, admin@mwrd.com)
+	•	Seed 200 master products across 3 categories
+	•	Build packages/auth-public with login, register, register/thank-you, activate
+	•	Build separate auth in apps/backoffice
+	•	Build all four app shells
+	•	Implement every flow end-to-end: registration with callback flow, master catalog browse, RFQ creation, supplier offer creation, auto-quote engine, manual quote, line-item comparison, split award, dual PO, GRN, invoice
+	•	Account Management: users, roles, approval tree (orders gate through chain)
+	•	Bundles, Saved Carts, Company Catalogs
+	•	Backoffice: Leads queue, KYC queue, Master Catalog management, Product Addition Requests, Offer Approval, Quote Manager, three-way match
+	•	Mobile: same flows, native UX, single codebase
+	•	Deliverable: clickable end-to-end on web and mobile, all in-memory
+Phase 2 -- database (week 4)
+	•	Supabase project in Bahrain region
+	•	Run the schema SQL
+	•	Replace packages/shared/src/data/index.ts with Supabase client calls (signatures unchanged)
+	•	Replace packages/auth-public auth functions with Supabase Auth
+	•	Backoffice gets its own Supabase Auth integration with separate aud claim
+	•	RLS policies on every table
+	•	Anonymity-aware Postgres views (v_supplier_rfqs, v_client_quotes)
+	•	Migrate seed data to real Supabase Auth accounts
+	•	Storage: kyc-docs, master-product-images, supplier-offer-photos, invoices, delivery-proofs (signed URLs only)
+	•	Deliverable: identical UX, real persistence, real auth
+Phase 3 -- ZATCA + Tap + notifications (week 5 to 7)
+	•	Apply for ZATCA Fatoora credentials
+	•	Plug TLV generator into invoice module, render QR on invoice PDF
+	•	Tap Payments merchant account, replace mock payment intents with real ones
+	•	Resend for email (registration confirmations, activation emails, quote notifications, order updates)
+	•	Expo Notifications for mobile push
+	•	Deliverable: production-ready
+
+Data model
+Entities
+Below is the full set of entities. TypeScript interfaces and Zod schemas live in packages/shared/src/types/ and packages/shared/src/validations/. The mock data layer in packages/shared/src/data/ exposes async functions that operate on these types.
+Identity
+	•	User: id, email, role ('client'|'supplier'|'admin'|'ops'|'finance'|'cs'), real_name, phone, platform_alias, company_id, status ('pending_callback'|'callback_completed'|'pending_kyc'|'active'|'suspended'), activation_status ('awaiting_callback'|'callback_completed'|'activated'), callback_notes (nullable), activation_token (nullable), language ('en'|'ar'), created_at, updated_at
+	•	Company: id, real_name, platform_alias, type ('client'|'supplier'), cr_number (nullable, set during onboarding), vat_number (nullable, set during onboarding), status, kyc_docs[], categories_served[] (suppliers only, set during onboarding), signup_source ('client_form'|'supplier_form'|'admin_invited'), signup_intent (nullable), expected_monthly_volume_sar (nullable), subscription_tier (default 'enterprise' for MVP), onboarding_completed (boolean), created_at, updated_at
+	•	CompanyMember: id, company_id, user_id, company_role_id (FK to CompanyRole)
+	•	CompanyRole: id, company_id, name (e.g. 'Administration', 'Procurement Manager', 'Junior Buyer'), permissions[]
+	•	ApprovalNode: id, company_id, member_user_id, direct_approver_user_id (nullable for top of chain). Used to compute approval chain at order time.
+	•	Address: id, company_id, type ('delivery'|'billing'), label, national_address_code, address_code, full_address, phone, is_default
+Master catalog (admin-owned)
+	•	Category: id, name_en, name_ar, slug, parent_id (nullable, supports 2 levels), icon_url, sort_order
+	•	MasterProduct: id, master_product_code (e.g. 'MWRD-PROD-04521'), name_en, name_ar, description_en, description_ar, category_id, specs (Record<string,string>, canonical), images[] (canonical), pack_types ('Each'|'Box'|'Carton'|...)[], default_unit, status ('active'|'deprecated'), created_by_admin_id, created_at, updated_at
+	•	Bundle (Essentials Pack): id, name_en, name_ar, slug, image_url, description, items: BundleItem[]
+	•	BundleItem: id, bundle_id, master_product_id, qty, sort_order
+Supplier offers
+	•	Offer: id, master_product_id (FK), supplier_company_id (FK), pack_type_pricing[] (each: { pack_type, supplier_cost_sar, min_order_qty }), default_lead_time_days, available_quantity_estimate (nullable), auto_quote_enabled (default false), fulfillment_mode ('express'|'market'), status ('active'|'inactive'), approval_status ('pending'|'approved'|'rejected'), supplier_internal_sku (nullable), supplier_notes (nullable), created_at, updated_at
+	•	ProductAdditionRequest: id, requested_by_user_id, supplier_company_id, proposed_name_en, proposed_name_ar, proposed_category_id, proposed_description, proposed_specs (Record<string,string>), sample_images[], reason_for_addition, estimated_demand (nullable), status ('submitted'|'under_review'|'approved'|'rejected'), admin_notes (nullable), resulting_master_product_id (nullable, set when approved), rejection_reason (nullable), reviewed_by_admin_id (nullable), created_at, decided_at
+Lists and carts
+	•	FavouriteList: id, user_id, master_product_ids[]
+	•	CompanyCatalog: id, company_id, name, description, master_product_ids[], created_by_user_id
+	•	Cart (RFQ draft): id, user_id, items: CartItem[], status ('active'|'saved'|'expired'), name (only when saved), expires_at (only when saved, +7 working days from creation)
+	•	CartItem: id, cart_id, master_product_id, qty, pack_type
+RFQ + quoting (the central flow)
+	•	RFQ: id, rfq_number, client_company_id, created_by_user_id, title, description, category_id (nullable for multi-category), delivery_city, delivery_date, status ('draft'|'open'|'quoted'|'awarded'|'partially_awarded'|'cancelled'), source ('catalog'|'custom_request'), items: RFQItem[], created_at, expires_at
+	•	RFQItem: id, rfq_id, master_product_id (nullable for custom_request items), free_text_name (nullable, for custom items), description, qty, unit, pack_type (nullable for custom items), specs_overrides (free-text notes from client)
+	•	Quote: id, quote_number, rfq_id, supplier_company_id, status ('draft_auto'|'draft_manual'|'pending_supplier_send'|'pending_admin_review'|'submitted_to_client'|'accepted'|'partially_accepted'|'rejected'|'expired'), is_auto_generated (boolean), supplier_review_window ('instant'|'30min'|'2hr'), supplier_reviewed_at (nullable), auto_send_at (nullable), admin_held (boolean, true if hold for admin), valid_until, lead_time_days, items: QuoteItem[], notes, submitted_at (nullable)
+	•	QuoteItem: id, quote_id, rfq_item_id, offer_id (nullable for manual quotes), supplier_unit_price_sar (server-only, NEVER returned to client), final_unit_price_sar (computed by margin engine, NEVER returned to supplier), qty_available, lead_time_days, notes, declined (boolean, supplier can decline individual lines)
+	•	QuoteLineSelection: id, rfq_id, quote_id, quote_item_id, client_user_id, selected_at. Tracks per-line client selections for split-award generation.
+Orders, deliveries, invoices
+	•	PO: id, po_number, type ('CPO'|'SPO'), transaction_ref (links the CPO/SPO pair), rfq_id, source_quote_id, source_quote_line_selections[] (which lines from which quote, supports split awards), client_company_id, supplier_company_id, status ('draft'|'awaiting_approval'|'confirmed'|'in_transit'|'delivered'|'completed'|'cancelled'), total_sar, items: POItem[], created_at
+	•	ApprovalTask: id, po_id, approver_user_id, status ('pending'|'approved'|'rejected'), order_in_chain, decided_at (nullable), note (nullable)
+	•	DN (Delivery Note): id, dn_number, spo_id, courier, tracking_number, dispatch_date, expected_delivery_date, items: DNItem[]
+	•	GRN (Goods Receipt Note): id, grn_number, cpo_id, dn_id, received_by_user_id, received_at, items (qty_received, condition: 'ok'|'damaged'|'short'), notes
+	•	Invoice: id, invoice_number, cpo_id, grn_id, total_sar, vat_amount_sar, status ('draft'|'issued'|'paid'|'overdue'), issue_date, due_date, zatca_uuid (nullable), zatca_qr (nullable, base64 PNG), payment_intent_id (nullable)
+Operations
+	•	Margin: id, scope ('global'|'category'|'client'), scope_id (null for global), pct, updated_by_user_id, updated_at
+	•	Notification: id, user_id, type, title, body, read_at, created_at, link
+	•	AuditLog: id, actor_user_id, action, entity_type, entity_id, before, after, created_at
+
+Anonymity rules -- NEVER violate
+These rules apply to every API response, every UI render, every PDF, every notification. A single real_name leak across the boundary is the most expensive bug class on this platform.
+	•	Client APIs and UIs: NEVER return supplier real_name or supplier company.real_name. Return platform_alias only.
+	•	Supplier APIs and UIs: NEVER return client real_name or client company.real_name. Return platform_alias only.
+	•	Backoffice: sees both real names. This is the ONLY place.
+	•	Aliases generated at registration via packages/shared/src/utils/aliases.ts.
+	•	Aliases never change. Format: client gets 'Client-' + 4 alphanumeric upper (e.g. Client-A8B4). Supplier gets 'Supplier ' + colour from pool (Violet, Indigo, Teal, Amber, Coral, Sage, Rose, Slate).
+Margin rules -- NEVER violate
+Margin is applied server-side in packages/shared/src/utils/margins.ts. Client-facing API responses NEVER contain margin_pct or supplier_unit_price. Supplier-facing API responses NEVER contain final_unit_price or margin.
+	•	Suppliers submit cost prices in SAR via Offer.pack_type_pricing
+	•	Margin resolution order: client-specific override > category override > global default
+	•	Margin shown to client = supplier_cost_sar * (1 + margin_pct/100), rounded to 2 decimals
+	•	Auto-quotes apply margin instantly. Quotes above SAR 25,000 hold for admin Quote Manager review.
+	•	Backoffice Quote Manager shows the supplier price, the applicable margin (with a slider to override), and the final client price, all live.
+Supplier blind rules -- NEVER violate
+Suppliers must operate without ANY visibility into other suppliers' offers, prices, or quote activity.
+	•	RFQ list for supplier: shows RFQs they were matched to. NO indicator of how many other suppliers received the same RFQ.
+	•	Quote submission: no aggregate price ranges, no 'competitive' indicators, no win-rate hints.
+	•	Quote rejection: when a quote is rejected, supplier sees only 'Quote not accepted'. No reason, no comparison, no mention of who won.
+	•	Won orders: shows only their own. No platform-wide win/loss data.
+	•	Master catalog browse: each master product shows only what's needed to create an offer. No 'X other suppliers sell this' counter, no price ranges.
+Auth scope rules -- NEVER violate
+Public auth tokens must NEVER authenticate against backoffice endpoints. Backoffice tokens must NEVER authenticate against public endpoints.
+	•	packages/auth-public is imported only by apps/client, apps/supplier, apps/mobile
+	•	apps/backoffice has its own auth code, never imports from packages/auth-public
+	•	Public registration creates users with role IN ('client'|'supplier'). Public registration NEVER creates admin/ops/finance/cs users.
+	•	Backoffice users created only via /settings/internal-users (superadmin only)
+	•	Phase 2: Supabase Auth uses different aud claims for public vs backoffice. Token aud='public' rejected by backoffice middleware. Token aud='backoffice' rejected by public middleware.
+
+Screen map
+Every screen across all four apps. The prompt set in Part 2 builds these screens in this order. Screens grounded in the Replit prototype are marked [Replit]. Screens for the three Lawazem leverage features are marked [Account / Bundles / Catalogs]. New screens for the quote-only model with master catalog are marked [Core].
+Public auth (mounted on client + supplier domains)
+Pages
+	•	/login [Core] -- shared. Email + password. Role-based redirect after auth: client -> client portal, supplier -> supplier portal, backoffice roles -> 403.
+	•	/register [Core] -- shared. Step 1: Account Type toggle (Client / Supplier). Step 2: minimal form (full name, email, phone, company name). Submit creates User with status='pending_callback', activation_status='awaiting_callback'. NO password set yet. Redirects to /register/thank-you.
+	•	/register/thank-you [Core] -- confirmation page. 'Thanks. We'll call you on +966XXXXX within 24 hours to verify your details. Once verified, you'll receive an activation email to set your password.'
+	•	/activate?token=xxx [Core] -- public. Token-gated page. Validates activation_token. Shows password creation form (new password, confirm password, terms checkbox). Submit calls activateAccount(). Auto-signs-in and routes to /onboarding.
+	•	/onboarding [Core] -- first-login wizard. Multi-step: Step 1 'About your company' (CR number, VAT number, business address). Step 2 (clients only) 'Set up your first user roles' (or skip). Step 2 (suppliers only) 'Categories you serve'. Step 3 'You're done'. Sets onboarding_completed=true, redirects to dashboard.
+
+Client portal (client.mwrd.io)
+Sidebar
+	•	Header: mwrd logo + 'Client Portal' subtitle, search input below
+	•	MAIN: Dashboard, Browse Catalog, RFQs, Orders
+	•	MANAGEMENT: Saved Carts, Favourite List, Company Catalogs, Bundles
+	•	ACCOUNT: Account Management, Settings, Help
+	•	Footer: AR/EN toggle, user card with avatar + name + email + logout
+Pages
+Dashboard
+	•	/dashboard [Replit] -- Heading + 'Welcome back, [name]'. Three action cards: Create New RFQ (primary blue) -> /rfqs/new, View Pending Quotes (count badge) -> /rfqs?status=quoted, Track Orders (count badge) -> /orders. Below: Recent RFQs (last 3, with status badges), Quotes Received (last 4, supplier alias + price + 'View Quote'), Order History (last 5).
+Master catalog browse -- NO PRICES
+	•	/catalog [Core] -- landing. Express vs Marketplace toggle pills (filters offers by fulfillment_mode). 8 categories grid with icons. Best Sellers strip. Bundles strip. Search bar.
+	•	/catalog/categories/[slug] [Core] -- subcategory pills, product grid. Each card shows: image, name, master_product_code, brief specs. NO PRICE. Button: [Add to RFQ]. Filter sidebar: Subcategory, Pack types, Spec filters (e.g., for chairs: material). Sort: Newest / Most Popular.
+	•	/catalog/products/[id] [Core] -- master product detail. Full specs, image gallery, pack types list. Pack Type dropdown, Quantity stepper. Three CTAs: [Favourite List], [Add to Catalog], [Add to RFQ] (full width primary). NO PRICE FIELD ANYWHERE.
+	•	/catalog/search?q=xxx [Core] -- search results across master catalog. If empty, shows 'Can't find what you need? Submit a Custom Request' CTA.
+Bundles
+	•	/catalog/bundles [Bundles] -- grid of Essentials Packs (CEO Office, Kitchen, Cleaning, Stationery, New Office). Each card: image, name, '5 items', [View Bundle]. NO 'From SAR X' text -- quote-only.
+	•	/catalog/bundles/[slug] [Bundles] -- bundle detail. Items table: Product (image + name + master_product_code), Pack Type, Default Qty, [Edit qty]. Single CTA: [Add Bundle to RFQ] which adds all items to active RFQ basket. Optional: [Download Spec Sheet] (PDF with specs, no prices).
+RFQ creation
+	•	/rfqs/new [Core] -- RFQ builder. Pulls items from active 'cart' (which is really an RFQ draft). Form fields: Title (required), Delivery City, Required Delivery Date, Description / additional context. Items section shows each line from the cart with [Edit qty] [Remove]. Submit -> createRFQ(source='catalog'). System fans out to matched suppliers. Redirects to /rfqs/[id].
+	•	/rfqs/new/custom [Core] -- Custom Request form. Used when a master product doesn't exist for what the client needs. Fields: Title, Category, Description (rich text), Delivery City, Delivery Date. Items repeater: Item Name, Description, Qty, Unit, Specs (key-value repeater). Submit -> createRFQ(source='custom_request'). Toast 'Request submitted. RFQ-XXXX created. Suppliers will be notified.'
+RFQ lifecycle
+	•	/rfqs [Replit] -- request history table. Columns: RFQ Details (#R + title), Date, Items count, Status (Pending / Quoted / Awarded / Partially Awarded / Closed), Action. Top right: [Export CSV] [+ New Request]. Action column: 'Awaiting Suppliers' if Pending, [Review Quotes] if Quoted, [View Award] if Awarded.
+	•	/rfqs/[id] [Replit + Core] -- RFQ detail header (number, title, status, submission date, quotes received count). Tabs: Details | Quotes Received.
+	•	/rfqs/[id]/compare [Core] -- THE LINE-ITEM COMPARISON VIEW. Matrix layout: rows = RFQ items, columns = responding suppliers (alias + star rating). Each cell: price (margin-applied) + lead time + [Select] checkbox. Sticky footer: Selected total per supplier + grand total + [Confirm Per-Item Award (creates split CPOs)] OR [Award Entire RFQ to ONE Supplier] dropdown. Sort dropdown: Price low-to-high, Lead time short-to-long, Best value. Filter: 'Only show suppliers who can deliver by [date]'. Color coding: green if lead time ≤ requested delivery date.
+RFQ basket / cart
+	•	/cart [Core] -- current RFQ draft. Shows items (master product image, name, pack type, qty stepper, [Remove]). NO PRICES (it's a quote request, not an order). Buttons: [Continue Browsing], [Save for Later], [Submit RFQ]. Save for Later -> dialog asking for cart name -> calls saveCart().
+	•	/cart/saved [Replit + Catalogs] -- list of saved carts. Each card: name, item count, 'Expires in X working days', [Resume] [Submit as RFQ] [Delete]. Empty state: icon + 'No Saved Cart. Create as many as you need from your cart and convert them to RFQs anytime. Note: Cart expires 7 working days from creation.' + [Create a cart] button.
+Orders
+	•	/orders [Replit] -- heading + tabs: Orders | Waiting Approval (sub-tabs: All / My Approval / Approved / Rejected). Top right: [Export]. Orders table: Order ID + 'Purchase Order', Date, Items, Amount, Status (In Transit / Awaiting Confirmation / Pending Payment / Delivered / Cancelled), View Details. Waiting Approval table: Order Number, Order Date, Created by, Amount, Order Status, Current WF Approver.
+	•	/orders/[id] [Replit + Core] -- CPO header (po_number, status, transaction_ref). Status timeline (Confirmed -> Awaiting Approval -> Approved -> In Transit -> Delivered -> Completed). Items table. Conditional buttons: [Approve][Reject with note] if awaiting_approval and current user is approver. [Confirm Receipt] if in_transit (opens GRN form). Supplier shown by alias only.
+Lists and catalogs
+	•	/favourites [Catalogs] -- grid of favourited master products with [Remove] [Add to RFQ] per card. NO PRICES.
+	•	/catalogs [Catalogs] -- list of company catalogs as cards: name, description, item count, [View] [Rename] [Delete]. [+ Create New Catalog]. Drawer view: list of master products in catalog, [Remove from catalog] per row, [Add Products] (opens master catalog picker).
+Account Management
+	•	/account/users [Account] -- Users tab. Top tabs: Users | Roles | User Group | Billing Details | Addresses | Approval Tree. Users table: Assigned User, Email, Number, Company Roles. Per-row actions menu (kebab). [+ Invite User] -> dialog (email, role dropdown).
+	•	/account/roles [Account] -- Roles tab. Each role as a card: name (e.g. 'Administration'), 'N Users' with [View All] link, [Assign User] button, kebab menu. Top right: [+ Add New Role].
+	•	/account/approval-tree [Account] -- table with Assigned User | Direct Approver | Chain. Per-row [Choose Approver] picker. Chain column shows visualisation of approver path computed via approval-chain util.
+	•	/account/addresses [Account] -- sub-tabs: Delivery Addresses | Billing Addresses. Each address card: label, full address + phone, National Code (e.g. RHOA2758), Address Code (e.g. add-45553-Main, copyable), delete icon. [+ Add Delivery Address] / [+ Add Billing Address].
+Settings
+	•	/settings [Replit] -- Profile picture upload. Company Information form (Company Name, Contact Email, Phone, Business Type). Notification Preferences toggles. Security Settings (Current Password, New Password, Confirm).
+
+Supplier portal (supplier.mwrd.io)
+Sidebar
+	•	Header: mwrd logo + 'Supplier Portal' subtitle, search input below
+	•	MAIN: Dashboard, Browse Master Catalog, My Rate Card, RFQ Requests, My Quotes, Orders
+	•	MANAGEMENT: Product Addition Requests
+	•	ACCOUNT: Settings, Help
+	•	Footer: AR/EN toggle, user card + logout
+Pages
+Dashboard
+	•	/dashboard [Replit] -- Welcome toast + heading. Three big stat cards: New RFQ Matches (count), Quotes Submitted (count), Active Offers (count). Pending Actions table: RFQ ID, Due Date (auto_send_at if auto-quote pending), Status (Pending / Quoted / Auto-Drafted), Action ([Review & Send] / [Submit Quote]).
+Master catalog browse -- to create offers
+	•	/catalog [Core] -- supplier-side master catalog browse. Same products as client sees, but each card shows: [Sell this Product] CTA if no offer yet, or [Edit Offer] if already selling. NO competitor data, NO pricing signals.
+	•	/catalog/products/[id] [Core] -- master product detail (read-only specs, images, pack types). [Sell this Product] modal at bottom with form: pack-type pricing repeater (per pack type: cost SAR + min order qty), default lead time days, fulfillment mode (Express/Market), supplier internal SKU (optional), supplier notes (optional), auto-quote toggle. Submit -> createOffer() with approval_status='pending'.
+	•	/catalog/search [Core] -- search master catalog. If empty: 'Don't see what you sell? Request to add it' CTA, pre-filled with search query.
+Rate card
+	•	/rate-card [Core] -- list of all the supplier's offers. Each row: Master Product (image + name), Pack Type Pricing (display first one + 'see all'), Lead Time, Auto-Quote (toggle inline), Status (Active/Inactive/Pending Approval), [Edit] [Pause] [Delete]. Filters: by category, by status. Bulk actions: [Toggle auto-quote on/off for selected]. NO competitor data.
+	•	/rate-card/offer/[id]/edit [Core] -- edit offer form. Same fields as creation.
+	•	/rate-card/settings [Core] -- global supplier settings: Auto-quote review window (Instant / 30 min hold / 2 hr hold) -- default 30 min. Auto-quote globally enabled (master kill switch toggle). Default lead time pad (e.g., 'add N days to all my offers').
+Product Addition Requests
+	•	/product-requests [Core] -- supplier's submitted requests. Table: Proposed Name, Category, Submitted Date, Status (Submitted / Under Review / Approved / Rejected). On approved: 'Now available, [Create Offer]' link. On rejected: [View reason] expandable. [+ Submit New Request].
+	•	/product-requests/new [Core] -- form: Proposed name (en + ar), Category (dropdown of existing categories), Description, Specs (key-value repeater), Sample images (up to 4), Reason for addition (free text), Estimated demand (optional, free text). Submit -> createProductAdditionRequest().
+RFQs and quotes
+	•	/rfqs [Replit + Core] -- Received RFQs. Table: RFQ ID, Date, Items, Match type ('All items match your rate card' / 'Some items match' / 'Custom request -- manual quote needed'), Auto-quote status ('Draft auto-quote ready' / 'Manual quote required'), Auto-send (timestamp if applicable), Action. Client identity NEVER shown beyond alias. NO indication of other supplier participation.
+	•	/rfqs/[id]/quote [Core] -- Submit Quote view. Two-column layout. LEFT: 'Requested Items' as cards with thumbnail, name, qty, pack type. For matched items, pre-filled with offer prices and lead times. Per-item: editable Unit Price (SAR), editable Lead Time, editable Qty Available, [Decline this line] checkbox. RIGHT (sticky): Quote Summary card with Subtotal, Shipping, Tax (15%), Total. [Send Quote Now] (primary) and [Discard]. Info banner: 'Your quote will be reviewed by the admin before being sent to the client.' If auto-quote was drafted: top banner 'Auto-quote drafted. Will send automatically at HH:MM unless you edit and confirm.'
+	•	/quotes [Replit] -- My Quotes list. Table: Quote ID, RFQ Ref, Submitted Date, Total, Status (Draft / Pending Admin Review / Submitted to Client / Accepted / Partially Accepted / Rejected / Expired). View action.
+	•	/quotes/[id] [Core] -- quote detail (view-only after submit). Items, totals, status timeline.
+Orders
+	•	/orders [Replit] -- Orders Management. [+ New Order] (top right, manual order creation, edge case). Three tabs: Won Purchase Orders | Completed Orders | Pending Orders.
+	•	Won Purchase Orders tab: subtext 'Client names are anonymized for privacy.' Search + Status filter + Date Range. Table: Order ID (#PO-XXXXX), Client (Client-A8B4), Items/Quantity, Acceptance Date, Status (Quote Accepted), [View Details].
+	•	Completed Orders tab: same columns, Final Status column (Delivered / Closed).
+	•	Pending Orders tab: same columns, Status (Pending / Processing / Shipped).
+	•	/orders/[id] [Replit + Core] -- SPO details. po_number, status, transaction_ref, items table. Client by alias only. Delivery address by city only. If status='confirmed': [Create Delivery Note].
+	•	/orders/[id]/dn [Core] -- Create DN form. Courier (dropdown), Tracking Number, Dispatch Date, Expected Delivery Date. Items repeater: per-item qty_dispatched, notes. Submit -> createDN(). Status moves to in_transit. Client gets notification.
+Settings
+	•	/settings [Replit] -- Account Settings. Profile picture, Company Information form (Company Name, Contact Email, Phone, Business Type), Notification Preferences toggles, Security Settings.
+
+Backoffice (backoffice.mwrd.io) -- separate auth
+Roles
+	•	superadmin: everything
+	•	ops: Leads, KYC, Master Catalog, Product Addition Requests, Offer Approval, RFQ oversight, supplier management, dispute resolution
+	•	finance: invoices, payments, margins, supplier payouts, three-way match
+	•	cs: customer support, view-only most things, can edit notes
+Sidebar
+	•	Header: mwrd logo + 'Admin Portal' subtitle, search input below
+	•	ONBOARDING: Leads (callback queue), KYC (post-callback)
+	•	CATALOG: Master Catalog, Product Requests, Offer Approvals
+	•	OPERATIONS: Quote Manager, Three-Way Match, Logistics
+	•	USERS: Clients, Suppliers, Internal Users (superadmin only)
+	•	ANALYTICS: Overview, Audit Log
+	•	ACCOUNT: Settings
+	•	Footer: AR/EN toggle, user card + logout
+Pages
+Dashboard
+	•	/dashboard [Replit] -- Last 30 Days dropdown + Custom Range. Three KPI tiles: Total Sales (SAR + delta + sparkline), Average Margin (% + delta), Total Orders (count + delta). Two-column below: Revenue Breakdown bar+line chart (Sales bars + Margin line by month) | Pending Actions panel (New Lead awaits callback, Product Approval, New Supplier verification, etc.) Below: Recent Orders table.
+Onboarding
+	•	/leads [Core] -- callback queue. Table: Submitted At, Name, Phone, Account Type, Company Name, Status (Awaiting Callback / Callback Completed). Per-row [View] -> drawer with: full registration data, signup_intent, [Mark Callback Complete + Notes] button. Marking complete: generates activation_token, sends activation email (console.log in MVP), moves to /kyc.
+	•	/kyc [Core] -- KYC document review queue. Users who've activated and uploaded KYC docs. Per-row [View] -> drawer with KYC docs viewer, [Approve KYC] [Request More Docs] [Reject] buttons.
+Catalog
+	•	/master-catalog [Core] -- Master Catalog Management. Tabs: Categories | Master Products. Categories tab: tree view, [+ Add Category] [Edit] [Deprecate]. Master Products tab: table with master_product_code, name, category, # active offers, status, [Edit] [Deprecate]. [+ Add Master Product] (opens form). Bulk import (CSV) at MVP launch -- wire it later.
+	•	/master-catalog/products/new [Core] / /master-catalog/products/[id]/edit [Core] -- form: name (en + ar), description (en + ar), category (dropdown), specs (key-value repeater), images (upload, mock base64), pack types multi-select, default unit. Submit -> createMasterProduct() (admin write only).
+	•	/product-requests [Core] -- Product Addition Request queue. Table: Proposed Name, Submitted By (supplier real name), Category, Submitted Date, Status. Per-row [Review] -> drawer with full request, [Approve and Create Master Product] (form pre-filled from request, admin can edit before saving), [Reject with reason]. Approve: creates MasterProduct, sets request.resulting_master_product_id, notifies supplier. Reject: sets status, notifies supplier.
+	•	/offer-approvals [Replit + Core] -- Offer Approval Queue (was 'Product Approval' in Replit). Table: Master Product (name + image), Supplier (real name), Cost Price (range across pack types), Lead Time, Submitted Date. Bulk Reject/Approve. Per-row [Info yellow] [Reject red] [Approve green]. Filters: Supplier, Category, Date Submitted.
+Operations
+	•	/quote-manager [Replit + Core] -- TOP: 'Global Margin Configuration' card. Universal Margin (single % input, default 15) | Category Margins grid (Electronics 12% / Furniture 20% / Industrial 18% / Footwear 15% / Accessories 25% / [+ Add Category]). BELOW: 'Quotes Pending Review' (auto-quotes >SAR 25k threshold and admin-flagged manual quotes). Each quote card: Quote ID + RFQ Ref + category pill + status pill. Three-column body: LEFT From Supplier (real name) -> To Client (real name). MIDDLE: Cost Price + Lead time + Margin slider [-] N% [+] (CATEGORY badge if using category default). RIGHT: Final Client Price (large, green) + Profit calc + [Send] (commits and sends to client). Margin slider live-updates final price. NEW: 'Pending Auto-Quotes' panel showing auto-quotes still in supplier review window -- view-only health monitor.
+	•	/three-way-match [Core] -- queue of invoices on hold (PO/GRN/Invoice variance >2%). Side-by-side comparison: PO totals | GRN totals | Invoice totals, highlighted discrepancies. Buttons: [Override + Approve] (with reason) | [Reject + Return to Supplier]. All actions audit-logged.
+	•	/logistics [Core] -- delivery oversight. In-transit POs, courier, tracking, expected delivery. Mark as delivered / mark exception.
+Users
+	•	/users/clients [Replit] -- Client Management. Search + Status dropdown + Date Range + Bulk Actions + [+ Add Client]. Table: checkbox, Client Name, Company, Email, Status (Active / Pending / Deactivated), Date Joined, kebab menu.
+	•	/users/suppliers [Replit] -- Supplier Management. Same pattern. Status badges: Approved / Pending / Rejected / Requires Attention. Extra column: KYC Status (Verified / Under Review / Rejected / Incomplete). Per-row [Review] link.
+	•	/users/[id] [Replit + Core] -- drawer (NOT modal). Profile section with real_name + real company name + alias. KYC docs viewer. Company members list. Activity log. [Suspend] [Reactivate] (with confirmation dialog). All actions audit-logged.
+	•	/users/internal [Core, superadmin only] -- Internal Users management. Table: Name, Email, Role (admin / ops / finance / cs), Last Login, Status, [Edit] [Deactivate]. [+ Invite Internal User] -> form (email, role, name). Invite goes to internal-user activation flow (different from public, no callback step).
+Analytics
+	•	/audit-log [Core, superadmin only] -- searchable log of every backoffice action. Columns: Timestamp, Actor, Action, Entity Type, Entity ID. Each row expandable to show before/after JSON diff. Filters: actor, entity_type, action, date range.
+Settings
+	•	/settings [Core] -- platform settings (VAT % default 15, default lead times, RFQ expiry default 7 days, auto-quote admin-hold threshold default SAR 25,000, email templates editor, master kill-switch for auto-quote across platform).
+
+Mobile (Expo, single codebase)
+Routing
+	•	(auth)/login + (auth)/register + (auth)/register/thank-you + (auth)/activate -- same screens as web, native UX. Imports auth functions from packages/shared (same data layer).
+	•	On sign-in: store {token, user} in expo-secure-store. Route by role: client -> (client)/, supplier -> (supplier)/, admin/ops/finance/cs -> reject (mobile is public-only).
+(client) bottom tabs
+	•	Home, Catalog, RFQs, Orders, Profile
+(client) screens
+	•	Home (dashboard with action cards, recent activity)
+	•	Catalog (Express/Market toggle, categories grid, search, NO PRICES)
+	•	Catalog -> Category -> Subcategory -> Master Product detail (Pack Type picker, qty stepper, [Add to RFQ])
+	•	Bundles list and detail with [Add Bundle to RFQ]
+	•	RFQ basket / cart
+	•	Custom Request flow (multi-step form: details, items, review, submit)
+	•	RFQ list, RFQ detail, line-item comparison view (mobile-optimised: vertical stack per item with horizontal scroll across suppliers, [Select] per cell)
+	•	Cart, Saved Carts (with 7-day expiry indicators)
+	•	Account Management hub: Users, Roles, Approval Tree, Addresses (each as a row -> sub-screen)
+	•	Orders list with Waiting Approval tab, Order detail with timeline, GRN flow (per-item Confirm Receipt, photo upload for damaged condition)
+	•	Profile (settings, language toggle with RTL flip, sign out)
+(supplier) bottom tabs
+	•	Home, Rate Card, RFQs, Orders, Profile
+(supplier) screens
+	•	Home (dashboard with stat cards, pending actions)
+	•	Master Catalog browse with [Sell this Product] flow
+	•	Rate Card list with inline auto-quote toggles
+	•	Product Addition Request submission and history
+	•	RFQs (open + auto-quote drafts), quote submit form (per-item editing, [Decline this line])
+	•	My Quotes list
+	•	Orders (SPOs), Order detail, Create DN flow
+	•	Profile (settings, language)
+Backoffice on mobile: NOT BUILT
+Mobile is public-only. Admin/ops/finance/cs users who try to log in on mobile get a clear message: 'Backoffice is web-only. Please access at backoffice.mwrd.io.'
+
+Build prompts
+Run these in order. Every prompt assumes you are at the monorepo root.
+Step 1: paste the master prompt below as CLAUDE.md at the repo root. Step 2 to 9: run prompts 1 to 8 in order. Do not run them in parallel. Do not skip prompt 1.
+
+Master prompt -- save as CLAUDE.md at repo root
+COPY EVERYTHING BELOW THIS LINE INTO CLAUDE.md AT THE REPO ROOT
+
+# MWRD -- Constitution
+ 
+You are building MWRD, an anonymous B2B procurement platform for Saudi Arabia.
+ 
+## What MWRD is
+A managed marketplace where Saudi businesses (clients) source goods from
+verified suppliers. Three client entry points:
+ 1. CATALOG RFQ: client browses admin-curated master catalog (NO PRICES)
+   and adds master products to an RFQ basket. Submits RFQ. System
+   auto-quotes from supplier offers + adds margin server-side.
+ 2. CUSTOM REQUEST: client describes off-catalog needs in free text.
+   Suppliers manually quote.
+ 3. BUNDLES: pre-built multi-item kits, one click to add all to RFQ.
+ 
+MWRD applies a configurable margin to supplier quotes server-side,
+coordinates logistics, and handles payments. Clients and suppliers
+never see each other's real identities. Both sides see platform-
+assigned aliases. Only backoffice sees real identities.
+ 
+## Categories (8 top-level)
+Office Supplies | IT & Electronics | Food & Beverages | Furniture |
+Maintenance & Facility | Raw Materials | Corporate Gifts | Logistics & Fleet
+ 
+## Apps (Turborepo monorepo)
+- apps/client    -> client.mwrd.io   (Next.js 15)
+- apps/supplier   -> supplier.mwrd.io  (Next.js 15)
+- apps/backoffice  -> backoffice.mwrd.io (Next.js 15)
+- apps/mobile    -> iOS + Android (Expo, single codebase, public only)
+ 
+## Tech stack (locked)
+- Monorepo: Turborepo + npm workspaces
+- Web: Next.js 15 App Router, TypeScript strict, Tailwind, shadcn/ui
+- Mobile: Expo SDK 51+, Expo Router, NativeWind, TypeScript strict
+- State: TanStack Query (web + mobile)
+- Forms: React Hook Form + Zod
+- i18n: next-intl (web), expo-localization (mobile). EN + AR with RTL.
+- PDFs: @react-pdf/renderer
+- Backend: Supabase Bahrain region (wired in Phase 2, NOT NOW)
+- Payments: Tap Payments (abstracted, NOT WIRED in MVP)
+- Invoicing: ZATCA Phase 2 (TLV stub, NOT SUBMITTED in MVP)
+ 
+## Phase 1 rule (CRITICAL)
+All data flows through packages/shared/src/data/index.ts. This is the
+ONLY place that touches a 'database'. In Phase 1 it returns mock
+in-memory data. In Phase 2 it will be replaced with Supabase calls.
+NEVER bypass this layer. NEVER call fetch() or supabase.from() from a
+component or page.
+ 
+## Auth split rule (NEVER violate)
+- packages/auth-public is shared between client + supplier + mobile only.
+- apps/backoffice has its OWN separate auth code, never imports
+ packages/auth-public.
+- Public registration creates users with role IN ('client'|'supplier').
+ Backoffice users (admin/ops/finance/cs) are created ONLY via the
+ /users/internal page (superadmin only).
+- Phase 2: Supabase Auth uses separate aud claims for public vs backoffice.
+ Public token rejected by backoffice middleware. Backoffice token
+ rejected by public middleware.
+- Backoffice idle session timeout: 15 min. Public: 24 hours.
+ 
+## Anonymity rules (NEVER violate)
+- Client APIs and UIs: NEVER return supplier real_name. Use alias only.
+- Supplier APIs and UIs: NEVER return client real_name. Use alias only.
+- Backoffice: sees both real names.
+- Aliases generated at registration via packages/shared/src/utils/aliases.ts
+- Client alias format: 'Client-' + 4 alphanumeric upper (e.g. Client-A8B4)
+- Supplier alias format: 'Supplier ' + colour name from pool
+ (Violet, Indigo, Teal, Amber, Coral, Sage, Rose, Slate)
+- Aliases never change.
+ 
+## Supplier blind rules (NEVER violate)
+- Suppliers see ONLY their own offers, quotes, orders.
+- Master catalog browse on supplier side: NO 'X other suppliers sell
+ this' counter, NO competitor pricing signals, NO aggregate ranges.
+- RFQ list on supplier side: shows only RFQs they were matched to,
+ with NO indicator of how many other suppliers received the same RFQ.
+- Quote rejection: supplier sees only 'Quote not accepted'. NO reason,
+ NO comparison, NO winner identity.
+ 
+## Quote-only client experience (NEVER violate)
+- NO public prices anywhere on client UI. Period.
+- Master catalog browse shows: name, image, specs, pack types. NEVER
+ a price field.
+- Bundle pages: NEVER show 'From SAR X'. Just product info.
+- The ONLY place a client sees a price is in a quote received in
+ response to an RFQ they submitted.
+ 
+## Margin rules (NEVER violate)
+- Suppliers submit cost prices in SAR via Offer.pack_type_pricing
+- Margin is applied SERVER-SIDE in packages/shared/src/utils/margins.ts
+- Client-facing API responses NEVER contain margin_pct or supplier_cost
+- Supplier-facing API responses NEVER contain final_price or margin
+- Margin resolution order: client > category > global
+- Auto-quotes apply margin instantly UNLESS quote total > SAR 25,000
+ (configurable threshold in /settings). Above threshold = hold for
+ admin Quote Manager review.
+ 
+## Master catalog rule (NEVER violate)
+- MasterProduct entities are CREATED ONLY by admin (in backoffice).
+- Suppliers do NOT create MasterProducts. Suppliers create Offers
+ attached to existing MasterProducts.
+- If a supplier wants to sell something not in the master catalog,
+ they submit a ProductAdditionRequest. Admin reviews; if approved,
+ admin creates the MasterProduct, supplier then creates the Offer.
+ 
+## Document numbering
+- CPO (Client PO):  MWRD-CPO-YYYYMMDD-XXXX
+- SPO (Supplier PO): MWRD-SPO-YYYYMMDD-XXXX
+- DN (Delivery Note): MWRD-DN-YYYYMMDD-XXXX
+- GRN (Goods Receipt):MWRD-GRN-YYYYMMDD-XXXX
+- INV (Invoice):   MWRD-INV-YYYYMMDD-XXXX
+- MasterProduct code: MWRD-PROD-NNNNN (5-digit padded sequence)
+- RFQ:        MWRD-RFQ-YYYYMMDD-XXXX
+- Quote:       MWRD-Q-YYYYMMDD-XXXX
+- Generators in packages/shared/src/utils/numbers.ts
+ 
+## Three-way matching
+PO x GRN x Invoice must match within 2% variance before invoice issues.
+Discrepancy auto-holds the invoice and flags it to backoffice.
+ 
+## Approval workflow (every order)
+When a client member places an order:
+ 1. CPO status -> 'awaiting_approval'
+ 2. Compute approval chain from ApprovalNode tree (member's direct
+   approver, then their approver, up to top of chain)
+ 3. Create ApprovalTask for first approver, status='pending'
+ 4. Each approver in turn: approve advances to next, reject sets
+   order status to 'cancelled'
+ 5. Final approver approves -> CPO status='confirmed', SPO sent to
+   supplier
+ 6. Cycle detection: setDirectApprover MUST reject configurations
+   where A approves B who eventually approves A.
+ 
+## Auto-quote engine
+When a client submits an RFQ:
+ 1. For each RFQ item with a master_product_id:
+   a. Find Offers where master_product_id matches AND
+    approval_status='approved' AND status='active' AND
+    auto_quote_enabled=true
+   b. Group offers by supplier_company_id
+ 2. For each supplier with at least one matching offer:
+   a. Generate Quote with status='draft_auto', is_auto_generated=true
+   b. For each RFQ item: create QuoteItem from matching Offer
+    (offer's pack_type_pricing for the requested pack_type)
+   c. For RFQ items with NO matching offer for this supplier:
+    skip (the supplier may add manually if they want)
+   d. Compute auto_send_at = now() + supplier.auto_quote_review_window
+   e. Notify supplier (sendNotification stub)
+ 3. For suppliers in matching categories with NO matching offers:
+   create Quote with status='draft_manual'. Supplier must build it
+   manually. No auto_send_at.
+ 4. When auto_send_at expires (background job in MVP: scheduled in
+   simple setTimeout simulation), if status still='draft_auto':
+   a. Apply margin server-side
+   b. If total > SAR 25,000: status='pending_admin_review'
+   c. Else: status='submitted_to_client', notify client
+ 
+## Currency and VAT
+- Currency: SAR everywhere (no USD)
+- VAT rate: 0.15 (15% Saudi VAT) on every taxable item
+- All prices and totals show price + VAT line item separately
+ 
+## Non-negotiable code rules
+- TypeScript strict mode. No 'any'. No '@ts-ignore'.
+- All API inputs validated with Zod before any logic
+- All UI strings via next-intl (web) or t() (mobile). No hardcoded strings.
+- All lists paginated, max 25 per page
+- Use shadcn/ui on web, NativeWind on mobile. Don't reinvent UI.
+- Soft deletes only (deleted_at). Never DELETE rows.
+- Every entity has created_at and updated_at
+- Use UUIDs for all IDs
+ 
+## File creation rules
+- One component per file
+- Filename matches default export
+- No barrel files except packages/shared/src/types/index.ts
+- Server actions live in app/actions/<entity>.ts
+ 
+## When you don't know
+Ask. Do not invent table names, column names, or API endpoints.
+The data contract is in packages/shared/src/types/ -- read it first.
+ 
+## What NOT to build in Phase 1
+- Real Supabase connection
+- Real Tap Payments API calls
+- Real ZATCA Fatoora submission
+- Real email or SMS sending (use console.log)
+- File uploads to cloud storage (use base64 in mock data)
+- Push notifications (stub the function)
+ 
+## What's deferred to v2 (do not build)
+- Wallet and Transaction History
+- Reports module
+- Subscriptions
+- Company Contracts
+- Analytics Tags
+- Bulk Orders
+- Customer Service ticketing
+- Tiered pricing (qty break-points)
+- Tag-based fuzzy matching for auto-quote
+- CSV bulk upload for offers
+- Aggregate competitor pricing signals
+- Client-driven product addition requests
+- Supplier ratings
+- 2FA
+
+Prompt 1 -- Monorepo and shared package setup
+Run this first. Sets up the workspace. Stop at the end of this prompt and verify everything boots before running prompt 2.
+COPY EVERYTHING BELOW THIS LINE
+
+Initialize a Turborepo monorepo for MWRD with 4 apps and 4 shared
+packages.
+ 
+## Step 1: Create the monorepo
+npx create-turbo@latest mwrd-platform --package-manager npm
+cd mwrd-platform
+rm -rf apps/web apps/docs # remove default starter apps
+ 
+## Step 2: Create the 3 web apps
+cd apps
+for app in client supplier backoffice; do
+ npx create-next-app@latest $app \
+  --typescript --tailwind --app --src-dir=false \
+  --import-alias="@/*" --eslint --no-turbopack
+done
+ 
+## Step 3: Create the mobile app (Expo)
+npx create-expo-app@latest mobile --template tabs
+cd mobile
+npx expo install expo-router expo-localization expo-secure-store \
+ react-native-safe-area-context react-native-screens
+cd ../..
+ 
+## Step 4: Create shared packages
+mkdir -p packages/shared/src/{types,validations,utils,data,constants}
+mkdir -p packages/auth-public/src/{components,actions,utils}
+mkdir -p packages/ui-web/src/components
+mkdir -p packages/ui-mobile/src/components
+mkdir -p packages/config
+ 
+## Step 5: packages/shared/package.json
+{
+ "name": "@mwrd/shared",
+ "version": "0.0.0",
+ "private": true,
+ "main": "./src/index.ts",
+ "types": "./src/index.ts",
+ "dependencies": {
+  "zod": "^3.23.8",
+  "date-fns": "^3.6.0",
+  "uuid": "^9.0.1"
+ },
+ "devDependencies": {
+  "@types/uuid": "^9.0.8",
+  "typescript": "^5.4.5"
+ }
+}
+ 
+## Step 6: packages/auth-public/package.json
+{
+ "name": "@mwrd/auth-public",
+ "version": "0.0.0",
+ "private": true,
+ "main": "./src/index.ts",
+ "types": "./src/index.ts",
+ "dependencies": {
+  "@mwrd/shared": "*",
+  "zod": "^3.23.8",
+  "react-hook-form": "^7.51.5",
+  "@hookform/resolvers": "^3.6.0"
+ }
+}
+ 
+## Step 7: Add workspace dependencies to apps
+In apps/client/package.json, apps/supplier/package.json,
+apps/mobile/package.json add:
+ "@mwrd/shared": "*",
+ "@mwrd/auth-public": "*"
+ 
+In apps/backoffice/package.json add ONLY:
+ "@mwrd/shared": "*"
+(NEVER add @mwrd/auth-public to backoffice. This is intentional.)
+ 
+## Step 8: Configure shadcn/ui in each web app
+for app in client supplier backoffice; do
+ cd apps/$app && npx shadcn@latest init -d --yes && cd ../..
+done
+ 
+## Step 9: Install dependencies in web apps
+In each of apps/client, apps/supplier, apps/backoffice run:
+ npm install zod react-hook-form @hookform/resolvers \
+  @tanstack/react-query next-intl @react-pdf/renderer lucide-react
+ 
+## Step 10: Install dependencies in mobile
+In apps/mobile run:
+ npm install zod react-hook-form @hookform/resolvers \
+  @tanstack/react-query nativewind
+ npm install --save-dev tailwindcss
+ npx tailwindcss init
+ 
+## Step 11: Update turbo.json
+Configure pipelines for build, dev, lint, type-check across all apps.
+Configure ports: client=3000, supplier=3001, backoffice=3002.
+ 
+## Step 12: Add a root README.md
+Document: how to start each app, where shared code lives, the Phase 1
+rule (all data flows through packages/shared/src/data), the auth split
+rule (auth-public for client+supplier+mobile, separate auth in
+backoffice), and the seed user credentials.
+ 
+## Verification
+From the root, `npm run dev` should start all 3 web apps and Expo
+bundler.
+- apps/client at localhost:3000 -> hello world
+- apps/supplier at localhost:3001 -> hello world
+- apps/backoffice at localhost:3002 -> hello world
+- mobile: Expo welcome screen on simulator
+ 
+STOP HERE. Confirm everything boots before proceeding to Prompt 2.
+
+Prompt 2 -- Shared package: types, schemas, utils, mock data
+This is the contract layer. Every other prompt depends on it. Get this right or everything downstream is wrong.
+COPY EVERYTHING BELOW THIS LINE
+
+Build the @mwrd/shared package: types, Zod schemas, utility
+functions, and the mock data layer that all 4 apps will read from.
+ 
+## File: packages/shared/src/types/index.ts
+ 
+Export TypeScript interfaces for these entities. Use exact field names.
+ 
+Identity:
+- User: { id, email, role: 'client'|'supplier'|'admin'|'ops'|'finance'
+  |'cs', real_name, phone, platform_alias, company_id,
+  status: 'pending_callback'|'callback_completed'|'pending_kyc'
+   |'active'|'suspended',
+  activation_status: 'awaiting_callback'|'callback_completed'
+   |'activated',
+  callback_notes: string|null,
+  activation_token: string|null,
+  language: 'en'|'ar',
+  onboarding_completed: boolean,
+  created_at, updated_at }
+- Company: { id, real_name, platform_alias, type: 'client'|'supplier',
+  cr_number: string|null, vat_number: string|null,
+  status, kyc_docs: KycDoc[],
+  categories_served?: string[],
+  signup_source: 'client_form'|'supplier_form'|'admin_invited',
+  signup_intent: string|null,
+  expected_monthly_volume_sar: number|null,
+  subscription_tier: string,
+  onboarding_completed: boolean,
+  created_at, updated_at }
+- CompanyMember: { id, company_id, user_id, company_role_id }
+- CompanyRole: { id, company_id, name, permissions: string[] }
+- ApprovalNode: { id, company_id, member_user_id,
+  direct_approver_user_id: string|null }
+- Address: { id, company_id, type: 'delivery'|'billing', label,
+  national_address_code, address_code, full_address, phone,
+  is_default }
+ 
+Master catalog (admin-owned):
+- Category: { id, name_en, name_ar, slug, parent_id?: string|null,
+  icon_url, sort_order }
+- MasterProduct: { id, master_product_code, name_en, name_ar,
+  description_en, description_ar, category_id,
+  specs: Record<string,string>, images: string[],
+  pack_types: ('Each'|'Box'|'Carton')[], default_unit,
+  status: 'active'|'deprecated', created_by_admin_id,
+  created_at, updated_at }
+- Bundle: { id, name_en, name_ar, slug, image_url, description,
+  items: BundleItem[] }
+- BundleItem: { id, bundle_id, master_product_id, qty, sort_order }
+ 
+Supplier offers:
+- Offer: { id, master_product_id, supplier_company_id,
+  pack_type_pricing: { pack_type, supplier_cost_sar,
+             min_order_qty }[],
+  default_lead_time_days: number,
+  available_quantity_estimate: number|null,
+  auto_quote_enabled: boolean,
+  fulfillment_mode: 'express'|'market',
+  status: 'active'|'inactive',
+  approval_status: 'pending'|'approved'|'rejected',
+  supplier_internal_sku: string|null,
+  supplier_notes: string|null,
+  created_at, updated_at }
+- ProductAdditionRequest: { id, requested_by_user_id,
+  supplier_company_id, proposed_name_en, proposed_name_ar,
+  proposed_category_id, proposed_description,
+  proposed_specs: Record<string,string>, sample_images: string[],
+  reason_for_addition, estimated_demand: string|null,
+  status: 'submitted'|'under_review'|'approved'|'rejected',
+  admin_notes: string|null,
+  resulting_master_product_id: string|null,
+  rejection_reason: string|null,
+  reviewed_by_admin_id: string|null,
+  created_at, decided_at }
+ 
+Lists and carts:
+- FavouriteList: { id, user_id, master_product_ids: string[] }
+- CompanyCatalog: { id, company_id, name, description,
+  master_product_ids: string[], created_by_user_id }
+- Cart: { id, user_id, items: CartItem[],
+  status: 'active'|'saved'|'expired',
+  name?: string, expires_at?: string }
+- CartItem: { id, cart_id, master_product_id, qty, pack_type }
+ 
+RFQ + quoting:
+- RFQ: { id, rfq_number, client_company_id, created_by_user_id,
+  title, description, category_id?: string|null, delivery_city,
+  delivery_date,
+  status: 'draft'|'open'|'quoted'|'awarded'|'partially_awarded'
+   |'cancelled',
+  source: 'catalog'|'custom_request',
+  items: RFQItem[], created_at, expires_at }
+- RFQItem: { id, rfq_id, master_product_id?: string|null,
+  free_text_name?: string|null, description, qty, unit,
+  pack_type?: string|null, specs_overrides?: string|null }
+- Quote: { id, quote_number, rfq_id, supplier_company_id,
+  status: 'draft_auto'|'draft_manual'|'pending_supplier_send'
+   |'pending_admin_review'|'submitted_to_client'|'accepted'
+   |'partially_accepted'|'rejected'|'expired',
+  is_auto_generated: boolean,
+  supplier_review_window: 'instant'|'30min'|'2hr',
+  supplier_reviewed_at: string|null,
+  auto_send_at: string|null,
+  admin_held: boolean,
+  valid_until, lead_time_days,
+  items: QuoteItem[], notes, submitted_at: string|null }
+- QuoteItem: { id, quote_id, rfq_item_id, offer_id?: string|null,
+  supplier_unit_price_sar (server-only),
+  final_unit_price_sar (server-only computed),
+  qty_available, lead_time_days, notes, declined: boolean }
+- QuoteLineSelection: { id, rfq_id, quote_id, quote_item_id,
+  client_user_id, selected_at }
+ 
+Orders, deliveries, invoices:
+- PO: { id, po_number, type: 'CPO'|'SPO', transaction_ref,
+  rfq_id?, source_quote_id?,
+  source_quote_line_selections?: string[],
+  client_company_id, supplier_company_id,
+  status: 'draft'|'awaiting_approval'|'confirmed'|'in_transit'
+   |'delivered'|'completed'|'cancelled',
+  total_sar, items: POItem[], created_at }
+- ApprovalTask: { id, po_id, approver_user_id,
+  status: 'pending'|'approved'|'rejected', order_in_chain,
+  decided_at?, note? }
+- DN: { id, dn_number, spo_id, courier, tracking_number,
+  dispatch_date, expected_delivery_date, items: DNItem[] }
+- GRN: { id, grn_number, cpo_id, dn_id, received_by_user_id,
+  received_at, items: GRNItem[], notes }
+- Invoice: { id, invoice_number, cpo_id, grn_id, total_sar,
+  vat_amount_sar,
+  status: 'draft'|'issued'|'paid'|'overdue',
+  issue_date, due_date,
+  zatca_uuid?: string, zatca_qr?: string,
+  payment_intent_id?: string }
+ 
+Operations:
+- Margin: { id, scope: 'global'|'category'|'client',
+  scope_id?: string, pct, updated_by_user_id, updated_at }
+- Notification: { id, user_id, type, title, body,
+  read_at?, created_at, link? }
+- AuditLog: { id, actor_user_id, action, entity_type, entity_id,
+  before?, after?, created_at }
+- PlatformSettings: { id, vat_rate, default_lead_time_days,
+  rfq_expiry_days, auto_quote_admin_hold_threshold_sar,
+  auto_quote_globally_enabled }
+ 
+## File: packages/shared/src/validations/index.ts
+Export Zod schemas matching every type. Naming: UserSchema,
+CreateRFQSchema, CreateQuoteSchema, CreateOfferSchema,
+CreateProductAdditionRequestSchema, etc. Include create/update
+variants where useful.
+ 
+## File: packages/shared/src/utils/aliases.ts
+export function generateClientAlias(): string
+// 'Client-' + 4 random alphanumeric upper, e.g. 'Client-A8B4'
+ 
+export function generateSupplierAlias(takenAliases: string[]): string
+// 'Supplier ' + colour from pool: Violet, Indigo, Teal, Amber, Coral,
+// Sage, Rose, Slate. If pool exhausted, append number e.g.
+// 'Supplier Violet 2'
+ 
+## File: packages/shared/src/utils/margins.ts
+export function applyMargin(supplier_cost: number,
+ margin_pct: number): number
+// supplier_cost * (1 + margin_pct / 100), rounded to 2 decimals
+ 
+export function resolveMargin(margins: Margin[], category_id: string,
+ client_company_id: string): number
+// Resolution order: client > category > global
+// SERVER ONLY. Never imported by client-facing components.
+ 
+## File: packages/shared/src/utils/numbers.ts
+export function generateDocNumber(
+ prefix: 'CPO'|'SPO'|'DN'|'GRN'|'INV'|'RFQ'|'Q'): string
+export function generateMasterProductCode(seq: number): string
+// 'MWRD-PROD-' + 5-digit zero-padded
+ 
+## File: packages/shared/src/utils/zatca.ts
+export function generateZatcaTLV(invoice: Invoice, seller: Seller):
+ string | null
+// MVP: returns null. Phase 3: real TLV builder.
+ 
+## File: packages/shared/src/utils/three-way-match.ts
+export function matchPOGRNInvoice(po: PO, grn: GRN, invoice: Invoice):
+ { matches: boolean, variance_pct: number, discrepancies: string[] }
+// Tolerance: 2%
+ 
+## File: packages/shared/src/utils/payments.ts
+export function createPaymentIntent(invoiceId: string, amount: number,
+ payment_method: string):
+ Promise<{intent_id: string, status: string}>
+// MVP: returns mock {intent_id: 'mock_'+uuid, status: 'requires_action'}
+ 
+## File: packages/shared/src/utils/approval-chain.ts
+export function computeApprovalChain(approvalNodes: ApprovalNode[],
+ startUserId: string): string[]
+// Walks tree from startUserId following direct_approver_user_id
+// until null approver. Returns ordered list of approver user_ids.
+ 
+export function detectCycle(approvalNodes: ApprovalNode[],
+ proposedMemberId: string,
+ proposedApproverId: string): boolean
+// Returns true if setting proposedApproverId as direct approver of
+// proposedMemberId would create a cycle. Used by setDirectApprover
+// to reject invalid configurations.
+ 
+## File: packages/shared/src/utils/auto-quote.ts
+export function matchOffersToRFQ(rfq: RFQ, offers: Offer[]):
+ Map<string /* supplier_company_id */, {
+  matched_items: Array<{ rfq_item: RFQItem, offer: Offer }>,
+  unmatched_rfq_items: RFQItem[]
+ }>
+// For each RFQ item with master_product_id, finds offers where
+// master_product_id matches AND approval_status='approved' AND
+// status='active' AND auto_quote_enabled=true. Groups by supplier.
+ 
+export function generateAutoQuote(rfq: RFQ, supplierId: string,
+ matchedItems, supplier: Company): Quote
+// Builds Quote with status='draft_auto', is_auto_generated=true,
+// computes auto_send_at based on supplier.auto_quote_review_window.
+ 
+export function processAutoSendQueue(quotes: Quote[],
+ now: Date, threshold_sar: number):
+ { to_send_to_client: Quote[], to_hold_for_admin: Quote[] }
+// For each quote with status='draft_auto' and auto_send_at <= now:
+//  apply margin, compute total. If > threshold: hold for admin.
+//  Else: ready for client.
+ 
+## File: packages/shared/src/data/index.ts (THE SWAP POINT)
+ 
+This file exports the entire data API. Today: in-memory Maps.
+Tomorrow: Supabase calls. Signatures NEVER change.
+ 
+Export these async functions:
+ 
+Auth (public):
+ registerPublic(payload: { full_name, email, phone, account_type:
+  'client'|'supplier', company_name }): Promise<{user, message}>
+ // Creates User with status='pending_callback',
+ // activation_status='awaiting_callback'. NO password set.
+ // Returns no session. Returns confirmation message.
+ 
+ markCallbackComplete(userId: string, notes: string,
+  actorAdminId: string): Promise<User>
+ // Backoffice action. Sets activation_status='callback_completed',
+ // status='callback_completed'. Generates activation_token.
+ // Calls sendNotification (console.log) with activation link.
+ 
+ activateAccount(token: string, password: string):
+  Promise<{user, sessionToken}>
+ // Public endpoint. Validates token, sets password,
+ // status='pending_kyc' (or 'active' if KYC waived for MVP),
+ // activation_status='activated'. Returns session.
+ 
+ signIn(email, password): Promise<{user, sessionToken}|null>
+ signOut(token): Promise<void>
+ getCurrentUser(token): Promise<User|null>
+ 
+ completeOnboarding(userId, payload): Promise<{user, company}>
+ // Sets onboarding_completed=true, populates company.cr_number,
+ // vat_number, address, categories_served (suppliers only)
+ 
+Auth (backoffice -- separate, lives in apps/backoffice/lib/auth.ts):
+ // Note: these functions are NOT in @mwrd/shared/data.
+ // They live in apps/backoffice. Documented here for completeness.
+ signInBackoffice(email, password)
+ inviteInternalUser(email, name, role, actorSuperadminId)
+ activateInternalUser(token, password)
+ 
+Master catalog (read-only for non-admin):
+ listCategories(): Promise<Category[]>
+ listMasterProducts(filters): Promise<{data: MasterProduct[],
+  total: number}>
+ // Filters: category_id, search, status (default: active only)
+ getMasterProduct(id): Promise<MasterProduct|null>
+ 
+Master catalog (admin write):
+ createMasterProduct(actorAdminId, input): Promise<MasterProduct>
+ updateMasterProduct(id, patch, actorAdminId):
+  Promise<MasterProduct>
+ deprecateMasterProduct(id, actorAdminId): Promise<MasterProduct>
+ createCategory(input, actorAdminId): Promise<Category>
+ updateCategory(id, patch, actorAdminId): Promise<Category>
+ 
+Offers:
+ listOffersForSupplier(supplierCompanyId, filters):
+  Promise<{data: Offer[], total: number}>
+ // Filters: master_product_id, category, status, approval_status,
+ //  auto_quote_enabled
+ // Returns ONLY this supplier's offers. NEVER aggregates.
+ getOffer(id, viewerSupplierId): Promise<Offer|null>
+ // Returns null if offer doesn't belong to viewer (unless admin)
+ 
+ createOffer(supplierUserId, masterProductId, input): Promise<Offer>
+ // approval_status='pending'. Goes to backoffice queue.
+ updateOffer(id, patch, supplierUserId): Promise<Offer>
+ toggleAutoQuote(offerId, enabled, supplierUserId): Promise<Offer>
+ pauseOffer(id, supplierUserId): Promise<Offer> // status='inactive'
+ resumeOffer(id, supplierUserId): Promise<Offer> // status='active'
+ 
+ approveOffer(id, actorAdminId): Promise<Offer>
+ rejectOffer(id, reason, actorAdminId): Promise<Offer>
+ listOfferApprovalQueue(filters): Promise<{data: Offer[],
+  total: number}>
+ 
+Product Addition Requests:
+ createProductAdditionRequest(supplierUserId, input):
+  Promise<ProductAdditionRequest>
+ listMyProductAdditionRequests(supplierCompanyId):
+  Promise<ProductAdditionRequest[]>
+ listAllProductAdditionRequests(filters, actorAdminId):
+  Promise<{data: ProductAdditionRequest[], total: number}>
+ approveProductAdditionRequest(requestId, masterProductInput,
+  actorAdminId): Promise<{request, masterProduct}>
+ // Creates MasterProduct from input. Sets request.status='approved',
+ // resulting_master_product_id. Notifies supplier.
+ rejectProductAdditionRequest(requestId, reason, actorAdminId):
+  Promise<ProductAdditionRequest>
+ 
+Bundles:
+ listBundles(): Promise<Bundle[]>
+ getBundle(slug): Promise<Bundle|null>
+ addBundleToCart(userId, bundleId): Promise<Cart>
+ 
+Carts (RFQ drafts):
+ getActiveCart(userId): Promise<Cart>
+ addToCart(userId, masterProductId, qty, packType): Promise<Cart>
+ updateCartItem(userId, cartItemId, patch): Promise<Cart>
+ removeFromCart(userId, cartItemId): Promise<Cart>
+ saveCart(userId, name): Promise<Cart>
+ // Freezes current active cart, sets +7 working days expiry,
+ // status='saved'. Creates fresh active cart.
+ listSavedCarts(userId): Promise<Cart[]>
+ resumeSavedCart(cartId): Promise<Cart>
+ // Replaces active cart with saved cart's items
+ submitCartAsRFQ(cartId, rfqMeta): Promise<RFQ>
+ // Converts cart items to RFQ with source='catalog'
+ 
+Catalogs (saved company catalogs):
+ listCompanyCatalogs(companyId): Promise<CompanyCatalog[]>
+ createCompanyCatalog(input, userId): Promise<CompanyCatalog>
+ addToCompanyCatalog(catalogId, masterProductId, userId):
+  Promise<CompanyCatalog>
+ removeFromCompanyCatalog(catalogId, masterProductId, userId):
+  Promise<CompanyCatalog>
+ renameCompanyCatalog(id, name, userId): Promise<CompanyCatalog>
+ deleteCompanyCatalog(id, userId): Promise<void>
+ 
+Favourites:
+ getFavourites(userId): Promise<FavouriteList>
+ toggleFavourite(userId, masterProductId): Promise<FavouriteList>
+ 
+RFQs:
+ createRFQ(clientUserId, input, source: 'catalog'|'custom_request'):
+  Promise<RFQ>
+ // Triggers auto-quote engine: matchOffersToRFQ + generateAutoQuote
+ // for each matched supplier.
+ listRFQsForClient(clientCompanyId, filters):
+  Promise<{data: RFQ[], total: number}>
+ listOpenRFQsForSupplier(supplierCompanyId, filters):
+  Promise<{data: RFQ[], total: number}>
+ // STRIPS client real_name. Returns RFQ items including
+ // master_product_id but NOT supplier-aggregate counts.
+ getRFQ(id, viewerId): Promise<RFQ|null>
+ // Anonymity-aware. Strips counterparty real_name.
+ 
+Quotes:
+ listQuotesForSupplier(supplierCompanyId, filters):
+  Promise<{data: Quote[], total: number}>
+ // Includes auto-drafted quotes pending supplier review
+ getQuote(id, viewerId): Promise<Quote|null>
+ editQuoteBeforeSend(quoteId, patch, supplierUserId): Promise<Quote>
+ // Used during supplier review window. Updates QuoteItems
+ // (price, lead time, qty available, decline status).
+ sendQuoteNow(quoteId, supplierUserId): Promise<Quote>
+ // Skips auto_send_at, applies margin, routes to client or admin.
+ // Sets supplier_reviewed_at.
+ approveAdminHeldQuote(quoteId, finalMarginPct, actorAdminId):
+  Promise<Quote>
+ // Backoffice action. Final margin override before sending to client.
+ listQuotesForRFQ(rfqId, viewerId): Promise<Quote[]>
+ // Client-facing. Strips supplier real_name and supplier_unit_price.
+ // Returns final_unit_price (computed with margin) only.
+ 
+Awarding:
+ acceptQuoteFullBasket(clientUserId, quoteId):
+  Promise<{cpo: PO, spo: PO}>
+ // Awards entire RFQ to one supplier. Creates one CPO + SPO pair.
+ acceptQuotesPerLine(clientUserId, rfqId, selections:
+  Array<{quote_id, quote_item_id}>):
+  Promise<Array<{cpo: PO, spo: PO}>>
+ // Awards different lines to different suppliers.
+ // Creates one CPO + SPO pair per supplier with their selected lines.
+ // Records QuoteLineSelection rows.
+ // CPOs all enter 'awaiting_approval'.
+ 
+Approvals:
+ listMyApprovalTasks(userId, status):
+  Promise<{task: ApprovalTask, po: PO}[]>
+ approveOrder(taskId, note, userId): Promise<ApprovalTask>
+ rejectOrder(taskId, note, userId): Promise<ApprovalTask>
+ getApprovalChainStatus(poId):
+  Promise<{tasks: ApprovalTask[], current_approver: User|null}>
+ 
+Account Management:
+ listCompanyMembers(companyId): Promise<CompanyMember[]>
+ inviteCompanyMember(companyId, email, roleId, inviterUserId):
+  Promise<CompanyMember>
+ listCompanyRoles(companyId): Promise<CompanyRole[]>
+ createCompanyRole(companyId, name, permissions, userId):
+  Promise<CompanyRole>
+ assignRoleToMember(memberId, roleId, userId):
+  Promise<CompanyMember>
+ listApprovalNodes(companyId): Promise<ApprovalNode[]>
+ setDirectApprover(memberUserId, approverUserId|null,
+  actorUserId): Promise<ApprovalNode>
+ // MUST run detectCycle first. Throws if cycle detected.
+ listAddresses(companyId, type?): Promise<Address[]>
+ createAddress(companyId, input, userId): Promise<Address>
+ updateAddress(id, patch, userId): Promise<Address>
+ deleteAddress(id, userId): Promise<void> // soft delete
+ 
+POs / DNs / GRNs / Invoices:
+ listPOsForUser(userId, role): Promise<PO[]>
+ // Anonymity-aware. Client side: strips supplier real_name.
+ // Supplier side: strips client real_name.
+ getPO(id, viewerId): Promise<PO|null>
+ createDN(supplierUserId, spoId, input): Promise<DN>
+ createGRN(clientUserId, cpoId, dnId, input): Promise<GRN>
+ generateInvoice(cpoId, grnId): Promise<Invoice>
+ // Runs three-way match. If variance >2%, status='draft', flagged.
+ recordPayment(invoiceId, paymentIntentId?): Promise<Invoice>
+ 
+Backoffice:
+ listLeadsQueue(filters, actorAdminId):
+  Promise<{data: User[], total: number}>
+ // Users with status='pending_callback'
+ listKycQueue(filters, actorAdminId):
+  Promise<{data: User[], total: number}>
+ approveKYC(userId, actorAdminId): Promise<User>
+ rejectKYC(userId, reason, actorAdminId): Promise<User>
+ listAllUsers(filters, actorAdminId): Promise<{data: User[],
+  total: number}>
+ setMargin(scope, scopeId|null, pct, actorAdminId): Promise<Margin>
+ getMargin(clientCompanyId, categoryId): Promise<number>
+ // Returns effective margin via resolution order
+ listAuditLog(filters, actorAdminId): Promise<AuditLog[]>
+ listAdminHeldQuotes(actorAdminId): Promise<Quote[]>
+ // Quotes with admin_held=true
+ listPendingAutoQuotes(actorAdminId): Promise<Quote[]>
+ // Quotes with status='draft_auto' currently in supplier window
+ // (health monitor view-only)
+ 
+Notifications:
+ listNotifications(userId): Promise<Notification[]>
+ markRead(notificationId, userId): Promise<void>
+ sendNotification(userId, type, title, body, link?): Promise<void>
+ // MVP: console.log. Phase 3: real email/push.
+ 
+## File: packages/shared/src/data/seed.ts
+Seed in-memory store with EXACTLY these users:
+ 
+CLIENT:
+ email: client@mwrd.com
+ password: client123
+ role: client
+ real_name: John Client
+ phone: +966500000001
+ platform_alias: Client-A8B4
+ status: active, activation_status: activated,
+ onboarding_completed: true
+ company: { real_name: 'Tech Solutions Ltd', vat_number: '...',
+  cr_number: '...' }
+ 
+SUPPLIER:
+ email: supplier@mwrd.com
+ password: supplier123
+ role: supplier
+ real_name: Sarah Supplier
+ phone: +966500000002
+ platform_alias: Supplier Indigo
+ status: active, activation_status: activated,
+ onboarding_completed: true
+ company: { real_name: 'Acme Supplies Ltd', vat_number: '...',
+  cr_number: '...', categories_served: [all 8],
+  auto_quote_review_window: '30min' }
+ 
+ADMIN:
+ email: admin@mwrd.com
+ password: admin123
+ role: admin
+ real_name: Admin User
+ 
+ADDITIONAL SEED DATA:
+- 8 categories (the canonical 8) with 2-3 subcategories each
+- 200 master products distributed across the 3 strongest categories
+ (Office Supplies, IT and Electronics, Furniture). Use realistic
+ product names, brief specs, mock image URLs. Other 5 categories
+ have 5-10 master products each as starter.
+- 50+ Offers: Sarah Supplier has offers on ~80% of master products
+ with auto_quote_enabled=true on most. A second mock supplier
+ ('Supplier Violet') has offers on ~30% of products with mixed
+ auto_quote_enabled.
+- 5 bundles: CEO Office Pack (5 items), Kitchen Essentials (4),
+ Cleaning Pack (3), Stationery Pack (6), New Office Pack (8)
+- 4 RFQs in various states: 1 draft, 1 open with auto-quotes pending,
+ 1 quoted with multiple supplier responses, 1 awarded (split CPO)
+- 6 quotes (3 auto-generated, 3 manual)
+- 2 confirmed CPOs with matching SPOs
+- 1 GRN, 1 invoice
+- 3 product addition requests in various states (1 submitted,
+ 1 approved, 1 rejected)
+- 5 leads in callback queue (status='pending_callback')
+- Margins: global=15%, Electronics=12%, Furniture=20%,
+ Industrial=18%, Footwear=15%, Accessories=25%
+- PlatformSettings: vat_rate=0.15, default_lead_time_days=7,
+ rfq_expiry_days=7, auto_quote_admin_hold_threshold_sar=25000,
+ auto_quote_globally_enabled=true
+ 
+## Verification
+Write packages/shared/test.ts that:
+- Imports signIn from data/index.ts, calls it with all 3 seed
+ credentials, prints the user.
+- Calls listMasterProducts({}) and verifies count >= 200.
+- Calls registerPublic({...}) with mock data, verifies User is
+ created with status='pending_callback' and no password set.
+- Calls markCallbackComplete, verifies activation_token is generated.
+- Calls activateAccount with the token, verifies user is activated.
+- Submits a mock RFQ, verifies auto-quote engine creates draft quotes
+ for matching suppliers (Sarah Supplier with auto_quote_enabled.
+- Calls processAutoSendQueue with now=auto_send_at+1min, verifies
+ quotes route correctly (small ones to client, large ones to admin).
+ 
+Run with: npx tsx packages/shared/test.ts
+All checks must pass.
+
+Prompt 3 -- Public auth package (client + supplier shared)
+Build the shared auth surface mounted on both client and supplier domains. NOT used by backoffice.
+COPY EVERYTHING BELOW THIS LINE
+
+Build packages/auth-public -- the shared authentication surface for
+clients and suppliers. This package is imported by apps/client,
+apps/supplier, and apps/mobile. It is NEVER imported by
+apps/backoffice.
+ 
+## Package structure
+packages/auth-public/
+├── src/
+│  ├── components/
+│  │  ├── LoginForm.tsx
+│  │  ├── RegisterForm.tsx
+│  │  ├── ThankYouCard.tsx
+│  │  ├── ActivateForm.tsx
+│  │  ├── OnboardingWizard.tsx
+│  │  └── AuthLayout.tsx
+│  ├── actions/
+│  │  ├── login.ts
+│  │  ├── register.ts
+│  │  ├── activate.ts
+│  │  └── onboarding.ts
+│  ├── utils/
+│  │  ├── role-redirect.ts  // determines target URL by role
+│  │  └── session.ts     // cookie/secure-store helpers
+│  └── index.ts
+└── package.json
+ 
+## Login form (LoginForm.tsx)
+- Centered card on AuthLayout
+- Header: MWRD logo, 'Sign in to MWRD'
+- Fields: Email, Password
+- 'Forgot password?' link (placeholder in MVP -- opens dialog with
+ 'Contact support@mwrd.io to reset')
+- 'Don't have an account? Register' link below button
+- Submit calls signIn() from @mwrd/shared/data
+- On success:
+  if user.role === 'client': redirect to /dashboard on client.mwrd.io
+  if user.role === 'supplier': redirect to /dashboard on supplier.mwrd.io
+  if user.role IN admin/ops/finance/cs: show error 'Backoffice
+   users must sign in at backoffice.mwrd.io. This URL is for
+   clients and suppliers only.' (NO redirect helpfully provided.)
+  if user.activation_status !== 'activated': show error 'Account
+   not activated. Check your email for the activation link.'
+  if user.onboarding_completed === false: redirect to /onboarding
+ 
+## Register form (RegisterForm.tsx)
+- Centered card. Header: 'Create your MWRD account'
+- Step 1: Account type toggle
+  Two large cards side by side:
+  [Client] 'I want to source goods' / [Supplier] 'I want to sell goods'
+  User clicks one. Selection sets account_type.
+- Step 2: Minimal info form (single screen, all required):
+  Full Name (real_name)
+  Email
+  Phone (+966 country code prefix, validates format)
+  Company Name (real_name for company)
+  [Submit] button
+- Submit calls registerPublic() with full payload + account_type
+- On success: redirect to /register/thank-you
+- Footer: 'Already have an account? Sign in' link
+ 
+## ThankYouCard.tsx
+- Centered card. Header: 'Thanks for signing up'
+- Body:
+  'We received your registration. Our team will call you on
+  [phone last 4 digits] within 24 hours to verify your details.'
+  'Once verified, you'll receive an activation email to set your
+  password.'
+  'Questions? Email support@mwrd.io.'
+- Single CTA: [Back to home] -> mwrd.io
+ 
+## ActivateForm.tsx (mounted at /activate?token=xxx)
+- Reads ?token query param
+- On mount: validates token by calling getCurrentUserByToken or similar
+  If invalid: show 'This activation link is invalid or expired.'
+  If valid: show password creation form
+- Form: New Password, Confirm Password, Terms checkbox
+- Password rules: 8+ chars, mixed case, 1 number
+- Submit calls activateAccount(token, password)
+- On success: store sessionToken, redirect to /onboarding
+ 
+## OnboardingWizard.tsx (mounted at /onboarding on each app)
+- Multi-step (3 steps)
+- Step 1: 'About your company'
+  CR Number (Saudi Commercial Registration), VAT Number
+  Business Address (full text)
+  [Continue]
+- Step 2 (clients only): 'Set up your team'
+  'You can invite team members and configure roles now or later.'
+  [Skip for now] [Continue with setup]
+  If continue: simplified user-roles-approval-tree mini-form
+- Step 2 (suppliers only): 'Categories you serve'
+  Multi-select of the 8 categories
+  [Continue]
+- Step 3: 'You're done'
+  'You can now start using MWRD.'
+  [Go to Dashboard]
+- Submit on each step calls completeOnboarding() incrementally
+- Last step sets onboarding_completed=true
+ 
+## role-redirect.ts
+export function getRedirectUrl(user: User, currentDomain: string):
+ string | null
+// Returns:
+//  null if user can stay on currentDomain
+//  absolute URL if user must be redirected to another domain
+//  error path '/error?code=wrong_portal' if user role is backoffice
+ 
+## session.ts
+// Web: httpOnly cookie 'mwrd_session_public'
+// Mobile: expo-secure-store key 'mwrd_session_public'
+// Two implementations exported separately to avoid React Native
+// in web bundles.
+export function setPublicSession(token: string)
+export function getPublicSession(): string | null
+export function clearPublicSession()
+ 
+## How apps mount auth-public
+In apps/client/app/(auth)/login/page.tsx:
+ import { LoginForm } from '@mwrd/auth-public';
+ export default function Page() { return <LoginForm /> }
+ 
+Same for /register, /register/thank-you, /activate, /onboarding
+Same in apps/supplier.
+Same in apps/mobile (with native components -- see prompt 7).
+ 
+## Middleware (in each web app)
+apps/client/middleware.ts:
+ - Reads mwrd_session_public cookie
+ - If absent and route !in (auth pages): redirect to /login
+ - If present: getCurrentUser. If role !== 'client': redirect to
+  /error?code=wrong_portal
+ - If onboarding_completed === false and route !== /onboarding:
+  redirect to /onboarding
+ 
+apps/supplier/middleware.ts: same pattern but role check is 'supplier'
+ 
+## Verification
+- Visit client.mwrd.io/login -> sees LoginForm
+- Visit supplier.mwrd.io/login -> sees same LoginForm (shared)
+- Sign in as client@mwrd.com on supplier.mwrd.io/login -> redirects to
+ client.mwrd.io/dashboard
+- Sign in as supplier@mwrd.com on client.mwrd.io/login -> redirects to
+ supplier.mwrd.io/dashboard
+- Try to sign in as admin@mwrd.com on client.mwrd.io/login -> error,
+ no helpful redirect to backoffice URL
+- Register as a new client (Hassan, hassan@example.com, +966501234567,
+ Acme Co): see thank-you page. User created with
+ status='pending_callback'.
+- Cannot sign in as the new user yet (no password set).
+- (Skip backoffice activation for now -- wire-up in prompt 6)
+
+Prompt 4 -- Client portal (client.mwrd.io)
+COPY EVERYTHING BELOW THIS LINE
+
+Build the client portal at apps/client. Reads from @mwrd/shared/data.
+Imports auth pages from @mwrd/auth-public. Anonymity rules apply
+throughout. Quote-only client experience: NO PUBLIC PRICES anywhere.
+ 
+## Layout
+AppShell with collapsible left sidebar + topbar.
+Sidebar (mwrd logo + 'Client Portal' subtitle, search input below):
+ MAIN
+  - Dashboard
+  - Browse Catalog
+  - RFQs
+  - Orders
+ MANAGEMENT
+  - Saved Carts
+  - Favourite List
+  - Company Catalogs
+  - Bundles
+ ACCOUNT
+  - Account Management
+  - Settings
+  - Help
+ Footer: AR/EN toggle, user card with avatar + name + email + logout
+ 
+Topbar: global search (master catalog), notification bell with badge,
+ chat icon, user avatar.
+ 
+## Auth pages
+Mount @mwrd/auth-public components at /login, /register,
+/register/thank-you, /activate, /onboarding (per Prompt 3).
+ 
+## /dashboard
+Heading 'Dashboard' + 'Welcome back, [first_name]'.
+Three big action cards in a row:
+ 1. Create New RFQ (primary, blue) -> /rfqs/new
+ 2. View Pending Quotes (count badge) -> /rfqs?status=quoted
+ 3. Track Orders (count badge) -> /orders
+Below: two-column layout
+ Left: Recent RFQs (last 3) with View All link, status badges
+ Right: Quotes Received (last 4) showing
+  'For RFQ-X, from Supplier Violet, SAR 1,320.00, View Quote'
+Below that: Order History full-width table with last 5 orders
+ 
+## /catalog (Browse Master Catalog)
+Top: Express vs Marketplace toggle pills. Express filters offers
+with fulfillment_mode='express'.
+Categories grid (8 categories from seed) with icons.
+Best Sellers strip (horizontal scroll, master products with most
+active offers -- proxy for popularity).
+Bundles strip (horizontal scroll, links to /bundles).
+Search input top-right.
+ 
+## /catalog/categories/[slug]
+Heading 'Master Catalog: [Category Name]' + breadcrumb.
+Left filter sidebar:
+ Subcategory (children of this category)
+ Pack types (multi-select)
+ Spec filters (dynamic based on category -- e.g., for chairs:
+  material; for paper: gsm)
+ Brand (placeholder for v2 -- show as 'Coming soon')
+ 'Clear all' link top right of filters
+Right: search input + sort dropdown (Newest / Most Popular)
+Product grid (3 cols), each card:
+ Image
+ Title (from MasterProduct.name_en or name_ar based on locale)
+ master_product_code
+ Brief specs (top 2 spec key-values)
+ Express or Market badge if any active offer has that fulfillment
+  mode (compute server-side, do not show price)
+ [Add to RFQ] button
+CRITICAL: NO PRICE FIELD ANYWHERE. NO 'From SAR X'.
+ 
+## /catalog/products/[id] (Master Product Detail)
+Breadcrumb: Home / Category / Product Name
+Two-column: image gallery (with thumbnails strip) | info panel
+ Category tag above title
+ Title h1, master_product_code
+ Express or Market badge
+ Full specs table
+ Pack Type dropdown (from master_product.pack_types)
+ Quantity stepper (- N +)
+ Three CTAs in 2 rows:
+  Row 1: [Favourite List] [Add to Catalog]
+  Row 2: [Add to RFQ] (full width primary)
+CRITICAL: NO PRICE. NO 'available from N suppliers'.
+ 
+## /catalog/bundles
+Grid of bundles. Each card: image, name, '5 items', [View Bundle].
+NO 'From SAR X'.
+ 
+## /catalog/bundles/[slug]
+Hero with bundle image (left) and dark teal title card (right).
+Items table: Product (image + name + master_product_code +
+ Pack Type), Default Qty, [Edit qty].
+Single CTA: [Add Bundle to RFQ] (blue, full width).
+Optional: [Download Spec Sheet PDF] (lists items + specs, NO PRICES).
+ 
+## /cart (RFQ basket)
+Heading 'Your RFQ Basket'.
+Items table: Product (image + name + code), Pack Type, Quantity
+ stepper, [Remove].
+NO PRICE COLUMN.
+Empty state: 'Your basket is empty. Browse catalog or submit a
+ custom request.'
+Bottom buttons: [Continue Browsing] [Save for Later (saves cart
+ with name and 7-day expiry)] [Submit RFQ] (primary)
+Submit RFQ leads to /rfqs/new which is a thin RFQ-meta form layered
+on top of the cart contents.
+ 
+## /rfqs/new (RFQ submission)
+Form fields:
+ Title (required, e.g. 'Office furniture for Riyadh branch')
+ Delivery City
+ Required Delivery Date
+ Description / additional context (textarea)
+Items section: read-only display of cart contents (master products).
+[Submit RFQ] -> calls submitCartAsRFQ().
+Toast: 'RFQ-XXXX submitted. Suppliers will be notified.'
+Redirect to /rfqs/[id].
+ 
+## /rfqs/new/custom (Custom Request)
+Heading 'Submit a Custom Request'.
+Subtext: 'For items not in our catalog. Tell us what you need; we'll
+source quotes from suppliers in our network.'
+Multi-step form (or single page with grouped sections):
+ 1. Basics: title, category dropdown, description (textarea),
+   delivery city, delivery date
+ 2. Items (repeater): Item Name, Description, Qty, Unit, Specs
+   (key-value repeater)
+ 3. Review and submit
+Submit calls createRFQ(userId, input, 'custom_request').
+Toast: 'Custom Request submitted. RFQ-XXXX created.'
+Redirect to /rfqs/[id].
+ 
+## /cart/saved
+Heading 'Saved RFQ Baskets'.
+Empty state: icon + 'No saved baskets. Create one from your active
+ basket. Note: baskets expire 7 working days from creation.'
+Non-empty: list of saved baskets as cards (name, item count,
+ 'Expires in X days', [Resume] [Submit as RFQ] [Delete] buttons).
+ 
+## /rfqs
+Heading 'Request History' + subtext 'Track the status of your RFQs
+and review incoming quotes.'
+Top right: [Export CSV] [+ New Request] (with dropdown: Catalog RFQ
+/ Custom Request).
+Table columns: RFQ Details (#R + title), Date, Items count, Status
+(Pending / Quoted / Awarded / Partially Awarded / Closed), Action.
+Action column shows:
+ - 'Awaiting Suppliers' if Pending
+ - [Review Quotes] (blue) if Quoted, with subtext 'N quotes received'
+ - [View Award] if Awarded or Partially Awarded
+ 
+## /rfqs/[id]
+RFQ detail header: number, title, status, submission date, quotes
+received count, expires_at countdown.
+Tabs: Details | Quotes Received.
+Details tab: items list, delivery info, original description.
+Quotes Received tab: button [Compare Line by Line] (primary) ->
+ /rfqs/[id]/compare. Below: list of supplier quote summary cards
+ (Supplier alias + star rating placeholder + total + lead time +
+ [View Full Quote]).
+ 
+## /rfqs/[id]/compare (THE LINE-ITEM COMPARISON VIEW)
+Heading 'Compare Quotes for RFQ-XXXX'.
+Sort dropdown: 'Best Price' / 'Fastest Delivery' / 'Best Value'.
+Filter: 'Only show suppliers who can deliver by [delivery_date]'
+ (toggle).
+Matrix table:
+ Header row: 'Item' | Supplier Alias 1 (★4.8) | Supplier Alias 2
+  (★4.5) | ...
+ Data rows: one per RFQ item. Each cell shows:
+  Final Price (margin-applied), small 'per unit'
+  Lead time (color-coded: green if ≤ delivery_date, amber if
+   borderline, red if too late)
+  [Select] checkbox (green if selected)
+  'Out of Stock' or 'Declined' if supplier declined this line
+Sticky footer:
+ Selected per supplier: aliases + total per supplier
+ Grand Total: SAR XX,XXX
+ Two CTAs:
+  [Confirm Per-Item Award (creates split CPOs)] (primary)
+  [Award Entire RFQ to one supplier] dropdown to choose supplier
+Confirm per-item award:
+ Calls acceptQuotesPerLine() with selections array.
+ Generates split CPOs (one per supplier).
+ Each CPO enters approval chain.
+ Toast 'N orders submitted for approval'.
+ Redirect to /orders.
+Award entire RFQ:
+ Calls acceptQuoteFullBasket().
+ Single CPO enters approval chain.
+ Toast 'Order submitted for approval.'
+ 
+## /orders
+Heading 'Order Management'.
+Tabs: Orders | Waiting Approval (with internal sub-tabs:
+ All / My Approval / Approved / Rejected).
+Top right: [Export].
+Orders table: Order ID + 'Purchase Order' subtitle, Date, Items
+ (Multiple Items pill if >1), Amount, Status (In Transit / Awaiting
+ Confirmation / Pending Payment / Delivered / Cancelled), View
+ Details.
+Waiting Approval table: Order Number, Order Date, Created by, Amount,
+ Order Status, Current WF Approver.
+ 
+## /orders/[id]
+CPO header: po_number, status, transaction_ref.
+Status timeline (Confirmed -> Awaiting Approval -> Approved ->
+ In Transit -> Delivered -> Completed).
+Items table.
+If awaiting_approval and current user is the approver:
+ [Approve] [Reject with note] buttons.
+If status='in_transit': [Confirm Receipt] -> opens GRN form
+ (per-item qty_received, condition radio: ok/damaged/short, notes).
+Supplier shown by alias only. Anonymity rules apply.
+ 
+## /favourites
+Simple grid of favourited master products with [Remove] [Add to RFQ]
+per card. NO PRICES.
+ 
+## /catalogs
+List of company catalogs as cards: name, description, item count,
+[View] [Rename] [Delete].
+[+ Create New Catalog].
+Drawer view: list of master products in catalog, [Remove from
+catalog] per row, [Add Products] (opens master catalog picker).
+ 
+## /account/users
+Top tabs: Users | Roles | User Group | Billing Details |
+ Addresses | Approval Tree.
+Users tab: table with Assigned User, Email, Number, Company Roles.
+Per-row actions menu (kebab).
+Top right: [+ Invite User] -> dialog (email, role dropdown).
+ 
+## /account/roles
+[+ Add New Role] top right.
+Each role as a card: name, 'N Users' with [View All] link, [Assign
+User] button, kebab menu.
+ 
+## /account/approval-tree
+Table: Assigned User | Direct Approver | Chain
+Each row: user name, [Choose Approver] (opens picker).
+Chain column shows visualization of full chain via approval-chain util.
+Cycle detection: setDirectApprover throws if cycle would form.
+Show error toast in that case: 'This would create an approval cycle.
+Choose a different approver.'
+ 
+## /account/addresses
+Sub-tabs: Delivery Addresses | Billing Addresses.
+[+ Add Delivery/Billing Address] button per tab.
+Address cards show: label, full address + phone, National Code,
+Address Code (copyable), delete icon.
+ 
+## /settings
+Profile picture, Company Information form (read-only fields shown
+which were captured at onboarding), Notification Preferences toggles,
+Security Settings (Current/New password).
+ 
+## Verification
+- Sign in as client@mwrd.com -> sees client portal dashboard.
+- Browse /catalog -> NO PRICES visible anywhere. Master products show
+ name, image, specs only.
+- Add 3 master products to cart, click Submit RFQ, fill meta form,
+ submit -> RFQ-XXXX created, suppliers notified, auto-quote engine
+ fires (verify in console.log).
+- After auto-quote settle period (or manually trigger by setting
+ auto_send_at to past), reload /rfqs/[id] -> see quotes received.
+- Click 'Compare Line by Line' -> matrix view rendered. Click
+ [Select] for different suppliers per line, click 'Confirm Per-Item
+ Award' -> verify split CPOs created (count = unique suppliers
+ selected).
+- Verify each CPO enters /orders Waiting Approval with correct
+ Current WF Approver.
+- Verify NO real_name leaks anywhere in client UI.
+- Submit a Custom Request via /rfqs/new/custom -- verify it shows up
+ with source='custom_request' and only manual quote suppliers
+ (no auto-quote attempted).
+- Save a cart, verify it appears in /cart/saved with 7-day expiry.
+- Bundle: add a bundle to RFQ basket, verify all items appear.
+
+Prompt 5 -- Supplier portal (supplier.mwrd.io)
+COPY EVERYTHING BELOW THIS LINE
+
+Build the supplier portal at apps/supplier. Reads from @mwrd/shared/data.
+Imports auth from @mwrd/auth-public. Anonymity rules: client real_name
+NEVER shown. Supplier blind rules: NO competitor data of any kind.
+ 
+## Layout
+Sidebar:
+ Header: mwrd logo + 'Supplier Portal' subtitle, search input below
+ MAIN
+  - Dashboard
+  - Browse Master Catalog
+  - My Rate Card
+  - RFQ Requests
+  - My Quotes
+  - Orders
+ MANAGEMENT
+  - Product Addition Requests
+ ACCOUNT
+  - Settings
+  - Help
+ Footer: AR/EN toggle, user card + logout
+Topbar: search, notification bell, chat icon, avatar.
+ 
+## Auth pages
+Mount @mwrd/auth-public components at /login, /register,
+/register/thank-you, /activate, /onboarding.
+ 
+## /dashboard
+Heading 'Dashboard' + 'Welcome back, [first_name].'
+Welcome toast top-right on first load (auto-dismiss 4s).
+Three big stat cards:
+ 1. New RFQ Matches (count, orange) -> /rfqs
+ 2. Quotes Submitted (count, dark) -> /quotes
+ 3. Active Offers (count, dark) -> /rate-card
+Below: 'Pending Actions' table. Columns: RFQ ID, Auto-Quote Status
+ ('Auto-draft pending review until [HH:MM]' / 'Manual quote needed'),
+ Items count, Action ([Review & Send] / [Submit Quote]).
+CRITICAL: NO 'how many other suppliers' indicator anywhere.
+ 
+## /catalog (Master Catalog browse, supplier view)
+Same master catalog the client sees, but each card has:
+ [Sell this Product] CTA if no offer yet
+ [Edit Offer] if already selling (pulls from offers list)
+Filters: category, subcategory, search, 'My Offers Only' toggle
+CRITICAL: NO 'X suppliers sell this' counter.
+CRITICAL: NO competitor pricing signals.
+ 
+## /catalog/products/[id] (Master Product detail, supplier view)
+Read-only product info: image gallery, name, specs, pack types.
+Below: 'Sell This Product' panel.
+ If no offer exists: form to create one
+ If offer exists: form pre-filled with current offer values
+Form fields:
+ Pack Type Pricing (repeater, one row per pack_type from master):
+  Pack Type (from master, locked)
+  Cost Price (SAR)
+  Min Order Qty
+ Default Lead Time (days)
+ Available Quantity Estimate (optional, for stock signals)
+ Fulfillment Mode (Express / Market radio)
+ Supplier Internal SKU (optional)
+ Supplier Notes (optional)
+ Auto-Quote Toggle
+[Save Offer] (sets approval_status='pending' on first creation).
+On approval pending: banner 'Your offer is awaiting admin approval
+ before it's matched to RFQs.'
+ 
+## /rate-card (My Rate Card)
+Heading 'My Rate Card' + 'Your active product offers and pricing.'
+Top right: [Rate Card Settings] -> /rate-card/settings.
+Filters: Category, Status (Active/Inactive/Pending), Auto-Quote
+ (On/Off).
+Table:
+ Master Product (image + name + master_product_code)
+ Pack Type Pricing (compact display, e.g. 'Each: SAR 5 |
+  Box of 12: SAR 50 +1')
+ Lead Time
+ Auto-Quote (inline toggle)
+ Status (Active / Inactive / Pending Approval / Rejected)
+ Actions: [Edit] [Pause/Resume] [Delete] kebab
+Bulk actions: 'Toggle auto-quote on/off for selected'.
+Empty state: 'No offers yet. Browse the master catalog to add
+ products you sell.' [Browse Master Catalog].
+ 
+## /rate-card/settings
+Heading 'Rate Card Settings'.
+Field: Auto-Quote Review Window -- radio:
+ Instant (auto-send to MWRD as soon as RFQ matches)
+ 30 minutes (default -- hold for review, auto-send if no action)
+ 2 hours (longer review window)
+Field: Auto-Quote Globally Enabled (toggle, default ON)
+ Subtext: 'Master kill switch. Turn off to disable auto-quotes for
+  all your offers without changing per-offer toggles.'
+Field: Default Lead Time Pad (days, default 0)
+ Subtext: 'Automatically add this many days to all your offers'
+  lead times. Useful during high-demand periods.'
+[Save].
+ 
+## /product-requests
+Heading 'Product Addition Requests' + 'Request additions to the
+master catalog.'
+Top right: [+ Submit New Request].
+Table: Proposed Name, Category, Submitted Date, Status (Submitted /
+ Under Review / Approved / Rejected).
+On approved: 'Now available, [Create Offer]' link in actions.
+On rejected: [View reason] expandable.
+ 
+## /product-requests/new
+Heading 'Submit a Product Addition Request' + 'Tell us about a
+product you'd like to sell that's not yet in our catalog.'
+Form (single page):
+ Proposed Product Name (English)
+ Proposed Product Name (Arabic)
+ Category (dropdown)
+ Description
+ Specs (key-value repeater)
+ Sample Images (up to 4, mock base64 in MVP)
+ Reason for Addition (textarea: 'Why should MWRD add this product?')
+ Estimated Demand (optional)
+[Submit Request].
+Toast: 'Request submitted. We'll review and get back to you within
+ 3 business days.'
+ 
+## /rfqs (Received RFQs)
+Heading 'RFQ Requests'.
+Two main filters: All | Auto-Drafts Pending | Manual Quote Needed
+Table:
+ RFQ ID
+ Date Received
+ Items (count + brief 'item names' tooltip)
+ Match Type ('All items match your rate card' / 'N of M items
+  match' / 'Custom request -- manual quote needed')
+ Auto-Draft Status ('Draft ready, auto-sends in HH:MM' / 'No
+  auto-quote' / 'Sent to client at HH:MM')
+ Action: [Review & Send] for auto-drafts pending review,
+  [Submit Quote] for manual, [View] for already sent
+CRITICAL: NO indication of how many other suppliers got the same RFQ.
+Client identity NEVER shown beyond alias.
+ 
+## /rfqs/[id]/quote (Submit/Edit Quote)
+Heading 'Quote for RFQ-XXXX'.
+Top banner conditional:
+ If is_auto_generated and status='draft_auto':
+  'Auto-quote drafted from your rate card. Will send automatically
+   at [HH:MM] unless you edit and confirm.'
+ If status='draft_manual':
+  'No matching offers found in your rate card. Please quote
+   manually for the items you can fulfill.'
+Two-column layout.
+LEFT: Quote Details -- items list. Each item card:
+ Master product image + name + qty + pack_type
+ Form fields per item:
+  Unit Price (SAR) -- pre-filled from offer if matched
+  Lead Time (days) -- pre-filled from offer if matched
+  Qty Available
+  Item Notes (optional)
+  [Decline this line] checkbox (greys out the row)
+RIGHT (sticky): Quote Summary -- Subtotal, Shipping (manual entry),
+ Tax (15% auto), Total.
+ Notes (textarea, applies to whole quote)
+ Valid Until (date picker, default +14 days)
+ [Send Quote Now] (primary)
+ [Save Draft] (only for manual, not auto)
+ Info banner: 'Your quote will be reviewed by the admin before
+  being sent to the client.'
+Submit calls editQuoteBeforeSend then sendQuoteNow.
+ 
+## /quotes (My Quotes)
+Heading 'My Quotes'.
+Filters: Status (Draft Auto / Draft Manual / Pending Admin Review /
+ Submitted / Accepted / Partially Accepted / Rejected / Expired).
+Table: Quote ID, RFQ Ref, Submitted Date, Total, Status, View.
+On 'Rejected': supplier sees 'Quote not accepted' -- NO reason,
+ NO comparison, NO winner identity.
+ 
+## /quotes/[id]
+Quote detail view-only after submit. Items, totals, status timeline.
+ 
+## /orders
+Heading 'Orders Management' + [+ New Order] (top right, edge case).
+Three tabs: Won Purchase Orders | Completed Orders | Pending Orders.
+Each tab: subtext 'Client names are anonymized for privacy.'
+Search by Order ID/Client + Status dropdown + Date Range.
+Table: checkbox, Order ID (#PO-XXXXX), Client (Client-A8B4),
+ Items/Quantity, Acceptance Date, Status, View Details.
+Pagination: 'Showing 1-3 of N'.
+ 
+## /orders/[id]
+SPO details: po_number, status, transaction_ref, items table,
+ client by alias only, delivery city only (NOT full address with
+ client name).
+If status='confirmed': [Create Delivery Note].
+ 
+## /orders/[id]/dn
+Form: Courier (dropdown), Tracking Number, Dispatch Date, Expected
+Delivery Date. Items repeater: per-item qty_dispatched, notes.
+Submit -> createDN(). Status moves to in_transit.
+ 
+## /settings
+Profile Picture upload.
+Company Information form.
+Notification Preferences toggles (New RFQ Alerts, Order Updates,
+ Payment Notifications).
+Security Settings.
+ 
+## Verification
+- Sign in as supplier@mwrd.com.
+- Browse master catalog at /catalog. Pick a master product, click
+ [Sell this Product]. Fill offer form with auto-quote ON. Submit.
+- Verify offer appears in /rate-card with status='pending approval'.
+- (Skip backoffice approval for now -- wire-up in prompt 6)
+- Submit a Product Addition Request via /product-requests/new.
+- Verify it appears in /product-requests with status='submitted'.
+- Sign in as client (different browser), submit an RFQ for products
+ the supplier has approved offers on with auto-quote ON.
+- Sign back in as supplier, see RFQ in /rfqs with auto-draft pending.
+- Open the auto-draft in /rfqs/[id]/quote -- see pre-filled prices.
+- Edit one line price, decline another, click Send Now.
+- Verify quote moves through pipeline (admin review if total >25k,
+ else direct to client).
+- Verify quote rejection (when client picks another supplier) shows
+ ONLY 'Quote not accepted' -- no reason, no winner.
+- Verify NO real_name leaks anywhere in supplier UI.
+- Verify NO competitor pricing or supplier-count indicators visible.
+
+Prompt 6 -- Backoffice (separate auth, separate everything)
+This is the platform's nerve center. It has its own auth, its own session policies, and its own user-creation flow. It NEVER shares auth code with public apps.
+COPY EVERYTHING BELOW THIS LINE
+
+Build the backoffice at apps/backoffice. Reads from @mwrd/shared/data.
+Has its OWN auth implementation in apps/backoffice/lib/auth.ts.
+DOES NOT import from @mwrd/auth-public. This is intentional and
+non-negotiable.
+ 
+## Auth (separate from public)
+ 
+### apps/backoffice/lib/auth.ts
+export async function signInBackoffice(email, password)
+// Validates credentials. Verifies user.role IN
+// ('admin','ops','finance','cs'). Returns session token.
+// 15-minute idle timeout (vs 24-hour for public).
+ 
+export async function getBackofficeSession(token)
+// Verifies token. Verifies role still in backoffice set.
+// Returns user or null.
+ 
+export async function inviteInternalUser(email, name, role,
+ actorSuperadminId)
+// Creates User with status='pending_kyc' (we skip callback for
+// internal users -- superadmin invitation IS verification).
+// Generates activation_token. Calls sendNotification with internal
+// activation link (different from public -- points to
+// /internal/activate).
+ 
+export async function activateInternalUser(token, password)
+// Sets password, status='active', activation_status='activated'.
+ 
+### apps/backoffice/middleware.ts
+- Reads mwrd_session_backoffice cookie (DIFFERENT NAME from public)
+- If absent and route !in (/login, /internal/activate): redirect
+ to /login
+- Verifies session via getBackofficeSession()
+- If user.role NOT in (admin/ops/finance/cs): clear cookie,
+ redirect to /login with error 'This portal is for internal users
+ only.'
+- Idle timeout enforced: if session.last_seen < now - 15min,
+ invalidate.
+ 
+### apps/backoffice/app/login/page.tsx
+- Custom LoginForm (NOT shared with public)
+- Header: 'MWRD Backoffice'
+- Body: email + password fields, [Sign in]
+- Footer: 'Forgot password? Contact your superadmin.'
+- NO 'Register' link (no public registration)
+- NO links to other portals
+ 
+### apps/backoffice/app/internal/activate/page.tsx
+- Token-gated. Reads ?token query param.
+- Validates token via getCurrentUserByToken (filters role to
+ internal set).
+- Password creation form.
+- On success: clears mwrd_session_public if present, sets
+ mwrd_session_backoffice. Redirects to /dashboard.
+ 
+## Layout
+AppShell with collapsible left sidebar + topbar.
+Sidebar:
+ Header: mwrd logo + 'Admin Portal' subtitle
+ Search input below
+ ONBOARDING
+  - Leads (callback queue, badge with count)
+  - KYC (post-callback, badge with count)
+ CATALOG
+  - Master Catalog
+  - Product Requests (badge with count)
+  - Offer Approvals (badge with count)
+ OPERATIONS
+  - Quote Manager
+  - Three-Way Match (badge with count)
+  - Logistics
+ USERS
+  - Clients
+  - Suppliers
+  - Internal Users (visible only to superadmin)
+ ANALYTICS
+  - Overview
+  - Audit Log (visible only to superadmin)
+ ACCOUNT
+  - Settings
+  - Help
+ Footer: AR/EN toggle, user card with name/email + logout
+Topbar: search, notification bell, avatar.
+Banner: yellow strip 'Backoffice Mode -- actions are audited'.
+ 
+## /dashboard
+Heading 'Dashboard' + 'Overview of platform performance.'
+Top right: Last 30 Days dropdown + 'Custom Range' link.
+Three KPI tiles:
+ Total Sales: SAR 348,920 with delta '+12% vs last month' +
+  sparkline
+ Average Margin: 18.2% with delta '+0.5% vs last month' + sparkline
+ Total Orders: 1,247 with delta '+8% vs last month' + sparkline
+Two-column row:
+ Left: 'Revenue Breakdown' bar+line chart (Sales bars + Margin
+  line by month, last 6 months)
+ Right: 'Pending Actions' panel with grouped items, each clickable:
+  'New Lead awaits callback' (count) -> /leads
+  'Product Approval' (count) -> /offer-approvals
+  'Product Addition Request' (count) -> /product-requests
+  'New Supplier verification' (count) -> /kyc
+  'Quote review' (count) -> /quote-manager
+  'Three-way match' (count) -> /three-way-match
+Below: 'Recent Orders' full-width table (last 10 across platform).
+ 
+## /leads (Callback Queue)
+Heading 'Lead Management -- Callback Queue'.
+Subtext: 'Newly registered users awaiting verification call. Status
+ flips to KYC after callback completes.'
+Filters: Account Type (Client/Supplier/All), Date submitted, Status
+ (Awaiting Callback / Callback Completed).
+Table: Submitted At, Name (real_name), Phone, Account Type, Company
+ Name (real_name), Status, Action.
+Per-row [View] -> drawer:
+ Full registration data (name, email, phone, company, account_type,
+  submitted_at)
+ Form: Notes (textarea, free text from callback)
+ Buttons: [Mark Callback Complete] [Mark Callback Failed (defer)]
+Mark Callback Complete:
+ Calls markCallbackComplete(userId, notes, actorAdminId)
+ Generates activation_token, sends activation email
+  (console.log link)
+ Moves user to /kyc queue (status='callback_completed' ->
+  'pending_kyc' once user activates)
+ Audit-logged.
+ 
+## /kyc (KYC Verification Queue)
+Heading 'KYC Verification Queue'.
+Subtext: 'Users who've activated and uploaded KYC documents.'
+Table: Activated At, Name, Account Type, Company, KYC Documents
+ count, Status, Action.
+Per-row [Review] -> drawer:
+ KYC document viewer (each doc as preview thumbnail + open in
+  new tab)
+ Buttons: [Approve KYC] [Request More Docs] [Reject]
+Approve KYC: status='active'. User can now use platform fully.
+Reject: status='suspended', notify with reason.
+ 
+## /master-catalog
+Heading 'Master Catalog Management'.
+Tabs: Categories | Master Products.
+ 
+Categories tab:
+ Tree view (parent categories with children indented)
+ [+ Add Category] (top right)
+ Per-row: [Edit] [Deprecate] kebab
+ Add/Edit form: name_en, name_ar, slug (auto-generated, editable),
+  parent_id (dropdown), icon (upload, mock base64), sort_order
+ 
+Master Products tab:
+ Filters: Category, Status (active/deprecated), Search
+ Top right: [+ Add Master Product] [Bulk Import (CSV)]
+  (CSV stubbed -- wire later)
+ Table: master_product_code, Name, Category, # Active Offers,
+  Status, Created At, Actions.
+ Per-row [Edit] -> /master-catalog/products/[id]/edit
+ Per-row [Deprecate] -> confirmation dialog. On deprecate: status
+  set to 'deprecated', existing offers continue but new offers
+  blocked, master product hidden from catalog browse.
+ 
+## /master-catalog/products/new and /master-catalog/products/[id]/edit
+Form (single page, sectioned):
+ Section 1: Basics
+  Name (English) (required)
+  Name (Arabic) (required)
+  Description (English) (textarea)
+  Description (Arabic) (textarea)
+  Category (dropdown, required)
+ Section 2: Specs
+  Specs (key-value repeater) -- e.g., for chair: material=mesh,
+   color=black, weight_capacity=120kg
+ Section 3: Images
+  Images (upload, up to 6, mock base64)
+  [Set as primary] per image
+ Section 4: Pack Types
+  Pack Types (multi-select with custom add): Each, Box, Carton,
+   Pallet, Ream, Pack of N (custom)
+  Default Unit (e.g. piece, ream, kg)
+[Save] -> calls createMasterProduct() (admin write).
+Edit form additionally shows # active offers (read-only) and
+ [Deprecate] button with confirmation.
+ 
+## /product-requests
+Heading 'Product Addition Requests'.
+Subtext: 'Supplier proposals for new master products.'
+Filters: Status (Submitted/Under Review/Approved/Rejected),
+ Category, Supplier.
+Table: Submitted At, Proposed Name (en), Submitted By (supplier
+ real_name), Category, Status, Action.
+Per-row [Review] -> drawer:
+ Full request details (proposed names, category, description, specs,
+  sample images, reason, estimated demand, supplier real name)
+ Two main actions:
+  [Approve and Create Master Product] -> opens form pre-filled
+   from request. Admin can edit any field before saving.
+   On save: creates MasterProduct, sets request.status='approved',
+   request.resulting_master_product_id, notifies supplier.
+  [Reject] -> dialog with reason textarea. Sets status='rejected',
+   stores rejection_reason, notifies supplier.
+All actions audit-logged.
+ 
+## /offer-approvals
+Heading 'Offer Approvals'.
+Subtext: 'New supplier offers awaiting admin verification.'
+Filters: Supplier, Category, Submitted Date, Status.
+Top: [Bulk Reject] [Bulk Approve] (acts on selected rows).
+Table:
+ Checkbox
+ Master Product (image + name + master_product_code)
+ Supplier (real_name + company real_name -- backoffice sees all)
+ Cost Price (range across pack types, e.g. 'SAR 5 - SAR 50')
+ Lead Time
+ Submitted Date
+ Status (Pending / Approved / Rejected)
+ Per-row icons: [Info yellow] [Reject red] [Approve green]
+Approve: sets approval_status='approved', status='active'.
+Reject: sets approval_status='rejected', dialog for reason.
+Approved offers immediately available for auto-quote matching.
+Audit-logged.
+ 
+## /quote-manager (THE central operations page)
+Heading 'Quote Manager'.
+ 
+TOP CARD: 'Global Margin Configuration'
+ Two-column layout:
+ Left: 'Universal Margin' card. Single % input (e.g. 15) +
+  [Save] button. Subtext: 'Default margin applied to all quotes
+  when no category-specific margin is set.'
+ Right: 'Category Margins' grid. Each category as a tile:
+  name + margin % (editable inline) + [Save].'
+  [+ Add Category] tile.
+Margin actions call setMargin() -- audit-logged.
+ 
+MIDDLE CARD: 'Quotes Pending Review'
+ Description: 'Auto-quotes flagged for admin review (above SAR
+  25,000 threshold) and manual quotes from suppliers.'
+ Each quote as expandable card:
+  Card header: Quote ID + RFQ Ref + category pill + status pill +
+   'Submitted [HH:MM]' + dropdown arrow
+  Card body (3 columns):
+   LEFT: 'From Supplier' (real_name + company) -> 'To Client'
+    (real_name + company). Items list with cost prices and
+    lead times.
+   MIDDLE: Margin slider
+    Cost Price (large)
+    Lead Time
+    Margin: [-] N% [+] (slider with manual override input)
+    CATEGORY pill if currently using category default
+    OVERRIDDEN pill if admin has manually set this quote's
+     margin
+   RIGHT: 'Final Client Price' (huge, green)
+    Profit calc (Cost x Qty x Margin% = SAR profit)
+    [Send to Client] button (commits and routes)
+  Margin slider live-updates final price (reactive).
+ 
+BOTTOM CARD: 'Pending Auto-Quotes' (health monitor)
+ Subtext: 'View-only. Auto-quotes still in supplier review window.
+  Will route automatically once window expires.'
+ Compact table: RFQ Ref, Supplier, Total, Auto-send at HH:MM,
+  Status.
+ 
+## /three-way-match
+Heading 'Three-Way Match Review'.
+Subtext: 'Invoices on hold due to PO/GRN/Invoice variance >2%.'
+Filters: Variance %, Date.
+Table: Invoice ID, CPO Ref, GRN Ref, Variance %, Issue Date, Action.
+Per-row [Review] -> drawer:
+ Side-by-side comparison: PO totals | GRN totals | Invoice totals
+ Highlighted discrepancies (red on cells with >2% variance)
+ Buttons: [Override + Approve] (with reason) | [Reject + Return
+  to Supplier]
+All actions audit-logged.
+ 
+## /logistics
+Heading 'Logistics Oversight'.
+Tabs: In Transit | Delayed | Delivered Last 7 Days.
+Table: SPO ID, Supplier, Client (alias), Courier, Tracking,
+ Dispatch Date, Expected Delivery, Status.
+Per-row [View] -> drawer with full DN.
+Bulk action: [Mark as Delivered] for selected rows.
+Per-row [Mark Exception] (delay/loss/damage) -> dialog with reason.
+ 
+## /users/clients
+Heading 'Client Management'.
+Top: search input + Status dropdown + Date range + [+ Add Client]
+ + [Bulk Actions] dropdown.
+Table:
+ Checkbox
+ Client Name (real_name)
+ Company (real_name)
+ Email
+ Status (Active green / Pending Review yellow / Deactivated red)
+ Date Joined
+ Kebab menu: [View] [Suspend] [Reactivate] [Send notification]
+Per-row [View] -> drawer (NOT modal):
+ Profile section: real_name, real company name, alias
+ KYC docs viewer
+ Company members list
+ Activity log (orders, RFQs, last login)
+ [Suspend] (confirmation dialog) -> status='suspended'
+ [Reactivate] (if suspended)
+ All actions audit-logged.
+ 
+## /users/suppliers
+Same pattern as Clients. Extra column: KYC Status. Extra status
+ values: Approved / Pending / Rejected / Requires Attention.
+Per-row [Review] -> drawer.
+ 
+## /users/internal (superadmin only)
+Heading 'Internal Users'.
+Subtext: 'MWRD team members with backoffice access.'
+Top right: [+ Invite Internal User].
+Table: Name, Email, Role (admin/ops/finance/cs), Last Login, Status
+ (Active / Pending Activation / Suspended), Created At, Actions.
+Per-row [Edit Role] [Deactivate] [Resend Invite] (if pending).
+Invite flow:
+ Dialog: email, full_name, role dropdown.
+ Submit calls inviteInternalUser().
+ Activation link goes to /internal/activate (NOT /activate).
+ No callback step (superadmin invitation IS verification).
+ 
+## /audit-log (superadmin only)
+Heading 'Audit Log'.
+Subtext: 'Every backoffice action is logged.'
+Filters: Actor, Entity Type, Action, Date Range.
+Table: Timestamp, Actor (real_name + role), Action, Entity Type,
+ Entity ID.
+Per-row [Expand] -> shows before/after JSON diff (collapsible).
+Export to CSV button top right.
+ 
+## /settings
+Heading 'Platform Settings'.
+Sections:
+ Tax: VAT rate (default 0.15 -- 15%)
+ Operational defaults: default lead time days (7), RFQ expiry days
+  (7), auto-quote admin hold threshold (SAR 25,000)
+ Auto-quote master switch: ON/OFF (when OFF, no auto-quotes
+  generated platform-wide; suppliers must quote manually)
+ Email templates: editor for activation email, quote received,
+  order confirmation
+[Save All] -> calls updatePlatformSettings().
+ 
+## Verification
+- Visit backoffice.mwrd.io -> redirected to /login (not /register -- 
+ no public registration option).
+- Sign in as admin@mwrd.com -> sees backoffice dashboard.
+- Try signing in as client@mwrd.com on backoffice -> error 'This
+ portal is for internal users only.' No helpful redirect.
+- Try accessing client.mwrd.io while logged in as admin -> error
+ 'wrong portal'.
+- /leads queue: see registered Hassan from Prompt 3 verification.
+- Mark Hassan's callback complete with notes 'Confirmed business
+ details, sole proprietor.' -> Hassan moves to KYC queue,
+ activation email link logged to console.
+- Copy activation link, open in incognito -> /activate page renders,
+ set password, redirected to /onboarding.
+- Back in backoffice: /offer-approvals shows Sarah Supplier's offer
+ from Prompt 5 verification. Approve it. Verify offer status flips
+ to active and is now used in auto-quote matching.
+- /product-requests shows Sarah's product addition request. Approve
+ with edits. Verify new MasterProduct created.
+- /quote-manager: see admin-held auto-quote (one of the seed quotes
+ total >SAR 25k). Drag margin slider, see final price update.
+ Click Send to Client.
+- /users/internal (sign out, sign in as superadmin or use seed
+ superadmin user -- extend seed data if needed): invite a new ops
+ user. Verify activation email logged.
+- /audit-log: verify previous actions appear with correct actor,
+ entity_type, before/after.
+- Idle for 16+ min, refresh -> kicked to /login.
+
+Prompt 7 -- Mobile app (Expo, single codebase, no backoffice)
+Single Expo codebase. Serves client and supplier roles, route-grouped at sign-in. Backoffice is web-only -- never on mobile.
+COPY EVERYTHING BELOW THIS LINE
+
+Build the MWRD mobile app at apps/mobile. Single Expo codebase serves
+client and supplier roles. Role detected at sign-in -> renders the
+appropriate route group. NO BACKOFFICE on mobile, ever.
+ 
+## Stack
+- Expo SDK 51+, Expo Router (file-based)
+- NativeWind (Tailwind for React Native)
+- TanStack Query, React Hook Form, Zod
+- @mwrd/shared imported directly (same data API as web)
+- packages/auth-public consumed for shared auth logic (mobile UI
+ variant - native screens, same logic)
+- expo-localization for EN/AR with I18nManager for RTL
+- expo-secure-store for token + user persistence
+ 
+## App structure (apps/mobile/app/)
+ 
+(auth)/
+ login.tsx       Email + password sign-in
+ register.tsx      Minimal: name, email, account type, phone,
+             company name. Account type segmented control.
+ thank-you.tsx     'We will call you within 24 hours' confirm
+ activate.tsx      Set password (deeplink from activation
+             email)
+ 
+(client)/
+ _layout.tsx      Bottom tabs
+ index.tsx       Dashboard (action cards, recent activity)
+ catalog/
+  index.tsx      Browse categories grid (NO PRICES)
+  [categorySlug].tsx  Master product grid (no prices, just info)
+  products/[id].tsx  Master product detail, [Add to RFQ] CTA
+  bundles/index.tsx  Bundle grid
+  bundles/[slug].tsx  Bundle detail, [Add Bundle to RFQ]
+ custom-request/
+  new.tsx       Multi-step wizard for off-catalog items
+ rfqs/
+  index.tsx      RFQ list with status badges
+  [id].tsx       RFQ detail, summary of received quotes
+  [id]/compare.tsx   Line-item comparison (mobile-optimized)
+ cart/
+  index.tsx      Active RFQ draft
+  saved.tsx      Saved RFQ drafts (with 7-day expiry)
+ orders/
+  index.tsx      Order list with Waiting Approval tab
+  [id].tsx       Order detail, GRN flow
+ account/
+  index.tsx      Account hub: Users, Roles, Approval Tree,
+             Addresses (each as a row -> sub-screen)
+ profile.tsx      Settings, language toggle, sign out
+ 
+(supplier)/
+ _layout.tsx      Bottom tabs
+ index.tsx       Dashboard
+ catalog/
+  index.tsx      Browse master catalog with [Sell This]
+             CTAs
+  [categorySlug].tsx  Browse by category
+  products/[id].tsx  Master product detail, [Sell This] CTA
+             (NO competitor data shown - fully blind)
+ rate-card.tsx     List of own offers, edit, toggle
+             auto-quote per offer
+ product-request/
+  new.tsx       Submit Product Addition Request
+  history.tsx     List of own requests with status
+ rfqs/
+  index.tsx      Open RFQs (client alias only, no count of
+             other quoters)
+  [id]/quote.tsx    Quote builder. Auto-quote draft if
+             applicable, with edit-before-send.
+ quotes.tsx       My quotes list
+ orders/
+  index.tsx      SPOs (Won / Completed / Pending tabs)
+  [id].tsx       Order detail
+  [id]/dn.tsx     Create delivery note
+ profile.tsx      Settings
+ 
+## Bottom tabs
+Client:  Home | Catalog | RFQs | Orders | Profile (5 tabs)
+Supplier: Home | Catalog | RFQs | Orders | Profile (5 tabs)
+ 
+Note: supplier 'Catalog' is browse-master-catalog-to-sell, not
+client's browse-master-catalog-to-buy. Same screens, different
+CTAs and data shown.
+ 
+## Auth flow
+- packages/auth-public exports shared logic (validation, API
+ signatures) but mobile renders its own native screens
+- /(auth)/register: form posts to register() -> redirects to
+ /(auth)/thank-you
+- /(auth)/login: signIn() -> if user.role IN {client, supplier},
+ store {token, user} in expo-secure-store, route to appropriate
+ group. If admin/ops/finance/cs -> show 'This portal is web-only'
+ message, sign out, do not store session.
+- Root _layout reads from secure-store on mount, routes accordingly
+- Logout clears secure-store, routes to /(auth)/login
+ 
+## Key UX rules
+- 5 tabs max, big tap targets (44pt minimum)
+- Pull-to-refresh on all lists, infinite scroll
+- Skeleton loading screens, NOT spinners
+- Errors: inline below field + toast for network errors
+- RTL: when language='ar', I18nManager.forceRTL(true) + reload
+- Anonymity: same rules as web, enforced at data layer
+- Forms: one logical block per screen, native pickers (date,
+ currency)
+- Empty states: friendly icon + 1-line copy + CTA
+ 
+## Mobile-specific UX considerations
+ 
+Line-item comparison view (THE killer mobile UX challenge):
+ Web: side-by-side table, all suppliers in columns.
+ Mobile: horizontal swipe between RFQ line items. For each line
+  item, vertical list of supplier cards (alias, price, lead
+  time, [Select] button). Selected supplier highlighted.
+ Bottom sticky bar: 'Selections: X of Y items priced. Total: SAR
+  Z. [Confirm Awards]'
+ Tab to switch to 'Award entire RFQ to one supplier' view
+  (vertical list of full-basket totals per supplier).
+ 
+Custom Request form:
+ Multi-step wizard: Step 1 (Basics), Step 2 (Items), Step 3
+  (Review). Progress dots top, [Back] [Next] bottom-sticky.
+ 
+Supplier rate card management:
+ /catalog -> tap a master product -> [Sell This] CTA -> bottom
+  sheet form: pack-type pricing inputs, lead time stepper, min
+  order qty, auto-quote toggle. Save -> creates draft offer ->
+  goes to backoffice approval queue.
+ Fully blind: no aggregate competitor data, no hint at how many
+  other suppliers sell this.
+ 
+## Localization
+- expo-localization to detect device locale on first launch
+- apps/mobile/locales/en.json + ar.json (same KEY structure as
+ web apps' next-intl messages)
+- Custom useT() hook
+- Toggle in /profile applies immediately + persists
+ 
+## Notifications stub
+- packages/shared exports sendNotification() - on mobile,
+ console.log
+- Hook for Expo Notifications wired but disabled in MVP
+ 
+## Verification
+- npx expo start, scan QR with Expo Go
+- Register a new supplier on mobile (minimal form) -> see
+ thank-you screen
+- Switch to web backoffice as admin -> see lead in /leads ->
+ mark callback complete -> activation email logged
+- Tap activation link on mobile -> /(auth)/activate -> set
+ password -> redirected to supplier dashboard
+- As supplier on mobile: browse master catalog, tap [Sell This]
+ on a product, fill pricing form, save -> verify offer appears
+ in backoffice approval queue
+- After admin approval, sign in as client (incognito web), create
+ RFQ for the same master product
+- Switch back to supplier mobile -> notification (badge) for new
+ RFQ -> open RFQ -> if auto-quote was on, see pre-filled draft
+ quote -> edit if needed -> send
+- Switch to client web -> see comparison view -> award per-item
+ (split CPOs)
+- Toggle Arabic in /profile -> verify RTL flips entire UI,
+ locale persists on relaunch
+- Try to log in with admin@mwrd.com on mobile -> see 'web-only'
+ message, no portal access
+
+Prompt 8 -- Wire Supabase (Phase 2)
+COPY EVERYTHING BELOW THIS LINE
+
+Replace the in-memory mock data layer in @mwrd/shared with real
+Supabase calls. Wire Supabase Auth for both public and backoffice
+with separate aud claims. Apply RLS to every table. Anonymity-aware
+Postgres views for client and supplier reads.
+ 
+Project provisioning is manual (you do this in the Supabase dashboard
+first, then this prompt scaffolds the schema and wires the client).
+ 
+## Step 0: Manual setup (you, before running this prompt)
+- Create Supabase project. Region: me-south-1 (Bahrain).
+- Note the Project URL and anon key.
+- Create env vars in each web app + mobile:
+ EXPO_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL
+ EXPO_PUBLIC_SUPABASE_ANON_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY
+- Create separate auth providers in Supabase:
+ Email auth ENABLED for both public and backoffice.
+ Use a custom JWT claim 'aud' to distinguish:
+  aud='public' for client+supplier
+  aud='backoffice' for admin/ops/finance/cs
+ 
+## Step 1: Schema SQL
+Generate supabase/migrations/0001_initial_schema.sql with:
+- All tables matching the TypeScript types in @mwrd/shared/src/types
+- UUID primary keys (uuid_generate_v4())
+- Foreign keys with proper ON DELETE behaviour
+- created_at/updated_at with default now() and trigger for updated_at
+- All enum types as Postgres ENUMs
+- Indexes on common query paths:
+  master_products(category_id), offers(master_product_id),
+  offers(supplier_company_id), rfqs(client_company_id),
+  quotes(rfq_id), quotes(supplier_company_id), pos(client_company_id),
+  pos(supplier_company_id), audit_logs(actor_user_id, created_at)
+- Soft-delete columns (deleted_at) on user-mutable tables
+ 
+## Step 2: RLS policies
+Enable RLS on EVERY table. Generate policies:
+ 
+Categories, master_products, bundles: SELECT for all authenticated
+ users; INSERT/UPDATE/DELETE only for aud='backoffice' AND role IN
+ ('admin','ops')
+ 
+Offers: SELECT for offer's supplier OR aud='backoffice'
+ INSERT/UPDATE only for offer's supplier (with
+ approval_status='pending')
+ Approval status changes only for aud='backoffice'
+ 
+Product addition requests: SELECT for own supplier OR backoffice.
+ INSERT only for suppliers. Status changes only for backoffice.
+ 
+Carts, favourites, company catalogs: SELECT/UPDATE only for
+ owning user.
+ 
+RFQs: SELECT for client's company OR for any supplier matched
+ to it (via offers/categories) OR backoffice.
+ INSERT only for clients.
+ 
+Quotes: SELECT for own supplier (writer) OR client (recipient)
+ OR backoffice.
+ INSERT/UPDATE only for own supplier.
+ CRITICAL RLS rule: when client SELECTs a Quote, the policy must
+ filter out columns supplier_unit_price_sar from QuoteItems.
+ Implement via a VIEW (see Step 3).
+ 
+POs: SELECT for client OR supplier on the PO OR backoffice.
+Address, Member, Role, ApprovalNode: SELECT/UPDATE for own company.
+AuditLog: INSERT for any backoffice user; SELECT only for superadmin.
+Internal users management: only superadmin (custom claim) can write.
+ 
+## Step 3: Anonymity-aware views
+CREATE VIEW v_supplier_rfqs (used by listOpenRFQsForSupplier):
+ Columns: rfq_id, rfq_number, title, description, delivery_city,
+  delivery_date, status, source, created_at, expires_at, items
+ STRIPS: client_company_id (replaced with NULL),
+  client.real_name (replaced with NULL)
+ No supplier-aggregate counts (no 'X suppliers received this')
+ 
+CREATE VIEW v_client_quotes (used by listQuotesForRFQ on client):
+ Columns: quote_id, quote_number, rfq_id, status, valid_until,
+  lead_time_days, items_with_final_price
+ STRIPS: supplier_unit_price_sar from items (replaced with NULL)
+  supplier real_name (replaced with platform_alias)
+ 
+CREATE VIEW v_supplier_orders (used by supplier-side order list):
+ Columns: po_id, po_number, type, status, created_at, total_sar,
+  items, client_alias
+ STRIPS: client_company_id, client.real_name
+ 
+All client/supplier-facing reads in @mwrd/shared/data go through
+these views, not raw tables. Backoffice reads from raw tables.
+ 
+## Step 4: Auth wiring
+ 
+packages/auth-public auth functions (login, register, activate)
+now call supabase.auth.signInWithPassword, signUp, etc.
+On signUp: create User row with status='pending_callback' via RPC
+(supabase function), DO NOT auto-set password (Supabase will create
+the auth user but our domain user has activation_status=
+'awaiting_callback').
+ 
+Public auth always sets aud='public' in JWT claims via custom auth
+hook. Reject if aud!='public' on public middleware.
+ 
+apps/backoffice/lib/auth.ts wires its own Supabase client with
+aud='backoffice' enforcement. Reject if aud!='backoffice'.
+ 
+## Step 5: Replace data layer
+Replace packages/shared/src/data/index.ts with Supabase client calls.
+Function signatures NEVER change. Only the bodies.
+ 
+Example transformation:
+BEFORE (mock):
+ export async function listMasterProducts(filters) {
+  return Array.from(masterProductsStore.values())
+   .filter(p => filterMatch(p, filters))
+ }
+AFTER (Supabase):
+ export async function listMasterProducts(filters) {
+  let q = supabase.from('master_products').select('*')
+   .eq('status', 'active')
+  if (filters.category_id) q = q.eq('category_id',
+   filters.category_id)
+  if (filters.search) q = q.ilike('name_en', `%${filters.search}%`)
+  const { data, count } = await q.range(...)
+  return { data: data ?? [], total: count ?? 0 }
+ }
+ 
+Anonymity-aware functions use views:
+ listOpenRFQsForSupplier: select from v_supplier_rfqs
+ listQuotesForRFQ (client side): select from v_client_quotes
+ 
+## Step 6: Storage
+Create Supabase Storage buckets:
+ kyc-docs (private, signed URLs only)
+ master-product-images (public-read, admin-write only)
+ supplier-offer-photos (private, signed URLs only)
+ invoices (private, signed URLs only)
+ delivery-proofs (private, signed URLs only)
+Replace base64 image handling with upload-to-bucket + signed URL.
+ 
+## Step 7: Edge functions stubs (deploy in Phase 3)
+supabase/functions/zatca-submit/index.ts (stub for now)
+supabase/functions/tap-webhook/index.ts (stub for now)
+supabase/functions/process-auto-quotes/index.ts:
+ Cron-style function called every 5 min.
+ Calls processAutoSendQueue() on quotes with status='draft_auto'
+  and auto_send_at <= now.
+ Routes to client or admin based on threshold.
+ 
+## Step 8: Migrate seed users
+Run a one-time migration script that:
+ - Creates real Supabase Auth users for the 3 seed accounts
+  (client@mwrd.com / client123, supplier@mwrd.com / supplier123,
+   admin@mwrd.com / admin123)
+ - Inserts corresponding User and Company rows
+ - Imports seed master products, categories, bundles, offers
+ - Imports seed margins and platform settings
+ 
+## Verification
+- Sign in as client@mwrd.com on client.mwrd.io -> dashboard loads,
+ data reads from Supabase.
+- Sign in as supplier@mwrd.com -> only supplier's offers visible.
+- Sign in as admin@mwrd.com on backoffice.mwrd.io -> backoffice loads.
+- Try to fetch a Quote as client via raw API call -> RLS blocks
+ (or strips supplier_unit_price).
+- Verify v_supplier_rfqs view does NOT return client real_name.
+- Verify backoffice middleware rejects aud='public' tokens.
+- Verify public middleware rejects aud='backoffice' tokens.
+- Submit a new RFQ as client -> auto-quote engine creates draft
+ quotes via direct insert. After 30 min (or via manual edge function
+ trigger), processAutoSendQueue routes them.
+- Run an audit log query as superadmin: see all backoffice actions
+ recorded.
+
+Prompt 9 -- ZATCA Phase 2 + Tap Payments + notifications (Phase 3)
+COPY EVERYTHING BELOW THIS LINE
+
+Wire ZATCA Phase 2 invoicing, Tap Payments, real email/push
+notifications. Replace stubs with real implementations.
+ 
+## ZATCA Phase 2
+ 
+Step 1 -- Credentials:
+Apply for production CCSID and PCSID via ZATCA Fatoora portal.
+Store certificates in Supabase secrets, NEVER in code.
+ 
+Step 2 -- Replace zatca.ts stub:
+packages/shared/src/utils/zatca.ts becomes:
+ generateZatcaTLV(invoice, seller): real TLV builder
+  - Tag 1: seller name
+  - Tag 2: VAT registration number
+  - Tag 3: timestamp
+  - Tag 4: total amount with VAT
+  - Tag 5: VAT amount
+  - Tag 6: hash of XML invoice
+  - Tag 7: ECDSA signature
+  - Tag 8: ECDSA public key
+  - Tag 9: ECDSA signature of public key
+  Returns base64-encoded TLV.
+ signInvoiceXml(invoice): builds UBL 2.1 XML, signs with PCSID.
+ submitToFatoora(signedXml): calls Fatoora reporting/clearance API.
+ generateQrPng(tlv): renders QR code as PNG, returns base64.
+ 
+Step 3 -- Edge function:
+supabase/functions/zatca-submit/index.ts:
+ Triggered when Invoice is generated.
+ Calls signInvoiceXml + submitToFatoora.
+ Updates Invoice.zatca_uuid, Invoice.zatca_qr.
+ On error: sets Invoice.status='draft' and notifies finance.
+ 
+Step 4 -- Update Invoice PDF:
+@react-pdf/renderer Invoice template renders QR code from
+Invoice.zatca_qr in the bottom-right of every invoice.
+ 
+## Tap Payments
+ 
+Step 1 -- Merchant account:
+Apply for Tap Payments merchant account. Get publishable key,
+secret key. Store secret in Supabase secrets.
+ 
+Step 2 -- Replace payments.ts stub:
+packages/shared/src/utils/payments.ts becomes:
+ createPaymentIntent(invoiceId, amount, payment_method):
+  Calls Tap charges API with
+   amount, currency=SAR, source.id (mada/visa/applepay/stcpay),
+   customer (linked to client real_name + email),
+   reference.invoice = invoice_number,
+   redirect.url = client.mwrd.io/orders/[id]?tap_callback=1,
+   post.url = supabase webhook endpoint.
+  Returns { intent_id: tap_charge_id, status, redirect_url }.
+ capturePayment(chargeId): no-op (Tap auto-captures by default)
+ refundPayment(chargeId, amount, reason): calls Tap refunds API
+ 
+Step 3 -- Webhook edge function:
+supabase/functions/tap-webhook/index.ts:
+ Verifies Tap signature.
+ On charge succeeded: Invoice.status='paid', record
+  payment_intent_id, fire sendNotification to both client + supplier
+  + finance.
+ On charge failed: Invoice.status remains, notify client to retry.
+ 
+Step 4 -- Client checkout flow:
+In /orders/[id], when status='delivered' and invoice.status='issued',
+show 'Pay Invoice' button. Clicking calls createPaymentIntent and
+redirects to Tap-hosted payment page.
+On return: poll for invoice.status update via getInvoice().
+ 
+## Email + push notifications
+ 
+Step 1 -- Resend setup:
+Sign up for Resend. Verify mwrd.io domain. Get API key. Store in
+Supabase secrets.
+ 
+Step 2 -- Email templates:
+Create React Email templates in
+packages/shared/src/email-templates/:
+ registration-thank-you.tsx
+ callback-completed-activation.tsx
+ internal-user-invitation.tsx
+ rfq-received-supplier.tsx
+ auto-quote-pending-review.tsx
+ quote-received-client.tsx
+ product-addition-request-approved.tsx
+ product-addition-request-rejected.tsx
+ offer-approved-supplier.tsx
+ order-confirmed.tsx
+ order-shipped.tsx
+ invoice-issued.tsx
+ payment-received.tsx
+ approval-request.tsx (when CPO enters approval chain)
+All bilingual (en + ar) with RTL where applicable.
+ 
+Step 3 -- Replace sendNotification stub:
+packages/shared/src/utils/notifications.ts becomes:
+ sendNotification(userId, type, title, body, link?):
+  1. Insert Notification row (in-app)
+  2. Look up user.email and user.push_token
+  3. Call Resend with appropriate template
+  4. If push_token: call Expo push API
+Wire from Supabase edge functions, not from web/mobile clients
+ (clients should never have notification credentials).
+ 
+Step 4 -- Mobile push token registration:
+On mobile app foreground, register token via expo-notifications.
+Save to user.push_token via authenticated RPC call.
+ 
+## Verification
+- Generate an Invoice on a delivered CPO. Verify ZATCA TLV is
+ created and QR appears on PDF.
+- Submit invoice to Fatoora sandbox. Verify zatca_uuid stored.
+- Click 'Pay Invoice' as client. Tap-hosted page loads, complete
+ test payment with mada test card. Verify invoice.status='paid'
+ after webhook fires.
+- Sign up new client. Verify thank-you email arrives via Resend.
+- Mark callback complete. Verify activation email arrives with
+ working link.
+- Submit RFQ. Verify all matched suppliers get supplier-side email.
+- Approve a CPO. Verify approval-request emails go up the chain.
+- Mobile: verify push notification arrives when a quote is sent
+ to the client.
+
+Closing
+What you have when Phase 1 ships
+	•	A Turborepo with 3 web apps + 1 mobile app + 5 shared packages
+	•	Public auth shared between client and supplier, separate auth in backoffice
+	•	Callback-flow registration, KYC queue, full onboarding
+	•	200+ master products seeded across the 3 strongest categories
+	•	Quote-only client experience with NO public prices anywhere
+	•	Auto-quote engine matching supplier offers to RFQ items, with per-supplier review window and admin-hold threshold
+	•	Line-item comparison view with split awards across suppliers (per-item) or full-basket awards
+	•	Custom Request flow for off-catalog needs
+	•	Product Addition Request flow for supplier-driven catalog growth
+	•	Offer Approval queue in backoffice with first-time supplier verification
+	•	Quote Manager with margin slider, threshold-based holds, and bulk operations
+	•	Bundles (Essentials Packs) with one-click add to RFQ
+	•	Saved Carts (RFQ drafts) with 7-day expiry
+	•	Company Catalogs (curated approved-product lists per company)
+	•	Account Management: users, roles, approval tree with cycle detection, addresses
+	•	Approval chain enforcement on every order
+	•	Dual PO system (CPO + SPO with shared transaction_ref)
+	•	Three-way matching (PO x GRN x Invoice within 2% variance)
+	•	Backoffice with separate auth, role-based access, and full audit log
+	•	Internal Users management (superadmin only)
+	•	Anonymity preserved end-to-end with platform_alias system
+	•	Suppliers fully blind: no competitor pricing signals, no aggregate ranges, no winner identity on quote rejection
+	•	Mobile app on iOS and Android with same flows, native UX, single codebase
+	•	Bilingual EN/AR with RTL across web and mobile
+	•	ZATCA Phase 2 stub ready for swap-in
+	•	Tap Payments stub ready for swap-in
+	•	Notifications stub ready for swap-in
+Risks to flag during build
+RFQ-only model adoption risk
+Lawazem's catalog UX trains buyers to expect instant prices. Quote-only is a learning curve. Mitigation: pre-launch onboarding videos, sales team walks through with first 20 clients, auto-quote engine keeps speed comparable for matched items.
+Master catalog cold-start risk
+If launch catalog is too thin, suppliers churn out before adoption. Mitigation: seed 200 to 300 master products in 3 strongest categories before opening to suppliers. Use AI for first draft, admin curates. Continue actively expanding via Product Addition Request approvals during the first 90 days.
+Approval Tree configuration complexity risk
+Lawazem ships approval trees as setup-on-day-one for enterprise. Most clients won't bother to configure it correctly. Mitigation: Onboarding wizard offers a 'Skip for now, single approver only' default that activates the simplest possible chain (1 approver = the registering user themselves). Show approval-tree health check in dashboard.
+Anonymity leak risk
+Real_name leaks are the highest-cost bug class on this platform. Every API endpoint, every PDF, every email needs anonymity audit. Mitigation: integration tests in CI that hit each endpoint as each role and grep responses for known real_names. Phase 2: Postgres views (v_supplier_rfqs etc.) make leaks structurally harder.
+Auth split misconfiguration risk
+If aud claims are not enforced strictly, a public token could grant backoffice access. Mitigation: middleware on EVERY backoffice route checks aud='backoffice' AND role IN backoffice set. Integration test that signs in as public user, captures token, attempts backoffice request, asserts 401.
+Auto-quote margin safety risk
+Auto-quotes apply margin without admin review for quotes below threshold. If threshold is too high, MWRD ships under-margined deals. If too low, every quote bottlenecks at admin. Mitigation: SAR 25,000 default is configurable in /settings. Monitor the realized margin distribution post-launch and adjust.
+Three-way match false positives
+2% variance tolerance might be too strict for industries with weight/volume rounding (e.g., paper, beverages). Watch the three-way-match queue for high false-positive rate; consider raising tolerance per category.
+ZATCA + Tap timing risk
+ZATCA Phase 2 onboarding can take 2 to 6 weeks for credential approval. Tap merchant account similar. Start the application processes in parallel with Phase 1 build, not after.
+v2 backlog (in priority order)
+	•	1. Wallet + Transaction History (large enterprise expectation)
+	•	2. Reports module (Spendings Report, Product Invoicing Summary, supplier performance)
+	•	3. Subscriptions (recurring orders monthly/quarterly)
+	•	4. Company Contracts (frame agreements with locked pricing for repeat buyers)
+	•	5. Aggregate competitor pricing signals to suppliers (price ranges only, no identities) -- only after 50+ active suppliers
+	•	6. CSV bulk upload for supplier offers (matters for big suppliers with 500+ SKUs)
+	•	7. Tag-based fuzzy matching for auto-quote (extends matching beyond exact master_product_id)
+	•	8. Tiered pricing on offers (qty break-points)
+	•	9. Client-driven product addition requests (Custom Requests can be canonized into master catalog)
+	•	10. Supplier rating and review system (anonymous, per-order)
+	•	11. Analytics Tags (cost-center coding at checkout)
+	•	12. Bulk Orders (single PO with multiple delivery sites)
+	•	13. Customer Service ticketing
+	•	14. WhatsApp intake channel for RFQs (popular in Saudi B2B)
+	•	15. AI-assisted quote summarisation in Quote Manager
+	•	16. Predictive pricing recommendations for suppliers (still preserving full blind)
+	•	17. 2FA mandatory for backoffice, optional for public
+	•	18. BNPL/credit facilitation (compete with Brkz on construction cash cycles)
+
+Build the boring plumbing perfectly. Plumbing is what makes a B2B platform credible. Lawazem's procurement-finance depth is their moat as much as their catalog breadth. MWRD's anonymity layer + master catalog + dual PO + three-way match + approval chain + audit log is the procurement plumbing finance directors need to adopt the platform.
+End of brief. Total: 9 prompts plus master CLAUDE.md. Build sequentially. Do not run prompts in parallel. Do not skip the verification steps. Each prompt's verification is the gate to the next.

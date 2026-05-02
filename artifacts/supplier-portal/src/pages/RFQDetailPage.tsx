@@ -23,6 +23,7 @@ export default function RFQDetailPage() {
   const { data: quotesData, isLoading: quotesLoading } = useListMyQuotes();
   
   const myQuote = quotesData?.data?.find(q => q.rfq_id === id);
+  const isDraft = myQuote?.status === "draft" || myQuote?.status === "draft_auto" || myQuote?.status === "draft_manual";
   
   const editQuoteMutation = useEditQuote();
   const sendQuoteMutation = useSendQuote();
@@ -87,14 +88,24 @@ export default function RFQDetailPage() {
           <h1 className="text-3xl font-bold">{rfq.title}</h1>
           <p className="text-muted-foreground">RFQ #: {rfq.rfq_number}</p>
         </div>
-        <div className="flex gap-2">
-          {myQuote?.status === "draft" && (
+        <div className="flex gap-2 items-center">
+          {!quotesLoading && !myQuote && (
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-800 border-yellow-200">
+              Not assigned to you yet
+            </Badge>
+          )}
+          {myQuote && !isDraft && (
+            <Badge variant="outline" className="capitalize bg-blue-50 text-blue-800 border-blue-200">
+              Quote {myQuote.status?.replace(/_/g, " ")}
+            </Badge>
+          )}
+          {isDraft && (
             <>
-              <Button variant="outline" onClick={handleSaveDraft} disabled={editQuoteMutation.isPending}>
-                Save Draft
+              <Button variant="outline" onClick={handleSaveDraft} disabled={editQuoteMutation.isPending} data-testid="button-save-draft">
+                {editQuoteMutation.isPending ? "Saving…" : "Save Draft"}
               </Button>
-              <Button onClick={handleSendQuote} disabled={sendQuoteMutation.isPending}>
-                Send Quote
+              <Button onClick={handleSendQuote} disabled={sendQuoteMutation.isPending} data-testid="button-send-quote">
+                {sendQuoteMutation.isPending ? "Sending…" : "Send Quote"}
               </Button>
             </>
           )}
@@ -126,7 +137,7 @@ export default function RFQDetailPage() {
                       </TableCell>
                       <TableCell>{item.qty} {item.unit}</TableCell>
                       <TableCell>
-                        {myQuote?.status === "draft" ? (
+                        {isDraft ? (
                           <Input
                             type="number"
                             className="w-32"
