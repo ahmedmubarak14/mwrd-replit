@@ -1,27 +1,81 @@
-# Workspace
+# MWRD B2B Procurement Platform
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+Full-stack B2B procurement platform (Phase 1 MVP) with mock data. Three separate React SPAs (client, supplier, backoffice) + Express 5 API server, all in a pnpm monorepo.
+
+## Architecture
+
+```
+artifacts/
+  api-server/        — Express 5 REST API, port from $PORT, path /api
+  client-portal/     — Buyer SPA, port from $PORT, path /
+  supplier-portal/   — Supplier SPA, port from $PORT, path /supplier/
+  backoffice/        — Admin SPA, port from $PORT, path /backoffice/
+
+lib/
+  mwrd-shared/       — Shared types, mock data, business logic (ESM, emitDeclarationOnly: false)
+  api-spec/          — OpenAPI 3.0.3 spec (3381 lines, 70+ endpoints)
+  api-client-react/  — Generated React Query hooks + Zod schemas (Orval codegen)
+```
 
 ## Stack
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Monorepo**: pnpm workspaces
+- **Node.js**: 24
+- **TypeScript**: 5.9
+- **API**: Express 5 (`artifacts/api-server`)
+- **Frontend**: React + Vite + Wouter + TanStack Query + shadcn/ui
+- **Shared lib**: `lib/mwrd-shared` — 130 products, 80+ async mock data functions
+- **Codegen**: Orval (from OpenAPI spec → React Query hooks)
+- **Build**: esbuild (API server ESM bundle)
 
 ## Key Commands
 
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/api-server run dev` — run API server locally
+- `pnpm run typecheck` — full typecheck
+- `pnpm --filter @workspace/mwrd-shared run build` — MUST run before api-server (generates dist/index.js)
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate hooks from OpenAPI
 
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+## Seed Credentials
+
+| Role     | Email                  | Password      |
+|----------|------------------------|---------------|
+| Client   | client@mwrd.com        | client123     |
+| Supplier | supplier@mwrd.com      | supplier123   |
+| Supplier | supplier2@mwrd.com     | supplier2123  |
+| Admin    | admin@mwrd.com         | admin123      |
+
+## Auth
+
+- **Client/Supplier tokens**: `sess_pub_*` — stored in `localStorage` as `mwrd_token`
+- **Backoffice tokens**: `sess_bo_*` — stored in `localStorage` as `mwrd_bo_token`
+- Token sent via `Authorization: Bearer <token>` header (configured in `lib/api-client-react/src/custom-fetch.ts`)
+- Both header and `mwrd_session` cookie are accepted by the API
+
+## Portal Routes
+
+### Client Portal (/)
+Login, Register, Dashboard, Catalog, Cart, RFQs, RFQ Detail, Orders, Order Detail, Notifications, Account
+
+### Supplier Portal (/supplier/)
+Login, Dashboard, RFQs, RFQ Detail, Quotes, Quote Detail, Orders, Order Detail, Offers, Create Offer, Product Requests, Notifications, Account
+
+### Backoffice (/backoffice/)
+Login, Dashboard, Leads Queue, KYC Queue, Clients, Suppliers, Products, Offers Queue, Product Requests, Quotes Review, Orders, Margins, Audit Log, Settings, Internal Users
+
+## API Routes (all under /api)
+
+- `POST /api/auth/login` — client/supplier login
+- `POST /api/auth/register` — new user registration
+- `GET /api/catalog/products` — paginated product list
+- `GET /api/rfqs` — list RFQs (role-filtered)
+- `GET /api/quotes` — list quotes (role-filtered)
+- `GET /api/orders` — list orders (role-filtered)
+- `GET /api/backoffice/*` — backoffice admin endpoints (require `sess_bo_*` token)
+
+## Important Notes
+
+- `lib/mwrd-shared` must have `emitDeclarationOnly: false` so esbuild can bundle it
+- All data is mock (in-memory) — no database
+- Anonymity: client APIs never expose supplier real_name; supplier APIs never expose client real_name; backoffice sees both
+- Margin % never sent to client or supplier portals

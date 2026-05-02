@@ -2,21 +2,45 @@ openapi: 3.1.0
 info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 0.2.0
+  description: MWRD B2B Procurement Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication (public — client & supplier)
+  - name: backoffice-auth
+    description: Authentication (backoffice — admin/ops/finance/cs)
+  - name: catalog
+    description: Master catalog (categories, products, bundles)
+  - name: offers
+    description: Supplier offers & pricing
+  - name: cart
+    description: Cart management
+  - name: rfq
+    description: RFQ (Request For Quote) management
+  - name: quote
+    description: Quote management
+  - name: order
+    description: Purchase orders, DNs, GRNs, invoices
+  - name: account
+    description: Company account, members, roles, approval tree, addresses
+  - name: favorites
+    description: Favorites & company catalogs
+  - name: notifications
+    description: In-app notifications
+  - name: backoffice
+    description: Backoffice operations (admin/ops only)
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +48,1949 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register new client or supplier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: Registration submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Sign in (client or supplier)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Sign out
+      responses:
+        "204":
+          description: Signed out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthMeResponse"
+        "401":
+          description: Not authenticated
+
+  /auth/activate:
+    post:
+      operationId: activateAccount
+      tags: [auth]
+      summary: Activate account with token (set password)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivateBody"
+      responses:
+        "200":
+          description: Account activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/onboarding:
+    post:
+      operationId: completeOnboarding
+      tags: [auth]
+      summary: Complete onboarding after activation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardingBody"
+      responses:
+        "200":
+          description: Onboarding complete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingResponse"
+
+  /backoffice/auth/login:
+    post:
+      operationId: backofficeLogin
+      tags: [backoffice-auth]
+      summary: Sign in to backoffice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /backoffice/auth/me:
+    get:
+      operationId: getBackofficeMe
+      tags: [backoffice-auth]
+      summary: Get current backoffice user
+      responses:
+        "200":
+          description: Current backoffice user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthMeResponse"
+        "401":
+          description: Not authenticated
+
+  /backoffice/auth/logout:
+    post:
+      operationId: backofficeLogout
+      tags: [backoffice-auth]
+      summary: Sign out from backoffice
+      responses:
+        "204":
+          description: Signed out
+
+  /catalog/categories:
+    get:
+      operationId: listCategories
+      tags: [catalog]
+      summary: List all categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /catalog/products:
+    get:
+      operationId: listMasterProducts
+      tags: [catalog]
+      summary: Browse master products
+      parameters:
+        - name: category_id
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterProductListResponse"
+
+  /catalog/products/{id}:
+    get:
+      operationId: getMasterProduct
+      tags: [catalog]
+      summary: Get a single master product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Master product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterProduct"
+        "404":
+          description: Not found
+
+  /catalog/bundles:
+    get:
+      operationId: listBundles
+      tags: [catalog]
+      summary: List all bundles
+      responses:
+        "200":
+          description: List of bundles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bundle"
+
+  /catalog/bundles/{slug}:
+    get:
+      operationId: getBundle
+      tags: [catalog]
+      summary: Get bundle by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Bundle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+        "404":
+          description: Not found
+
+  /offers:
+    get:
+      operationId: listMyOffers
+      tags: [offers]
+      summary: List supplier's own offers
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: approval_status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfferListResponse"
+    post:
+      operationId: createOffer
+      tags: [offers]
+      summary: Create a new offer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOfferBody"
+      responses:
+        "201":
+          description: Offer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+
+  /offers/{id}:
+    get:
+      operationId: getOffer
+      tags: [offers]
+      summary: Get a single offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Offer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateOffer
+      tags: [offers]
+      summary: Update an offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOfferBody"
+      responses:
+        "200":
+          description: Updated offer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+
+  /offers/product-requests:
+    get:
+      operationId: listMyProductRequests
+      tags: [offers]
+      summary: List supplier's product addition requests
+      responses:
+        "200":
+          description: List of requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductAdditionRequest"
+    post:
+      operationId: createProductRequest
+      tags: [offers]
+      summary: Submit a product addition request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequestBody"
+      responses:
+        "201":
+          description: Request submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductAdditionRequest"
+
+  /cart:
+    get:
+      operationId: getCart
+      tags: [cart]
+      summary: Get active cart
+      responses:
+        "200":
+          description: Active cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/items:
+    post:
+      operationId: addToCart
+      tags: [cart]
+      summary: Add item to cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToCartBody"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/items/{itemId}:
+    patch:
+      operationId: updateCartItem
+      tags: [cart]
+      summary: Update cart item
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartItemBody"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    delete:
+      operationId: removeCartItem
+      tags: [cart]
+      summary: Remove item from cart
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/bundle/{bundleId}:
+    post:
+      operationId: addBundleToCart
+      tags: [cart]
+      summary: Add all bundle items to cart
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/save:
+    post:
+      operationId: saveCart
+      tags: [cart]
+      summary: Save current cart as named draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveCartBody"
+      responses:
+        "200":
+          description: Saved cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/saved:
+    get:
+      operationId: listSavedCarts
+      tags: [cart]
+      summary: List saved RFQ drafts
+      responses:
+        "200":
+          description: Saved carts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Cart"
+
+  /cart/saved/{cartId}/resume:
+    post:
+      operationId: resumeSavedCart
+      tags: [cart]
+      summary: Resume a saved cart
+      parameters:
+        - name: cartId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Active cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/submit-rfq:
+    post:
+      operationId: submitCartAsRFQ
+      tags: [cart]
+      summary: Submit active cart as a new RFQ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitCartAsRFQBody"
+      responses:
+        "201":
+          description: RFQ created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RFQ"
+
+  /rfqs:
+    get:
+      operationId: listRFQs
+      tags: [rfq]
+      summary: List RFQs
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RFQListResponse"
+    post:
+      operationId: createRFQ
+      tags: [rfq]
+      summary: Create a custom-request RFQ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRFQBody"
+      responses:
+        "201":
+          description: RFQ created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RFQ"
+
+  /rfqs/{id}:
+    get:
+      operationId: getRFQ
+      tags: [rfq]
+      summary: Get a single RFQ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: RFQ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RFQ"
+        "404":
+          description: Not found
+
+  /rfqs/{id}/quotes:
+    get:
+      operationId: listQuotesForRFQ
+      tags: [rfq]
+      summary: List quotes for an RFQ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quote"
+
+  /rfqs/{id}/award/full-basket:
+    post:
+      operationId: awardFullBasket
+      tags: [rfq]
+      summary: Award entire RFQ to one supplier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AwardFullBasketBody"
+      responses:
+        "201":
+          description: CPO + SPO created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/POPairResponse"
+
+  /rfqs/{id}/award/per-line:
+    post:
+      operationId: awardPerLine
+      tags: [rfq]
+      summary: Award individual lines to different suppliers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AwardPerLineBody"
+      responses:
+        "201":
+          description: PO pairs created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/POPairResponse"
+
+  /quotes:
+    get:
+      operationId: listMyQuotes
+      tags: [quote]
+      summary: List supplier's own quotes
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteListResponse"
+
+  /quotes/{id}:
+    get:
+      operationId: getQuote
+      tags: [quote]
+      summary: Get a single quote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Quote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+    patch:
+      operationId: editQuote
+      tags: [quote]
+      summary: Edit quote before sending
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditQuoteBody"
+      responses:
+        "200":
+          description: Updated quote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+
+  /quotes/{id}/send:
+    post:
+      operationId: sendQuote
+      tags: [quote]
+      summary: Send quote to client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Quote submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [order]
+      summary: List orders
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of POs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PO"
+
+  /orders/pending-approval:
+    get:
+      operationId: listPendingApproval
+      tags: [order]
+      summary: List orders awaiting my approval
+      responses:
+        "200":
+          description: Pending approval tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApprovalTaskWithOrder"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [order]
+      summary: Get order detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: PO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PO"
+        "404":
+          description: Not found
+
+  /orders/{id}/approval:
+    get:
+      operationId: getOrderApprovalStatus
+      tags: [order]
+      summary: Get approval chain status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Approval status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApprovalStatusResponse"
+
+  /orders/{id}/approve:
+    post:
+      operationId: approveOrder
+      tags: [order]
+      summary: Approve a pending order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApproveOrderBody"
+      responses:
+        "200":
+          description: Approval task updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApprovalTask"
+
+  /orders/{id}/reject:
+    post:
+      operationId: rejectOrder
+      tags: [order]
+      summary: Reject a pending order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectOrderBody"
+      responses:
+        "200":
+          description: Approval task updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApprovalTask"
+
+  /orders/{id}/dn:
+    post:
+      operationId: createDeliveryNote
+      tags: [order]
+      summary: Create delivery note for SPO (supplier only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDNBody"
+      responses:
+        "201":
+          description: Delivery note created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DN"
+
+  /orders/{id}/grn:
+    post:
+      operationId: createGRN
+      tags: [order]
+      summary: Create goods receipt note (client only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGRNBody"
+      responses:
+        "201":
+          description: GRN created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GRN"
+
+  /orders/{id}/invoice:
+    get:
+      operationId: getInvoice
+      tags: [order]
+      summary: Get invoice for order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /orders/{id}/pay:
+    post:
+      operationId: payInvoice
+      tags: [order]
+      summary: Initiate payment for invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayInvoiceBody"
+      responses:
+        "200":
+          description: Invoice paid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /account/members:
+    get:
+      operationId: listCompanyMembers
+      tags: [account]
+      summary: List company members
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompanyMember"
+    post:
+      operationId: inviteCompanyMember
+      tags: [account]
+      summary: Invite a new member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteCompanyMemberBody"
+      responses:
+        "201":
+          description: Member invited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyMember"
+
+  /account/roles:
+    get:
+      operationId: listCompanyRoles
+      tags: [account]
+      summary: List company roles
+      responses:
+        "200":
+          description: Roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompanyRole"
+    post:
+      operationId: createCompanyRole
+      tags: [account]
+      summary: Create a company role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyRoleBody"
+      responses:
+        "201":
+          description: Role created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyRole"
+
+  /account/approval-tree:
+    get:
+      operationId: listApprovalTree
+      tags: [account]
+      summary: Get approval tree nodes
+      responses:
+        "200":
+          description: Approval nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApprovalNode"
+    post:
+      operationId: setApprover
+      tags: [account]
+      summary: Set direct approver for a member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetApproverBody"
+      responses:
+        "200":
+          description: Approval node updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApprovalNode"
+
+  /account/addresses:
+    get:
+      operationId: listAddresses
+      tags: [account]
+      summary: List company addresses
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [delivery, billing]
+      responses:
+        "200":
+          description: Addresses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Address"
+    post:
+      operationId: createAddress
+      tags: [account]
+      summary: Add a new address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAddressBody"
+      responses:
+        "201":
+          description: Address created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Address"
+
+  /account/addresses/{id}:
+    patch:
+      operationId: updateAddress
+      tags: [account]
+      summary: Update address
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAddressBody"
+      responses:
+        "200":
+          description: Updated address
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Address"
+    delete:
+      operationId: deleteAddress
+      tags: [account]
+      summary: Delete address
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /account/dashboard-stats:
+    get:
+      operationId: getDashboardStats
+      tags: [account]
+      summary: Get dashboard stats for current user's company
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /favorites:
+    get:
+      operationId: getFavorites
+      tags: [favorites]
+      summary: Get user's favorites list
+      responses:
+        "200":
+          description: Favorites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoriteList"
+
+  /favorites/{productId}:
+    post:
+      operationId: toggleFavorite
+      tags: [favorites]
+      summary: Toggle a product in/out of favorites
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated favorites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoriteList"
+
+  /company-catalogs:
+    get:
+      operationId: listCompanyCatalogs
+      tags: [favorites]
+      summary: List company catalogs
+      responses:
+        "200":
+          description: Catalogs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompanyCatalog"
+    post:
+      operationId: createCompanyCatalog
+      tags: [favorites]
+      summary: Create a company catalog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyCatalogBody"
+      responses:
+        "201":
+          description: Catalog created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyCatalog"
+
+  /company-catalogs/{id}/products/{productId}:
+    post:
+      operationId: addToCompanyCatalog
+      tags: [favorites]
+      summary: Add product to company catalog
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyCatalog"
+    delete:
+      operationId: removeFromCompanyCatalog
+      tags: [favorites]
+      summary: Remove product from company catalog
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyCatalog"
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List in-app notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Marked read
+
+  /backoffice/dashboard-stats:
+    get:
+      operationId: getBackofficeDashboardStats
+      tags: [backoffice]
+      summary: Backoffice dashboard stats
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BackofficeDashboardStats"
+
+  /backoffice/leads:
+    get:
+      operationId: listLeads
+      tags: [backoffice]
+      summary: List leads queue
+      parameters:
+        - name: account_type
+          in: query
+          schema:
+            type: string
+            enum: [client, supplier]
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Leads
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+
+  /backoffice/leads/{id}/callback-complete:
+    post:
+      operationId: markCallbackComplete
+      tags: [backoffice]
+      summary: Mark callback complete and send activation link
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CallbackCompleteBody"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /backoffice/kyc:
+    get:
+      operationId: listKycQueue
+      tags: [backoffice]
+      summary: List KYC verification queue
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: KYC queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+
+  /backoffice/kyc/{id}/approve:
+    post:
+      operationId: approveKYC
+      tags: [backoffice]
+      summary: Approve KYC and activate user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /backoffice/kyc/{id}/reject:
+    post:
+      operationId: rejectKYC
+      tags: [backoffice]
+      summary: Reject KYC
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectKYCBody"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /backoffice/catalog/products:
+    get:
+      operationId: adminListProducts
+      tags: [backoffice]
+      summary: List all master products (admin view)
+      parameters:
+        - name: category_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Paginated products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterProductListResponse"
+    post:
+      operationId: adminCreateProduct
+      tags: [backoffice]
+      summary: Create a new master product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMasterProductBody"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterProduct"
+
+  /backoffice/catalog/products/{id}:
+    patch:
+      operationId: adminUpdateProduct
+      tags: [backoffice]
+      summary: Update a master product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMasterProductBody"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterProduct"
+
+  /backoffice/catalog/products/{id}/deprecate:
+    post:
+      operationId: adminDeprecateProduct
+      tags: [backoffice]
+      summary: Deprecate a master product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product deprecated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterProduct"
+
+  /backoffice/catalog/categories:
+    post:
+      operationId: adminCreateCategory
+      tags: [backoffice]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryBody"
+      responses:
+        "201":
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /backoffice/offer-approvals:
+    get:
+      operationId: listPendingOffers
+      tags: [backoffice]
+      summary: List pending offer approvals
+      responses:
+        "200":
+          description: Pending offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Offer"
+
+  /backoffice/offer-approvals/{id}/approve:
+    post:
+      operationId: adminApproveOffer
+      tags: [backoffice]
+      summary: Approve an offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Offer approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+
+  /backoffice/offer-approvals/{id}/reject:
+    post:
+      operationId: adminRejectOffer
+      tags: [backoffice]
+      summary: Reject an offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectOfferBody"
+      responses:
+        "200":
+          description: Offer rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+
+  /backoffice/product-requests:
+    get:
+      operationId: adminListProductRequests
+      tags: [backoffice]
+      summary: List all product addition requests
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductAdditionRequestListResponse"
+
+  /backoffice/product-requests/{id}/approve:
+    post:
+      operationId: adminApproveProductRequest
+      tags: [backoffice]
+      summary: Approve product request and create master product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMasterProductBody"
+      responses:
+        "200":
+          description: Request approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApproveProductRequestResponse"
+
+  /backoffice/product-requests/{id}/reject:
+    post:
+      operationId: adminRejectProductRequest
+      tags: [backoffice]
+      summary: Reject product addition request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectProductRequestBody"
+      responses:
+        "200":
+          description: Request rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductAdditionRequest"
+
+  /backoffice/quote-manager/held:
+    get:
+      operationId: listHeldQuotes
+      tags: [backoffice]
+      summary: List admin-held quotes
+      responses:
+        "200":
+          description: Held quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quote"
+
+  /backoffice/quote-manager/pending-auto:
+    get:
+      operationId: listPendingAutoQuotes
+      tags: [backoffice]
+      summary: List pending auto-quotes
+      responses:
+        "200":
+          description: Pending auto quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quote"
+
+  /backoffice/quote-manager/{id}/approve:
+    post:
+      operationId: adminApproveHeldQuote
+      tags: [backoffice]
+      summary: Approve held quote and route to client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminApproveQuoteBody"
+      responses:
+        "200":
+          description: Quote approved and sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+
+  /backoffice/margins:
+    get:
+      operationId: listMargins
+      tags: [backoffice]
+      summary: List all margins
+      responses:
+        "200":
+          description: Margins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Margin"
+    post:
+      operationId: setMargin
+      tags: [backoffice]
+      summary: Set a margin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetMarginBody"
+      responses:
+        "200":
+          description: Margin set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Margin"
+
+  /backoffice/users/clients:
+    get:
+      operationId: listClients
+      tags: [backoffice]
+      summary: List all client users
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Client users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+
+  /backoffice/users/suppliers:
+    get:
+      operationId: listSuppliers
+      tags: [backoffice]
+      summary: List all supplier users
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Supplier users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+
+  /backoffice/users/internal:
+    get:
+      operationId: listInternalUsers
+      tags: [backoffice]
+      summary: List internal backoffice users
+      responses:
+        "200":
+          description: Internal users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+    post:
+      operationId: inviteInternalUser
+      tags: [backoffice]
+      summary: Invite a new internal user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteInternalUserBody"
+      responses:
+        "201":
+          description: Invitation sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /backoffice/users/{id}/suspend:
+    post:
+      operationId: suspendUser
+      tags: [backoffice]
+      summary: Suspend a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User suspended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /backoffice/users/{id}/reactivate:
+    post:
+      operationId: reactivateUser
+      tags: [backoffice]
+      summary: Reactivate a suspended user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User reactivated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /backoffice/audit-log:
+    get:
+      operationId: listAuditLog
+      tags: [backoffice]
+      summary: List audit log
+      parameters:
+        - name: actor_user_id
+          in: query
+          schema:
+            type: string
+        - name: entity_type
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
+
+  /backoffice/settings:
+    get:
+      operationId: getPlatformSettings
+      tags: [backoffice]
+      summary: Get platform settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSettings"
+    patch:
+      operationId: updatePlatformSettings
+      tags: [backoffice]
+      summary: Update platform settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePlatformSettingsBody"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSettings"
+
+  /backoffice/logistics:
+    get:
+      operationId: listLogistics
+      tags: [backoffice]
+      summary: List logistics overview
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Orders with delivery info
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PO"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +1998,1383 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    RegisterBody:
+      type: object
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        account_type:
+          type: string
+          enum: [client, supplier]
+        company_name:
+          type: string
+      required: [full_name, email, phone, account_type, company_name]
+
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserResponse"
+      required: [message]
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserResponse"
+      required: [token, user]
+
+    AuthMeResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        company:
+          $ref: "#/components/schemas/CompanyResponse"
+      required: [user]
+
+    ActivateBody:
+      type: object
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+      required: [token, password]
+
+    OnboardingBody:
+      type: object
+      properties:
+        cr_number:
+          type: string
+        vat_number:
+          type: string
+        full_address:
+          type: string
+        categories_served:
+          type: array
+          items:
+            type: string
+
+    OnboardingResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        company:
+          $ref: "#/components/schemas/CompanyResponse"
+      required: [user]
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        real_name:
+          type: string
+        phone:
+          type: string
+        platform_alias:
+          type: string
+        company_id:
+          type: string
+        status:
+          type: string
+        activation_status:
+          type: string
+        language:
+          type: string
+        onboarding_completed:
+          type: boolean
+        created_at:
+          type: string
+      required: [id, email, role, real_name, platform_alias, company_id, status]
+
+    CompanyResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        real_name:
+          type: string
+        platform_alias:
+          type: string
+        type:
+          type: string
+        cr_number:
+          type: string
+          nullable: true
+        vat_number:
+          type: string
+          nullable: true
+        status:
+          type: string
+        onboarding_completed:
+          type: boolean
+        subscription_tier:
+          type: string
+        categories_served:
+          type: array
+          items:
+            type: string
+      required: [id, real_name, platform_alias, type, status]
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name_en:
+          type: string
+        name_ar:
+          type: string
+        slug:
+          type: string
+        parent_id:
+          type: string
+          nullable: true
+        icon_url:
+          type: string
+        sort_order:
+          type: integer
+      required: [id, name_en, name_ar, slug, sort_order]
+
+    PackTypePricing:
+      type: object
+      properties:
+        pack_type:
+          type: string
+        supplier_cost_sar:
+          type: number
+        min_order_qty:
+          type: integer
+      required: [pack_type, min_order_qty]
+
+    MasterProduct:
+      type: object
+      properties:
+        id:
+          type: string
+        master_product_code:
+          type: string
+        name_en:
+          type: string
+        name_ar:
+          type: string
+        description_en:
+          type: string
+        description_ar:
+          type: string
+        category_id:
+          type: string
+        specs:
+          type: object
+          additionalProperties:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        pack_types:
+          type: array
+          items:
+            type: string
+        default_unit:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: string
+      required: [id, name_en, name_ar, category_id, status]
+
+    MasterProductListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MasterProduct"
+        total:
+          type: integer
+      required: [data, total]
+
+    Bundle:
+      type: object
+      properties:
+        id:
+          type: string
+        name_en:
+          type: string
+        name_ar:
+          type: string
+        slug:
+          type: string
+        image_url:
+          type: string
+        description:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BundleItem"
+      required: [id, name_en, slug]
+
+    BundleItem:
+      type: object
+      properties:
+        id:
+          type: string
+        bundle_id:
+          type: string
+        master_product_id:
+          type: string
+        qty:
+          type: integer
+        sort_order:
+          type: integer
+      required: [id, master_product_id, qty]
+
+    Offer:
+      type: object
+      properties:
+        id:
+          type: string
+        master_product_id:
+          type: string
+        supplier_company_id:
+          type: string
+        pack_type_pricing:
+          type: array
+          items:
+            $ref: "#/components/schemas/PackTypePricing"
+        default_lead_time_days:
+          type: integer
+        available_quantity_estimate:
+          type: integer
+          nullable: true
+        auto_quote_enabled:
+          type: boolean
+        fulfillment_mode:
+          type: string
+        status:
+          type: string
+        approval_status:
+          type: string
+        supplier_internal_sku:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+      required: [id, master_product_id, status, approval_status]
+
+    OfferListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Offer"
+        total:
+          type: integer
+      required: [data, total]
+
+    CreateOfferBody:
+      type: object
+      properties:
+        master_product_id:
+          type: string
+        pack_type_pricing:
+          type: array
+          items:
+            $ref: "#/components/schemas/PackTypePricing"
+        default_lead_time_days:
+          type: integer
+        available_quantity_estimate:
+          type: integer
+          nullable: true
+        auto_quote_enabled:
+          type: boolean
+        fulfillment_mode:
+          type: string
+        supplier_internal_sku:
+          type: string
+          nullable: true
+        supplier_notes:
+          type: string
+          nullable: true
+      required: [master_product_id, pack_type_pricing, default_lead_time_days]
+
+    UpdateOfferBody:
+      type: object
+      properties:
+        pack_type_pricing:
+          type: array
+          items:
+            $ref: "#/components/schemas/PackTypePricing"
+        default_lead_time_days:
+          type: integer
+        auto_quote_enabled:
+          type: boolean
+        status:
+          type: string
+
+    ProductAdditionRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        supplier_company_id:
+          type: string
+        proposed_name_en:
+          type: string
+        proposed_name_ar:
+          type: string
+        proposed_category_id:
+          type: string
+        proposed_description:
+          type: string
+        status:
+          type: string
+        admin_notes:
+          type: string
+          nullable: true
+        rejection_reason:
+          type: string
+          nullable: true
+        resulting_master_product_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+      required: [id, proposed_name_en, status]
+
+    ProductAdditionRequestListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductAdditionRequest"
+        total:
+          type: integer
+      required: [data, total]
+
+    CreateProductRequestBody:
+      type: object
+      properties:
+        proposed_name_en:
+          type: string
+        proposed_name_ar:
+          type: string
+        proposed_category_id:
+          type: string
+        proposed_description:
+          type: string
+        proposed_specs:
+          type: object
+          additionalProperties:
+            type: string
+        reason_for_addition:
+          type: string
+        estimated_demand:
+          type: string
+          nullable: true
+        sample_images:
+          type: array
+          items:
+            type: string
+      required: [proposed_name_en, proposed_name_ar, proposed_category_id, reason_for_addition]
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+        cart_id:
+          type: string
+        master_product_id:
+          type: string
+        qty:
+          type: integer
+        pack_type:
+          type: string
+      required: [id, master_product_id, qty, pack_type]
+
+    Cart:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        status:
+          type: string
+        name:
+          type: string
+          nullable: true
+        expires_at:
+          type: string
+          nullable: true
+      required: [id, items, status]
+
+    AddToCartBody:
+      type: object
+      properties:
+        master_product_id:
+          type: string
+        qty:
+          type: integer
+        pack_type:
+          type: string
+      required: [master_product_id, qty, pack_type]
+
+    UpdateCartItemBody:
+      type: object
+      properties:
+        qty:
+          type: integer
+        pack_type:
+          type: string
+
+    SaveCartBody:
+      type: object
+      properties:
+        name:
+          type: string
+      required: [name]
+
+    SubmitCartAsRFQBody:
+      type: object
+      properties:
+        cart_id:
+          type: string
+        title:
+          type: string
+        delivery_city:
+          type: string
+        delivery_date:
+          type: string
+        description:
+          type: string
+      required: [cart_id, title, delivery_city, delivery_date, description]
+
+    RFQItem:
+      type: object
+      properties:
+        id:
+          type: string
+        rfq_id:
+          type: string
+        master_product_id:
+          type: string
+          nullable: true
+        free_text_name:
+          type: string
+          nullable: true
+        description:
+          type: string
+        qty:
+          type: integer
+        unit:
+          type: string
+        pack_type:
+          type: string
+          nullable: true
+      required: [id, description, qty, unit]
+
+    RFQ:
+      type: object
+      properties:
+        id:
+          type: string
+        rfq_number:
+          type: string
+        client_company_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        delivery_city:
+          type: string
+        delivery_date:
+          type: string
+        status:
+          type: string
+        source:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RFQItem"
+        created_at:
+          type: string
+        expires_at:
+          type: string
+      required: [id, rfq_number, title, status]
+
+    RFQListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RFQ"
+        total:
+          type: integer
+      required: [data, total]
+
+    CreateRFQBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        delivery_city:
+          type: string
+        delivery_date:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              master_product_id:
+                type: string
+                nullable: true
+              free_text_name:
+                type: string
+                nullable: true
+              description:
+                type: string
+              qty:
+                type: integer
+              unit:
+                type: string
+              pack_type:
+                type: string
+                nullable: true
+            required: [description, qty, unit]
+      required: [title, delivery_city, delivery_date, items]
+
+    QuoteItem:
+      type: object
+      properties:
+        id:
+          type: string
+        quote_id:
+          type: string
+        rfq_item_id:
+          type: string
+        supplier_unit_price_sar:
+          type: number
+        final_unit_price_sar:
+          type: number
+        qty_available:
+          type: integer
+        lead_time_days:
+          type: integer
+        notes:
+          type: string
+        declined:
+          type: boolean
+      required: [id, rfq_item_id, final_unit_price_sar, qty_available]
+
+    Quote:
+      type: object
+      properties:
+        id:
+          type: string
+        quote_number:
+          type: string
+        rfq_id:
+          type: string
+        supplier_company_id:
+          type: string
+        status:
+          type: string
+        is_auto_generated:
+          type: boolean
+        valid_until:
+          type: string
+        lead_time_days:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteItem"
+        notes:
+          type: string
+        submitted_at:
+          type: string
+          nullable: true
+        admin_held:
+          type: boolean
+      required: [id, quote_number, rfq_id, status]
+
+    QuoteListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Quote"
+        total:
+          type: integer
+      required: [data, total]
+
+    EditQuoteBody:
+      type: object
+      properties:
+        notes:
+          type: string
+        lead_time_days:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              supplier_unit_price_sar:
+                type: number
+              qty_available:
+                type: integer
+              notes:
+                type: string
+              declined:
+                type: boolean
+
+    AwardFullBasketBody:
+      type: object
+      properties:
+        quote_id:
+          type: string
+      required: [quote_id]
+
+    LineSelection:
+      type: object
+      properties:
+        quote_id:
+          type: string
+        quote_item_id:
+          type: string
+      required: [quote_id, quote_item_id]
+
+    AwardPerLineBody:
+      type: object
+      properties:
+        selections:
+          type: array
+          items:
+            $ref: "#/components/schemas/LineSelection"
+      required: [selections]
+
+    POItem:
+      type: object
+      properties:
+        id:
+          type: string
+        master_product_id:
+          type: string
+        name_en:
+          type: string
+        qty:
+          type: integer
+        pack_type:
+          type: string
+        unit_price_sar:
+          type: number
+        total_sar:
+          type: number
+      required: [id, name_en, qty, unit_price_sar, total_sar]
+
+    PO:
+      type: object
+      properties:
+        id:
+          type: string
+        po_number:
+          type: string
+        type:
+          type: string
+        transaction_ref:
+          type: string
+        client_company_id:
+          type: string
+        supplier_company_id:
+          type: string
+        status:
+          type: string
+        total_sar:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/POItem"
+        created_at:
+          type: string
+      required: [id, po_number, type, status, total_sar]
+
+    POPairResponse:
+      type: object
+      properties:
+        cpo:
+          $ref: "#/components/schemas/PO"
+        spo:
+          $ref: "#/components/schemas/PO"
+      required: [cpo, spo]
+
+    ApprovalTask:
+      type: object
+      properties:
+        id:
+          type: string
+        po_id:
+          type: string
+        approver_user_id:
+          type: string
+        status:
+          type: string
+        order_in_chain:
+          type: integer
+        decided_at:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+      required: [id, po_id, status, order_in_chain]
+
+    ApprovalStatusResponse:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApprovalTask"
+        current_approver:
+          nullable: true
+          oneOf:
+            - $ref: "#/components/schemas/UserResponse"
+            - type: "null"
+      required: [tasks]
+
+    ApprovalTaskWithOrder:
+      type: object
+      properties:
+        task:
+          $ref: "#/components/schemas/ApprovalTask"
+        po:
+          $ref: "#/components/schemas/PO"
+      required: [task, po]
+
+    ApproveOrderBody:
+      type: object
+      properties:
+        task_id:
+          type: string
+        note:
+          type: string
+          default: ""
+      required: [task_id]
+
+    RejectOrderBody:
+      type: object
+      properties:
+        task_id:
+          type: string
+        note:
+          type: string
+      required: [task_id, note]
+
+    DNItem:
+      type: object
+      properties:
+        id:
+          type: string
+        master_product_id:
+          type: string
+        name_en:
+          type: string
+        qty_dispatched:
+          type: integer
+        notes:
+          type: string
+      required: [name_en, qty_dispatched]
+
+    DN:
+      type: object
+      properties:
+        id:
+          type: string
+        dn_number:
+          type: string
+        spo_id:
+          type: string
+        courier:
+          type: string
+        tracking_number:
+          type: string
+        dispatch_date:
+          type: string
+        expected_delivery_date:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DNItem"
+      required: [id, dn_number, spo_id]
+
+    CreateDNBody:
+      type: object
+      properties:
+        courier:
+          type: string
+        tracking_number:
+          type: string
+        dispatch_date:
+          type: string
+        expected_delivery_date:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              master_product_id:
+                type: string
+              name_en:
+                type: string
+              qty_dispatched:
+                type: integer
+              notes:
+                type: string
+            required: [name_en, qty_dispatched]
+      required: [courier, tracking_number, dispatch_date, expected_delivery_date, items]
+
+    GRNItem:
+      type: object
+      properties:
+        id:
+          type: string
+        master_product_id:
+          type: string
+        name_en:
+          type: string
+        qty_received:
+          type: integer
+        condition:
+          type: string
+      required: [name_en, qty_received, condition]
+
+    GRN:
+      type: object
+      properties:
+        id:
+          type: string
+        grn_number:
+          type: string
+        cpo_id:
+          type: string
+        dn_id:
+          type: string
+        received_at:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/GRNItem"
+        notes:
+          type: string
+      required: [id, grn_number, cpo_id, dn_id, received_at]
+
+    CreateGRNBody:
+      type: object
+      properties:
+        dn_id:
+          type: string
+        notes:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              master_product_id:
+                type: string
+              name_en:
+                type: string
+              qty_received:
+                type: integer
+              condition:
+                type: string
+                enum: [ok, damaged, short]
+            required: [name_en, qty_received, condition]
+      required: [dn_id, items]
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        invoice_number:
+          type: string
+        cpo_id:
+          type: string
+        grn_id:
+          type: string
+        total_sar:
+          type: number
+        vat_amount_sar:
+          type: number
+        status:
+          type: string
+        issue_date:
+          type: string
+        due_date:
+          type: string
+        zatca_qr:
+          type: string
+          nullable: true
+      required: [id, invoice_number, total_sar, status]
+
+    PayInvoiceBody:
+      type: object
+      properties:
+        invoice_id:
+          type: string
+        payment_method:
+          type: string
+      required: [invoice_id]
+
+    CompanyMember:
+      type: object
+      properties:
+        id:
+          type: string
+        company_id:
+          type: string
+        user_id:
+          type: string
+        company_role_id:
+          type: string
+      required: [id, company_id, user_id]
+
+    CompanyRole:
+      type: object
+      properties:
+        id:
+          type: string
+        company_id:
+          type: string
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+      required: [id, name]
+
+    ApprovalNode:
+      type: object
+      properties:
+        id:
+          type: string
+        company_id:
+          type: string
+        member_user_id:
+          type: string
+        direct_approver_user_id:
+          type: string
+          nullable: true
+      required: [id, member_user_id]
+
+    Address:
+      type: object
+      properties:
+        id:
+          type: string
+        company_id:
+          type: string
+        type:
+          type: string
+        label:
+          type: string
+        full_address:
+          type: string
+        phone:
+          type: string
+        is_default:
+          type: boolean
+      required: [id, type, label, full_address]
+
+    CreateAddressBody:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [delivery, billing]
+        label:
+          type: string
+        national_address_code:
+          type: string
+        address_code:
+          type: string
+        full_address:
+          type: string
+        phone:
+          type: string
+        is_default:
+          type: boolean
+      required: [type, label, full_address]
+
+    DashboardStats:
+      type: object
+      properties:
+        open_rfqs:
+          type: integer
+        pending_quotes:
+          type: integer
+        active_orders:
+          type: integer
+        total_spend_sar:
+          type: number
+      required: [open_rfqs, pending_quotes, active_orders, total_spend_sar]
+
+    FavoriteList:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        master_product_ids:
+          type: array
+          items:
+            type: string
+      required: [id, user_id, master_product_ids]
+
+    CompanyCatalog:
+      type: object
+      properties:
+        id:
+          type: string
+        company_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        master_product_ids:
+          type: array
+          items:
+            type: string
+      required: [id, name, master_product_ids]
+
+    CreateCompanyCatalogBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+      required: [name]
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        read_at:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+        link:
+          type: string
+          nullable: true
+      required: [id, title, body, created_at]
+
+    Margin:
+      type: object
+      properties:
+        id:
+          type: string
+        scope:
+          type: string
+          enum: [global, category, client]
+        scope_id:
+          type: string
+          nullable: true
+        pct:
+          type: number
+        updated_at:
+          type: string
+      required: [id, scope, pct]
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+        actor_user_id:
+          type: string
+        action:
+          type: string
+        entity_type:
+          type: string
+        entity_id:
+          type: string
+        created_at:
+          type: string
+      required: [id, actor_user_id, action, entity_type, entity_id, created_at]
+
+    PlatformSettings:
+      type: object
+      properties:
+        id:
+          type: string
+        vat_rate:
+          type: number
+        default_lead_time_days:
+          type: integer
+        rfq_expiry_days:
+          type: integer
+        auto_quote_admin_hold_threshold_sar:
+          type: number
+        auto_quote_globally_enabled:
+          type: boolean
+      required: [vat_rate, default_lead_time_days, rfq_expiry_days, auto_quote_admin_hold_threshold_sar, auto_quote_globally_enabled]
+
+    UpdatePlatformSettingsBody:
+      type: object
+      properties:
+        vat_rate:
+          type: number
+        default_lead_time_days:
+          type: integer
+        rfq_expiry_days:
+          type: integer
+        auto_quote_admin_hold_threshold_sar:
+          type: number
+        auto_quote_globally_enabled:
+          type: boolean
+
+    BackofficeDashboardStats:
+      type: object
+      properties:
+        pending_leads:
+          type: integer
+        pending_kyc:
+          type: integer
+        pending_offers:
+          type: integer
+        held_quotes:
+          type: integer
+        active_clients:
+          type: integer
+        active_suppliers:
+          type: integer
+        total_rfqs_open:
+          type: integer
+        recent_orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/PO"
+      required: [pending_leads, pending_kyc, pending_offers, held_quotes, active_clients, active_suppliers, total_rfqs_open]
+
+    UserListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResponse"
+        total:
+          type: integer
+      required: [data, total]
+
+    CallbackCompleteBody:
+      type: object
+      properties:
+        notes:
+          type: string
+      required: [notes]
+
+    RejectKYCBody:
+      type: object
+      properties:
+        reason:
+          type: string
+      required: [reason]
+
+    CreateMasterProductBody:
+      type: object
+      properties:
+        name_en:
+          type: string
+        name_ar:
+          type: string
+        description_en:
+          type: string
+        description_ar:
+          type: string
+        category_id:
+          type: string
+        specs:
+          type: object
+          additionalProperties:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        pack_types:
+          type: array
+          items:
+            type: string
+        default_unit:
+          type: string
+        status:
+          type: string
+      required: [name_en, name_ar, category_id]
+
+    CreateCategoryBody:
+      type: object
+      properties:
+        name_en:
+          type: string
+        name_ar:
+          type: string
+        slug:
+          type: string
+        parent_id:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
+      required: [name_en, name_ar, slug]
+
+    RejectOfferBody:
+      type: object
+      properties:
+        reason:
+          type: string
+      required: [reason]
+
+    AdminApproveQuoteBody:
+      type: object
+      properties:
+        margin_pct:
+          type: number
+      required: [margin_pct]
+
+    SetMarginBody:
+      type: object
+      properties:
+        scope:
+          type: string
+          enum: [global, category, client]
+        scope_id:
+          type: string
+          nullable: true
+        pct:
+          type: number
+      required: [scope, pct]
+
+    InviteCompanyMemberBody:
+      type: object
+      properties:
+        email:
+          type: string
+        role_id:
+          type: string
+      required: [email, role_id]
+
+    CreateCompanyRoleBody:
+      type: object
+      properties:
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+      required: [name]
+
+    SetApproverBody:
+      type: object
+      properties:
+        member_user_id:
+          type: string
+        approver_user_id:
+          type: string
+          nullable: true
+      required: [member_user_id]
+
+    InviteInternalUserBody:
+      type: object
+      properties:
+        email:
+          type: string
+        full_name:
+          type: string
+        role:
+          type: string
+          enum: [admin, ops, finance, cs]
+      required: [email, full_name, role]
+
+    AdminApproveProductRequestResponse:
+      type: object
+      properties:
+        request:
+          $ref: "#/components/schemas/ProductAdditionRequest"
+        masterProduct:
+          $ref: "#/components/schemas/MasterProduct"
+      required: [request, masterProduct]
+
+    RejectProductRequestBody:
+      type: object
+      properties:
+        reason:
+          type: string
+      required: [reason]

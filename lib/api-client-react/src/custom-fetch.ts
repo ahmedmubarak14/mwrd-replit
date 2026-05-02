@@ -37,11 +37,15 @@ export function setBaseUrl(url: string | null): void {
  * Useful for Expo bundles making token-gated API calls.
  * Pass `null` to clear the getter.
  *
- * NOTE: This function should never be used in web applications where session
- * token cookies are automatically associated with API calls by the browser.
+ * NOTE: For web applications, this can be used to pull a token from localStorage.
  */
 export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
+}
+
+// Set default getter for web to look in localStorage
+if (typeof window !== "undefined") {
+  setAuthTokenGetter(() => localStorage.getItem("mwrd_bo_token") || localStorage.getItem("mwrd_token"));
 }
 
 function isRequest(input: RequestInfo | URL): input is Request {
