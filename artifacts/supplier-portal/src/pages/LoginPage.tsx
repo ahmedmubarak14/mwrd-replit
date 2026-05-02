@@ -36,9 +36,17 @@ export default function LoginPage() {
   const onSubmit = (data: LoginFormValues) => {
     loginMutation.mutate({ data }, {
       onSuccess: (response) => {
+        if (response.user?.role !== "supplier") {
+          toast({
+            title: "Access denied",
+            description: "This portal is for suppliers only. Please use the correct portal.",
+            variant: "destructive",
+          });
+          return;
+        }
         localStorage.setItem("mwrd_supplier_token", response.token);
         toast({ title: "Welcome back", description: "Redirecting to your supplier dashboard." });
-        setLocation("/");
+        window.location.replace("/supplier/");
       },
       onError: (error: any) => {
         toast({
