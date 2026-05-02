@@ -3,7 +3,7 @@ import { useGetMe, useListAddresses } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, MapPin } from "lucide-react";
+import { Building02, MarkerPin01 } from "@untitledui/icons";
 
 export default function AccountPage() {
   const { data: user, isLoading: userLoading } = useGetMe();
@@ -16,11 +16,11 @@ export default function AccountPage() {
       <Tabs defaultValue="company" className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="company">
-            <Building2 className="mr-2 h-4 w-4" />
+            <Building02 className="mr-2 h-4 w-4" />
             Company Info
           </TabsTrigger>
           <TabsTrigger value="addresses">
-            <MapPin className="mr-2 h-4 w-4" />
+            <MarkerPin01 className="mr-2 h-4 w-4" />
             Addresses
           </TabsTrigger>
         </TabsList>

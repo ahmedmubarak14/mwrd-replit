@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle } from "@untitledui/icons";
 
 export default function RFQDetailPage() {
   const [, params] = useRoute("/rfqs/:id");

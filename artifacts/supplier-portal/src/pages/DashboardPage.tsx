@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useGetDashboardStats, useListMyQuotes } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, Quote, ShoppingCart, TrendingUp } from "lucide-react";
+import { File06, MessageChatCircle, ShoppingCart01, TrendUp01 } from "@untitledui/icons";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -40,28 +40,28 @@ export default function DashboardPage() {
         <StatCard
           title="Open RFQs"
           value={stats?.open_rfqs || 0}
-          icon={FileText}
+          icon={File06}
           description="Awaiting your quote"
           isLoading={statsLoading}
         />
         <StatCard
           title="Submitted Quotes"
           value={stats?.pending_quotes || 0}
-          icon={Quote}
+          icon={MessageChatCircle}
           description="In review"
           isLoading={statsLoading}
         />
         <StatCard
           title="Active Orders"
           value={stats?.active_orders || 0}
-          icon={ShoppingCart}
+          icon={ShoppingCart01}
           description="Needs delivery"
           isLoading={statsLoading}
         />
         <StatCard
           title="Total Revenue"
           value={`$${(stats?.total_spend_sar || 0).toLocaleString()}`}
-          icon={TrendingUp}
+          icon={TrendUp01}
           description="All time"
           isLoading={statsLoading}
         />

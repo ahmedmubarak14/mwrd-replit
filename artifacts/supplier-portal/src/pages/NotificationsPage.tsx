@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
-import { Bell, CheckCircle } from "lucide-react";
+import { Bell01, CheckCircle } from "@untitledui/icons";
 import { cn } from "@/lib/utils";
 
 export default function NotificationsPage() {
@@ -36,7 +36,7 @@ export default function NotificationsPage() {
           ))
         ) : !notifications || notifications.length === 0 ? (
           <div className="text-center py-12 bg-card border border-card-border rounded-lg">
-            <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <Bell01 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">You have no notifications.</p>
           </div>
         ) : (

@@ -1,47 +1,98 @@
 import { Link, useLocation } from "wouter";
-import { 
-  LayoutDashboard, 
-  Users, 
-  UserSquare2, 
-  Package, 
-  Tag, 
-  ShoppingBag, 
-  FileText, 
-  Receipt, 
-  Percent, 
-  History, 
-  Settings, 
-  ShieldCheck,
-  LogOut,
-  ChevronRight,
-  Menu
-} from "lucide-react";
+import {
+  LayoutGrid01,
+  Users01,
+  Shield01,
+  File06,
+  Tag01,
+  Receipt,
+  UserSquare,
+  ShoppingBag01,
+  Package,
+  BarChart01,
+  LogOut01,
+  Menu01,
+  Settings01,
+} from "@untitledui/icons";
 import { useState, useEffect } from "react";
 import { useGetBackofficeMe } from "@workspace/api-client-react";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarHeader, 
-  SidebarMenu, 
-  SidebarMenuItem, 
-  SidebarMenuButton, 
-  SidebarGroup, 
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarProvider,
-  SidebarFooter
-} from "@/components/ui/sidebar";
+import { cx } from "@/utils/cx";
 
 interface BackofficeLayoutProps {
   children: React.ReactNode;
 }
 
+const navGroups = [
+  {
+    label: "Operations",
+    items: [
+      { href: "/", label: "Dashboard", icon: LayoutGrid01 },
+      { href: "/leads", label: "Leads Queue", icon: Users01 },
+      { href: "/kyc", label: "KYC Queue", icon: Shield01 },
+      { href: "/product-requests", label: "Product Requests", icon: File06 },
+      { href: "/offers", label: "Pending Offers", icon: Tag01 },
+      { href: "/quotes", label: "Held Quotes", icon: Receipt },
+    ],
+  },
+  {
+    label: "Management",
+    items: [
+      { href: "/clients", label: "Clients", icon: UserSquare },
+      { href: "/suppliers", label: "Suppliers", icon: ShoppingBag01 },
+      { href: "/products", label: "Product Catalog", icon: Package },
+      { href: "/orders", label: "Orders", icon: File06 },
+    ],
+  },
+  {
+    label: "Finance & Admin",
+    items: [
+      { href: "/margins", label: "Margin Rules", icon: BarChart01 },
+      { href: "/audit-log", label: "Audit Log", icon: File06 },
+      { href: "/settings", label: "Platform Settings", icon: Settings01 },
+      { href: "/internal-users", label: "Internal Users", icon: Shield01 },
+    ],
+  },
+];
+
+function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: () => void }) {
+  return (
+    <nav className="flex-1 overflow-y-auto px-3 py-4">
+      {navGroups.map((group) => (
+        <div key={group.label} className="mb-4">
+          <p className="px-3 mb-1.5 text-xs font-semibold uppercase tracking-widest text-[rgb(100,90,70)]">
+            {group.label}
+          </p>
+          <div className="space-y-0.5">
+            {group.items.map((item) => {
+              const isActive = location === item.href;
+              return (
+                <Link key={item.href} href={item.href}>
+                  <a
+                    onClick={onNavigate}
+                    className={cx(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-[rgb(50,50,50)] text-[rgb(252,204,57)]"
+                        : "text-[rgb(180,170,150)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)]",
+                    )}
+                    data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    <item.icon className="w-5 h-5 shrink-0" aria-hidden />
+                    <span>{item.label}</span>
+                  </a>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
 export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
   const [location, setLocation] = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { data: user, isLoading } = useGetBackofficeMe();
 
   useEffect(() => {
@@ -56,142 +107,90 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
     setLocation("/login");
   };
 
-  const navItems = [
-    { 
-      label: "Operations",
-      items: [
-        { href: "/", label: "Dashboard", icon: LayoutDashboard },
-        { href: "/leads", label: "Leads Queue", icon: Users },
-        { href: "/kyc", label: "KYC Queue", icon: ShieldCheck },
-        { href: "/product-requests", label: "Product Requests", icon: FileText },
-        { href: "/offers", label: "Pending Offers", icon: Tag },
-        { href: "/quotes", label: "Held Quotes", icon: Receipt },
-      ]
-    },
-    {
-      label: "Management",
-      items: [
-        { href: "/clients", label: "Clients", icon: UserSquare2 },
-        { href: "/suppliers", label: "Suppliers", icon: ShoppingBag },
-        { href: "/products", label: "Product Catalog", icon: Package },
-        { href: "/orders", label: "Orders", icon: FileText },
-      ]
-    },
-    {
-      label: "Finance & Admin",
-      items: [
-        { href: "/margins", label: "Margin Rules", icon: Percent },
-        { href: "/audit-log", label: "Audit Log", icon: History },
-        { href: "/settings", label: "Platform Settings", icon: Settings },
-        { href: "/internal-users", label: "Internal Users", icon: ShieldCheck },
-      ]
-    }
-  ];
-
   if (isLoading && location !== "/login") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-color-bg-secondary">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(252,204,57)] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <Sidebar className="hidden md:flex">
-          <SidebarHeader className="p-4 border-b">
-            <h1 className="text-xl font-bold truncate">MWRD Backoffice</h1>
-          </SidebarHeader>
-          <SidebarContent>
-            <ScrollArea className="h-full">
-              {navItems.map((group) => (
-                <SidebarGroup key={group.label}>
-                  <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {group.items.map((item) => (
-                        <SidebarMenuItem key={item.href}>
-                          <Link href={item.href}>
-                            <SidebarMenuButton 
-                              isActive={location === item.href}
-                              tooltip={item.label}
-                              data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                            >
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.label}</span>
-                            </SidebarMenuButton>
-                          </Link>
-                        </SidebarMenuItem>
-                      ))} persistence
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              ))}
-            </ScrollArea>
-          </SidebarContent>
-          <SidebarFooter className="p-4 border-t">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium truncate max-w-[120px]">
-                  {user?.user.email}
-                </span>
-                <span className="text-xs text-muted-foreground capitalize">
-                  {user?.user.role}
-                </span>
+    <div className="flex min-h-screen w-full bg-color-bg-secondary">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[rgb(26,26,26)] text-[rgb(220,210,190)] border-r border-[rgb(44,44,44)]">
+        <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
+          <h1 className="text-xl font-bold text-[rgb(252,204,57)]">MWRD</h1>
+          <p className="text-xs text-[rgb(100,90,70)] mt-0.5">Backoffice</p>
+        </div>
+
+        <SidebarNav location={location} />
+
+        <div className="px-3 py-4 border-t border-[rgb(44,44,44)]">
+          {user && (
+            <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
+              <div className="w-8 h-8 rounded-full bg-[rgb(252,204,57)] flex items-center justify-center text-[rgb(26,26,26)] font-semibold text-sm shrink-0">
+                {user.user?.email?.charAt(0).toUpperCase() || "A"}
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleLogout}
-                data-testid="button-logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate text-[rgb(220,210,190)]">{user.user?.email}</p>
+                <p className="text-xs text-[rgb(100,90,70)] capitalize">{user.user?.role}</p>
+              </div>
             </div>
-          </SidebarFooter>
-        </Sidebar>
+          )}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[rgb(150,140,120)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)] transition-colors"
+            data-testid="button-logout"
+          >
+            <LogOut01 className="w-5 h-5 shrink-0" aria-hidden />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
 
-        <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-16 border-b flex items-center px-4 justify-between md:hidden">
-            <h1 className="text-lg font-bold">MWRD Backoffice</h1>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-72">
-                <div className="p-4 border-b">
-                  <h1 className="text-xl font-bold">MWRD Backoffice</h1>
-                </div>
-                <ScrollArea className="h-[calc(100vh-4rem)]">
-                  {navItems.map((group) => (group.items.map(item => (
-                    <Link key={item.href} href={item.href}>
-                      <a className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-accent ${location === item.href ? 'bg-accent' : ''}`}>
-                        <item.icon className="h-4 w-4" />
-                        {item.label}
-                      </a>
-                    </Link>
-                  ))))}
-                  <Separator />
-                  <button 
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-accent w-full text-left"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </button>
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
-          </header>
+      {/* Mobile overlay drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="absolute inset-y-0 left-0 flex flex-col w-72 bg-[rgb(26,26,26)] text-[rgb(220,210,190)] z-50">
+            <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
+              <h1 className="text-xl font-bold text-[rgb(252,204,57)]">MWRD Backoffice</h1>
+            </div>
+            <SidebarNav location={location} onNavigate={() => setMobileOpen(false)} />
+            <div className="p-3 border-t border-[rgb(44,44,44)]">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[rgb(150,140,120)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)] transition-colors"
+              >
+                <LogOut01 className="w-5 h-5 shrink-0" aria-hidden />
+                <span>Logout</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
 
-          <div className="flex-1 p-4 md:p-8 overflow-auto">
-            {children}
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+      {/* Main content */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Mobile header */}
+        <header className="h-16 border-b border-color-border-secondary flex items-center px-4 justify-between md:hidden bg-color-bg-primary">
+          <h1 className="text-lg font-bold text-color-text-primary">MWRD Backoffice</h1>
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 rounded-lg text-color-fg-tertiary hover:bg-color-bg-secondary transition-colors"
+          >
+            <Menu01 className="h-6 w-6" aria-hidden />
+          </button>
+        </header>
+
+        <div className="flex-1 p-4 md:p-8 overflow-auto">
+          {children}
+        </div>
+      </main>
+    </div>
   );
 }

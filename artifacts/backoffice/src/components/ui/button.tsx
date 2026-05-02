@@ -1,59 +1,103 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { cx } from "@/utils/cx";
 
-import { cn } from "@/lib/utils"
+type ButtonColor = "primary" | "secondary" | "tertiary" | "error" | "brand";
+type ButtonSize = "sm" | "md" | "lg" | "xl" | "2xl";
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-primary text-primary-foreground border border-primary-border shadow-sm",
-        destructive:
-          "bg-destructive text-destructive-foreground border border-destructive-border shadow-sm",
-        outline:
-          "border [border-color:var(--button-outline)] bg-transparent shadow-xs active:shadow-none",
-        secondary:
-          "bg-secondary text-secondary-foreground border border-secondary-border",
-        ghost: "border border-transparent hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline border-transparent",
-      },
-      size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-lg px-6",
-        xl: "h-11 rounded-lg px-8 text-base",
-        icon: "h-9 w-9",
-        "icon-sm": "h-8 w-8 rounded-md",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  color?: ButtonColor;
+  size?: ButtonSize;
+  destructive?: boolean;
+  iconLeading?: React.ElementType;
+  iconTrailing?: React.ElementType;
+  iconOnly?: boolean;
+  asChild?: boolean;
+  variant?: "primary" | "secondary" | "tertiary" | "ghost" | "link" | "destructive" | "outline";
+}
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+const colorMap: Record<string, string> = {
+  primary: "bg-color-bg-primary text-color-text-primary border border-color-border-primary shadow-xs hover:bg-color-bg-primary_hover",
+  brand: "bg-color-bg-brand-solid text-color-text-primary border border-color-bg-brand-solid shadow-xs hover:bg-color-bg-brand-solid_hover",
+  secondary: "bg-color-bg-secondary text-color-fg-secondary border border-color-border-primary shadow-xs hover:bg-color-bg-secondary_hover",
+  tertiary: "bg-transparent text-color-fg-tertiary hover:bg-color-bg-secondary_hover",
+  error: "bg-color-bg-error-solid text-color-text-white border border-color-bg-error-solid shadow-xs hover:bg-color-bg-error-solid_hover",
+};
+
+const sizeMap: Record<string, string> = {
+  sm: "h-9 px-3.5 py-2 text-sm gap-1.5 rounded-lg",
+  md: "h-10 px-4 py-2.5 text-sm gap-1.5 rounded-lg",
+  lg: "h-11 px-4.5 py-2.5 text-md gap-2 rounded-lg",
+  xl: "h-12 px-5 py-3 text-md gap-2 rounded-lg",
+  "2xl": "h-15 px-7 py-4 text-lg gap-3 rounded-xl",
+};
+
+const iconSizeMap: Record<string, string> = {
+  sm: "w-4 h-4",
+  md: "w-5 h-5",
+  lg: "w-5 h-5",
+  xl: "w-5 h-5",
+  "2xl": "w-6 h-6",
+};
+
+function variantToColor(variant?: ButtonProps["variant"]): ButtonColor {
+  if (!variant || variant === "primary") return "primary";
+  if (variant === "destructive") return "error";
+  if (variant === "secondary") return "secondary";
+  if (variant === "ghost" || variant === "tertiary") return "tertiary";
+  return "primary";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
-Button.displayName = "Button"
+  ({
+    className,
+    color,
+    size = "md",
+    destructive,
+    iconLeading: IconLeading,
+    iconTrailing: IconTrailing,
+    iconOnly,
+    children,
+    variant,
+    ...props
+  }, ref) => {
+    const resolvedColor = color ?? (destructive ? "error" : variantToColor(variant));
+    const colorClasses = colorMap[resolvedColor] ?? colorMap.primary;
+    const sizeClasses = sizeMap[size] ?? sizeMap.md;
+    const iconCls = iconSizeMap[size] ?? iconSizeMap.md;
 
-export { Button, buttonVariants }
+    return (
+      <button
+        ref={ref}
+        className={cx(
+          "inline-flex items-center justify-center font-semibold transition-colors duration-150",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-focus-ring focus-visible:ring-offset-1",
+          "disabled:pointer-events-none disabled:opacity-50",
+          iconOnly && "aspect-square",
+          colorClasses,
+          sizeClasses,
+          className,
+        )}
+        {...props}
+      >
+        {IconLeading && <IconLeading className={iconCls} aria-hidden />}
+        {children}
+        {IconTrailing && <IconTrailing className={iconCls} aria-hidden />}
+      </button>
+    );
+  }
+);
+Button.displayName = "Button";
+
+export { Button };
+
+export function buttonVariants({ variant = "primary", size = "md" }: { variant?: string; size?: string } = {}) {
+  const colorClasses = colorMap[variantToColor(variant as ButtonProps["variant"])] ?? colorMap.primary;
+  const sizeClasses = sizeMap[size] ?? sizeMap.md;
+  return cx(
+    "inline-flex items-center justify-center font-semibold transition-colors duration-150",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-focus-ring focus-visible:ring-offset-1",
+    "disabled:pointer-events-none disabled:opacity-50",
+    colorClasses,
+    sizeClasses,
+  );
+}

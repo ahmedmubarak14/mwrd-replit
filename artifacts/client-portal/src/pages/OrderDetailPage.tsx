@@ -25,13 +25,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { 
-  CheckCircle, 
-  ClipboardCheck, 
-  Truck,
-  FileText,
-  UserCheck
-} from "lucide-react";
+import { CheckCircle, ClipboardCheck, Truck01, File06, UserCheck01 } from "@untitledui/icons";
 
 export default function OrderDetailPage() {
   const [, params] = useRoute("/orders/:id");
@@ -115,7 +109,7 @@ export default function OrderDetailPage() {
             </Button>
           )}
           <Button variant="outline">
-            <Truck className="mr-2 h-4 w-4" />
+            <Truck01 className="mr-2 h-4 w-4" />
             Track Shipment
           </Button>
         </div>
@@ -162,7 +156,7 @@ export default function OrderDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <UserCheck className="h-5 w-5" />
+                <UserCheck01 className="h-5 w-5" />
                 Approval Status
               </CardTitle>
             </CardHeader>
@@ -197,7 +191,7 @@ export default function OrderDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <FileText className="h-5 w-5" />
+                <File06 className="h-5 w-5" />
                 PO Details
               </CardTitle>
             </CardHeader>

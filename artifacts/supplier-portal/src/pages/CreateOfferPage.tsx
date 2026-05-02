@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -84,23 +84,16 @@ export default function CreateOfferPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="select-product">
-                          <SelectValue placeholder="Select a product" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {productsLoading ? (
-                          <SelectItem value="loading" disabled>Loading products...</SelectItem>
-                        ) : (
-                          productsData?.data.map((product) => (
-                            <SelectItem key={product.id} value={product.id}>
-                              {product.name_en}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
+                    <Select onValueChange={field.onChange} value={field.value} placeholder="Select a product">
+                      {productsLoading ? (
+                        <SelectItem value="loading">Loading products...</SelectItem>
+                      ) : (
+                        productsData?.data.map((product) => (
+                          <SelectItem key={product.id} value={product.id}>
+                            {product.name_en}
+                          </SelectItem>
+                        ))
+                      )}
                     </Select>
                     <FormMessage />
                   </FormItem>

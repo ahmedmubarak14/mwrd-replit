@@ -17,14 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Trash2, 
-  Plus, 
-  Minus, 
-  FileCheck, 
-  Save,
-  Calendar as CalendarIcon
-} from "lucide-react";
+import { Trash01, Plus, Minus, FileCheck01, Save01, Calendar as CalendarIcon } from "@untitledui/icons";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
@@ -36,13 +29,7 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 
 export default function CartPage() {
   const { toast } = useToast();
@@ -177,7 +164,7 @@ export default function CartPage() {
                       disabled={removeItem.isPending}
                       data-testid={`button-remove-item-${item.id}`}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash01 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -214,7 +201,7 @@ export default function CartPage() {
                 disabled={items.length === 0 || saveCart.isPending}
                 data-testid="button-save-cart"
               >
-                <Save className="h-4 w-4" />
+                <Save01 className="h-4 w-4" />
                 Save for Later
               </Button>
               <Button 
@@ -224,7 +211,7 @@ export default function CartPage() {
                 disabled={items.length === 0}
                 data-testid="button-submit-rfq"
               >
-                <FileCheck className="h-4 w-4" />
+                <FileCheck01 className="h-4 w-4" />
                 Submit as RFQ
               </Button>
             </CardFooter>
@@ -253,16 +240,15 @@ export default function CartPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="city">Delivery City</Label>
-              <Select onValueChange={setDeliveryCity} value={deliveryCity}>
-                <SelectTrigger id="city" data-testid="select-city">
-                  <SelectValue placeholder="Select a city" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Riyadh">Riyadh</SelectItem>
-                  <SelectItem value="Jeddah">Jeddah</SelectItem>
-                  <SelectItem value="Dammam">Dammam</SelectItem>
-                  <SelectItem value="Khobar">Khobar</SelectItem>
-                </SelectContent>
+              <Select
+                placeholder="Select a city"
+                value={deliveryCity}
+                onValueChange={setDeliveryCity}
+              >
+                <SelectItem value="Riyadh">Riyadh</SelectItem>
+                <SelectItem value="Jeddah">Jeddah</SelectItem>
+                <SelectItem value="Dammam">Dammam</SelectItem>
+                <SelectItem value="Khobar">Khobar</SelectItem>
               </Select>
             </div>
             <div className="space-y-2">

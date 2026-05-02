@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bell, BellOff, Check, Circle } from "lucide-react";
+import { Bell01, BellOff01, Check } from "@untitledui/icons";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -40,7 +40,7 @@ export default function NotificationsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
           <p className="text-muted-foreground">Stay updated on your RFQs and Orders.</p>
         </div>
-        <Bell className="h-6 w-6 text-muted-foreground" />
+        <Bell01 className="h-6 w-6 text-color-fg-tertiary" />
       </div>
 
       <Card>
@@ -65,7 +65,7 @@ export default function NotificationsPage() {
                 >
                   <div className="mt-1">
                     {!n.read_at ? (
-                      <Circle className="h-3 w-3 fill-primary text-primary" />
+                      <span className="h-2 w-2 rounded-full bg-color-fg-brand-primary" />
                     ) : (
                       <Check className="h-3 w-3 text-muted-foreground" />
                     )}
@@ -92,7 +92,7 @@ export default function NotificationsPage() {
               ))}
               {(!notifications?.notifications || notifications.notifications.length === 0) && (
                 <div className="py-20 text-center text-muted-foreground flex flex-col items-center gap-2">
-                  <BellOff className="h-8 w-8 opacity-20" />
+                  <BellOff01 className="h-8 w-8 opacity-20" />
                   <p>All caught up! No new notifications.</p>
                 </div>
               )}

@@ -28,7 +28,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X, Search } from "lucide-react";
+import { Check, X, SearchMd } from "@untitledui/icons";
 
 export default function ProductRequestsPage() {
   const { toast } = useToast();
@@ -149,7 +149,7 @@ export default function ProductRequestsPage() {
             <div className="space-y-2">
               <label className="text-sm font-medium">Search Master Product</label>
               <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <SearchMd className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
                   placeholder="Type to search catalog..." 
                   className="pl-8"

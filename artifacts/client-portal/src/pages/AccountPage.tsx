@@ -34,7 +34,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Users, Shield, GitBranch, MapPin } from "lucide-react";
+import { Plus, Users01, Shield01, GitBranch01, MarkerPin01 } from "@untitledui/icons";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -81,19 +81,19 @@ export default function AccountPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="members" className="gap-2">
-            <Users className="h-4 w-4" />
+            <Users01 className="h-4 w-4" />
             Members
           </TabsTrigger>
           <TabsTrigger value="roles" className="gap-2">
-            <Shield className="h-4 w-4" />
+            <Shield01 className="h-4 w-4" />
             Roles
           </TabsTrigger>
           <TabsTrigger value="approval" className="gap-2">
-            <GitBranch className="h-4 w-4" />
+            <GitBranch01 className="h-4 w-4" />
             Approval Tree
           </TabsTrigger>
           <TabsTrigger value="addresses" className="gap-2">
-            <MapPin className="h-4 w-4" />
+            <MarkerPin01 className="h-4 w-4" />
             Addresses
           </TabsTrigger>
         </TabsList>
@@ -228,7 +228,7 @@ export default function AccountPage() {
                   {addresses?.map((addr) => (
                     <Card key={addr.id}>
                       <CardContent className="p-4 flex gap-4">
-                        <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                        <MarkerPin01 className="h-5 w-5 text-color-fg-tertiary flex-shrink-0 mt-1" />
                         <div>
                           <p className="font-semibold">{addr.type === 'delivery' ? 'Delivery Address' : 'Billing Address'}</p>
                           <p className="text-sm text-muted-foreground">{addr.line1}</p>

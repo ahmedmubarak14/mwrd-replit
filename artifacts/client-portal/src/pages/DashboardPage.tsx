@@ -21,13 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  PlusCircle, 
-  FileText, 
-  Clock, 
-  CheckCircle, 
-  TrendingUp 
-} from "lucide-react";
+import { PlusCircle, File06, Clock, CheckCircle, TrendUp01 } from "@untitledui/icons";
 
 export default function DashboardPage() {
   const [, setLocation] = useLocation();
@@ -64,7 +58,7 @@ export default function DashboardPage() {
         <Card data-testid="card-open-rfqs">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Open RFQs</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <File06 className="h-4 w-4 text-color-fg-quaternary" />
           </CardHeader>
           <CardContent>
             {statsLoading ? <Skeleton className="h-8 w-16" /> : (
@@ -77,7 +71,7 @@ export default function DashboardPage() {
         <Card data-testid="card-pending-quotes">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Quotes</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-color-fg-quaternary" />
           </CardHeader>
           <CardContent>
             {statsLoading ? <Skeleton className="h-8 w-16" /> : (
@@ -90,7 +84,7 @@ export default function DashboardPage() {
         <Card data-testid="card-active-orders">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CheckCircle className="h-4 w-4 text-color-fg-quaternary" />
           </CardHeader>
           <CardContent>
             {statsLoading ? <Skeleton className="h-8 w-16" /> : (
@@ -103,7 +97,7 @@ export default function DashboardPage() {
         <Card data-testid="card-total-spend">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Spend</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendUp01 className="h-4 w-4 text-color-fg-quaternary" />
           </CardHeader>
           <CardContent>
             {statsLoading ? <Skeleton className="h-8 w-24" /> : (

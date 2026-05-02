@@ -17,7 +17,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Power, PowerOff } from "lucide-react";
+import { Power01, Power02 } from "@untitledui/icons";
 
 export default function ClientsPage() {
   const { toast } = useToast();
@@ -100,7 +100,7 @@ export default function ClientsPage() {
                         disabled={suspendMutation.isPending}
                         data-testid={`button-suspend-${client.id}`}
                       >
-                        <PowerOff className="h-4 w-4 mr-2" />
+                        <Power02 className="h-4 w-4 mr-2" />
                         Suspend
                       </Button>
                     ) : (
@@ -112,7 +112,7 @@ export default function ClientsPage() {
                         disabled={reactivateMutation.isPending}
                         data-testid={`button-reactivate-${client.id}`}
                       >
-                        <Power className="h-4 w-4 mr-2" />
+                        <Power01 className="h-4 w-4 mr-2" />
                         Activate
                       </Button>
                     )}

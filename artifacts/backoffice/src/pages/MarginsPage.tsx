@@ -10,13 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useListMargins, useSetMargin, getListMarginsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -90,17 +84,10 @@ export default function MarginsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Scope</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select scope" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="global">Global</SelectItem>
-                          <SelectItem value="category">Category Specific</SelectItem>
-                          <SelectItem value="client">Client Specific</SelectItem>
-                        </SelectContent>
+                      <Select onValueChange={field.onChange} value={field.value} placeholder="Select scope">
+                        <SelectItem value="global">Global</SelectItem>
+                        <SelectItem value="category">Category Specific</SelectItem>
+                        <SelectItem value="client">Client Specific</SelectItem>
                       </Select>
                       <FormMessage />
                     </FormItem>

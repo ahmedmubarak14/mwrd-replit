@@ -1,11 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Users, 
-  ShieldCheck, 
-  Receipt, 
-  FilePlus, 
-  Activity 
-} from "lucide-react";
+import { Users01, Shield01, Receipt, FilePlus02, Activity } from "@untitledui/icons";
 import { useGetBackofficeDashboardStats, useListAuditLog } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -19,14 +13,14 @@ export default function DashboardPage() {
     { 
       label: "Leads Queue", 
       value: stats?.pending_leads ?? 0, 
-      icon: Users, 
+      icon: Users01, 
       color: "text-blue-500",
       description: "Pending callback requests" 
     },
     { 
       label: "KYC Queue", 
       value: stats?.pending_kyc ?? 0, 
-      icon: ShieldCheck, 
+      icon: Shield01, 
       color: "text-yellow-500",
       description: "Users awaiting verification" 
     },
@@ -39,8 +33,8 @@ export default function DashboardPage() {
     },
     { 
       label: "Product Requests", 
-      value: stats?.pending_offers ?? 0, // Using pending_offers as proxy for requests in stats
-      icon: FilePlus, 
+      value: stats?.pending_offers ?? 0,
+      icon: FilePlus02, 
       color: "text-green-500",
       description: "New additions pending" 
     },
@@ -77,7 +71,7 @@ export default function DashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
+            <Activity className="h-5 w-5 text-muted-foreground" />
             Recent Activity
           </CardTitle>
         </CardHeader>

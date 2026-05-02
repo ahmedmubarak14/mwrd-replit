@@ -14,7 +14,7 @@ import {
 import { InputField } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useBackofficeLogin } from "@workspace/api-client-react";
-import { Loader2, Mail, Lock, LayoutDashboard } from "lucide-react";
+import { Loading01, Mail01, Lock01, LayoutGrid01 } from "@untitledui/icons";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -55,7 +55,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-[45%] bg-sidebar flex-col justify-between p-10">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
+            <LayoutGrid01 className="w-5 h-5 text-primary-foreground" />
           </div>
           <span className="font-semibold text-sidebar-foreground text-lg tracking-tight">MWRD Backoffice</span>
         </div>
@@ -80,7 +80,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm space-y-7">
           <div className="flex items-center gap-3 lg:hidden">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <LayoutDashboard className="w-4 h-4 text-primary-foreground" />
+              <LayoutGrid01 className="w-4 h-4 text-primary-foreground" />
             </div>
             <span className="font-semibold text-lg">MWRD Backoffice</span>
           </div>
@@ -100,7 +100,7 @@ export default function LoginPage() {
                     <FormLabel>Email address</FormLabel>
                     <FormControl>
                       <InputField
-                        leadingIcon={<Mail />}
+                        leadingIcon={<Mail01 />}
                         placeholder="admin@mwrd.com"
                         autoComplete="email"
                         data-testid="input-email"
@@ -120,7 +120,7 @@ export default function LoginPage() {
                     <FormControl>
                       <InputField
                         type="password"
-                        leadingIcon={<Lock />}
+                        leadingIcon={<Lock01 />}
                         placeholder="••••••••"
                         autoComplete="current-password"
                         data-testid="input-password"
@@ -138,7 +138,7 @@ export default function LoginPage() {
                 disabled={loginMutation.isPending}
                 data-testid="button-submit"
               >
-                {loginMutation.isPending && <Loader2 className="animate-spin" />}
+                {loginMutation.isPending && <Loading01 className="animate-spin" />}
                 {loginMutation.isPending ? "Signing in…" : "Sign in"}
               </Button>
             </form>

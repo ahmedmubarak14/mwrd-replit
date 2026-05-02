@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loading01, CheckCircle } from "@untitledui/icons";
 
 const registerSchema = z.object({
   company_name: z.string().min(2, "Company name is too short"),
@@ -62,7 +62,7 @@ export default function RegisterPage() {
       <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">
         <Card className="w-full max-w-md text-center py-8">
           <CardContent className="space-y-4">
-            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
             <CardTitle className="text-2xl font-bold">Registration Successful!</CardTitle>
             <CardDescription>
               Your application has been submitted. Our team will review your company details and contact you via email shortly.
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                       disabled={registerMutation.isPending}
                       data-testid="button-register"
                     >
-                      {registerMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {registerMutation.isPending && <Loading01 className="mr-2 h-4 w-4 animate-spin" />}
                       Register
                     </Button>
                   </div>

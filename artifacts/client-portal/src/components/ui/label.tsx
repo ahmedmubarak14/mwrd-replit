@@ -1,29 +1,27 @@
-"use client"
+import * as React from "react";
+import { Label as AriaLabel } from "react-aria-components";
+import { cx } from "@/utils/cx";
 
-import * as React from "react"
-import * as LabelPrimitive from "@radix-ui/react-label"
-import { cva, type VariantProps } from "class-variance-authority"
+interface LabelProps extends React.ComponentPropsWithoutRef<typeof AriaLabel> {
+  required?: boolean;
+}
 
-import { cn } from "@/lib/utils"
+const Label = React.forwardRef<React.ElementRef<typeof AriaLabel>, LabelProps>(
+  ({ className, required, children, ...props }, ref) => (
+    <AriaLabel
+      ref={ref}
+      className={cx(
+        "text-sm font-medium text-color-text-secondary",
+        "peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      {required && <span className="ml-0.5 text-color-text-error-primary">*</span>}
+    </AriaLabel>
+  )
+);
+Label.displayName = "Label";
 
-const labelVariants = cva(
-  "text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-)
-
-const Label = React.forwardRef<
-  React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
-    VariantProps<typeof labelVariants> & { required?: boolean }
->(({ className, required, children, ...props }, ref) => (
-  <LabelPrimitive.Root
-    ref={ref}
-    className={cn(labelVariants(), className)}
-    {...props}
-  >
-    {children}
-    {required && <span className="ml-0.5 text-destructive">*</span>}
-  </LabelPrimitive.Root>
-))
-Label.displayName = LabelPrimitive.Root.displayName
-
-export { Label }
+export { Label };

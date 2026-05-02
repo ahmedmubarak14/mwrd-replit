@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, MoreHorizontal } from "lucide-react";
+import { SearchMd, Plus, DotsHorizontal } from "@untitledui/icons";
 import { 
   useAdminListProducts, 
   useAdminDeprecateProduct,
@@ -65,7 +65,7 @@ export default function ProductsPage() {
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <SearchMd className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search products..."
             className="pl-8"
@@ -113,7 +113,7 @@ export default function ProductsPage() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" data-testid={`button-actions-${product.id}`}>
-                          <MoreHorizontal className="h-4 w-4" />
+                          <DotsHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

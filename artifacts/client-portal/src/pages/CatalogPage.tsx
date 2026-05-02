@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ShoppingCart, Filter } from "lucide-react";
+import { SearchLg, ShoppingCart01, FilterLines } from "@untitledui/icons";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CatalogPage() {
@@ -73,7 +73,7 @@ export default function CatalogPage() {
         {/* Sidebar */}
         <div className="w-full md:w-64 space-y-4">
           <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <SearchLg className="absolute left-2 top-2.5 h-4 w-4 text-color-fg-quaternary" />
             <Input 
               placeholder="Search products..." 
               className="pl-8" 
@@ -85,7 +85,7 @@ export default function CatalogPage() {
 
           <div className="space-y-2">
             <h3 className="font-semibold flex items-center gap-2">
-              <Filter className="h-4 w-4" />
+              <FilterLines className="h-4 w-4" />
               Categories
             </h3>
             <div className="space-y-1">
@@ -163,7 +163,7 @@ export default function CatalogPage() {
                       disabled={addToCartMutation.isPending}
                       data-testid={`button-add-to-cart-${product.id}`}
                     >
-                      <ShoppingCart className="h-4 w-4" />
+                      <ShoppingCart01 className="h-4 w-4" />
                       Add to Cart
                     </Button>
                   </CardFooter>

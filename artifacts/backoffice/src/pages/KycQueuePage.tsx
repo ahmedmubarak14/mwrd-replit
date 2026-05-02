@@ -18,7 +18,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X, Eye } from "lucide-react";
+import { Check, X, Eye } from "@untitledui/icons";
 
 export default function KycQueuePage() {
   const { toast } = useToast();

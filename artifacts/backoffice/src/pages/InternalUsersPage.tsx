@@ -11,13 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useListInternalUsers, useInviteInternalUser, getListInternalUsersQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,7 +27,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { UserPlus } from "lucide-react";
+import { UserPlus01 } from "@untitledui/icons";
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -83,7 +77,7 @@ export default function InternalUsersPage() {
         <Card className="lg:col-span-1 h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5" />
+              <UserPlus01 className="h-5 w-5" />
               Invite New User
             </CardTitle>
             <CardDescription>Send an invitation to a new team member.</CardDescription>
@@ -123,18 +117,11 @@ export default function InternalUsersPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Role</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="ops">Operations</SelectItem>
-                          <SelectItem value="finance">Finance</SelectItem>
-                          <SelectItem value="cs">Customer Support</SelectItem>
-                        </SelectContent>
+                      <Select onValueChange={field.onChange} value={field.value} placeholder="Select a role">
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="ops">Operations</SelectItem>
+                        <SelectItem value="finance">Finance</SelectItem>
+                        <SelectItem value="cs">Customer Support</SelectItem>
                       </Select>
                       <FormMessage />
                     </FormItem>

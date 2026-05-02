@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle } from "@untitledui/icons";
 import { cn } from "@/lib/utils";
 
 export default function OffersPage() {
