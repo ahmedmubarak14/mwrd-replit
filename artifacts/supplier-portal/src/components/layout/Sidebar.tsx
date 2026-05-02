@@ -59,32 +59,31 @@ function isGroup(item: NavItem): item is NavGroup {
 function NavLeafItem({ item, location }: { item: NavLeaf; location: string }) {
   const isActive = location === item.href;
   return (
-    <Link href={item.href}>
-      <a
+    <Link
+      href={item.href}
+      className={cx(
+        "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+        isActive
+          ? "bg-[rgb(249,250,251)] text-[rgb(16,24,40)]"
+          : "text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] hover:text-[rgb(52,64,84)]",
+      )}
+      data-testid={`link-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+    >
+      <item.icon
         className={cx(
-          "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+          "w-[18px] h-[18px] shrink-0 transition-colors",
           isActive
-            ? "bg-[rgb(249,250,251)] text-[rgb(16,24,40)]"
-            : "text-[rgb(102,112,133)] hover:bg-[rgb(249,250,251)] hover:text-[rgb(52,64,84)]",
+            ? "text-[rgb(255,109,67)]"
+            : "text-[rgb(152,162,179)] group-hover:text-[rgb(102,112,133)]",
         )}
-        data-testid={`link-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-      >
-        <item.icon
-          className={cx(
-            "w-[18px] h-[18px] shrink-0 transition-colors",
-            isActive
-              ? "text-[rgb(255,109,67)]"
-              : "text-[rgb(152,162,179)] group-hover:text-[rgb(102,112,133)]",
-          )}
-          aria-hidden
-        />
-        <span className="flex-1">{item.label}</span>
-        {item.badge !== undefined && (
-          <span className="ml-auto text-xs font-medium bg-[rgb(242,244,247)] text-[rgb(102,112,133)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
-            {item.badge}
-          </span>
-        )}
-      </a>
+        aria-hidden
+      />
+      <span className="flex-1">{item.label}</span>
+      {item.badge !== undefined && (
+        <span className="ml-auto text-xs font-medium bg-[rgb(242,244,247)] text-[rgb(102,112,133)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+          {item.badge}
+        </span>
+      )}
     </Link>
   );
 }
@@ -127,22 +126,22 @@ function NavGroupItem({ item, location }: { item: NavGroup; location: string }) 
           {item.items.map((child) => {
             const isActive = location === child.href;
             return (
-              <Link key={child.href} href={child.href}>
-                <a
-                  className={cx(
-                    "flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-all duration-150",
-                    isActive
-                      ? "text-[rgb(255,109,67)] font-medium"
-                      : "text-[rgb(102,112,133)] hover:text-[rgb(52,64,84)]",
-                  )}
-                >
-                  <span>{child.label}</span>
-                  {child.badge !== undefined && (
-                    <span className="text-xs font-medium bg-[rgb(242,244,247)] text-[rgb(102,112,133)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
-                      {child.badge}
-                    </span>
-                  )}
-                </a>
+              <Link
+                key={child.href}
+                href={child.href}
+                className={cx(
+                  "flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-all duration-150",
+                  isActive
+                    ? "text-[rgb(255,109,67)] font-medium"
+                    : "text-[rgb(102,112,133)] hover:text-[rgb(52,64,84)]",
+                )}
+              >
+                <span>{child.label}</span>
+                {child.badge !== undefined && (
+                  <span className="text-xs font-medium bg-[rgb(242,244,247)] text-[rgb(102,112,133)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+                    {child.badge}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -182,7 +181,6 @@ export function Sidebar() {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col bg-white border-r border-[rgb(228,231,236)]">
-      {/* Logo */}
       <div className="flex h-16 items-center px-5 border-b border-[rgb(228,231,236)]">
         <button
           onClick={handleLogoClick}
@@ -193,7 +191,6 @@ export function Sidebar() {
         </button>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
         {navConfig.map((item, i) => {
           if (isDivider(item)) {
@@ -206,7 +203,6 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
       <div className="border-t border-[rgb(228,231,236)] p-3 space-y-0.5">
         {user && (
           <div className="flex items-center gap-3 px-3 py-2 mb-1">

@@ -1,173 +1,197 @@
 import { useLocation } from "wouter";
-import { 
-  useGetDashboardStats, 
-  useListRFQs, 
-  getListRFQsQueryKey 
+import {
+  useGetDashboardStats,
+  useListRFQs,
+  getListRFQsQueryKey,
 } from "@workspace/api-client-react";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlusCircle, File06, Clock, CheckCircle, TrendUp01 } from "@untitledui/icons";
+import { Badge } from "@/components/ui/badge";
+import { PlusCircle, ArrowUpRight, File06, Clock, CheckCircle, CurrencyDollarCircle } from "@untitledui/icons";
+
+// Sparkline SVG paths (pre-computed smooth curves)
+const SPARKLINES = {
+  up: "M0,36 C20,34 40,30 60,26 C80,22 100,16 120,12 C140,8 160,5 180,3",
+  down: "M0,3 C20,6 40,10 60,16 C80,22 100,28 120,32 C140,36 160,38 180,36",
+  flat: "M0,20 C30,18 60,23 90,20 C120,17 150,22 180,20",
+  grow: "M0,32 C30,30 60,27 90,23 C120,18 150,12 180,8",
+};
+
+function Sparkline({ path = SPARKLINES.up, color = "#FF6D43" }: { path?: string; color?: string }) {
+  return (
+    <svg width="100%" height="48" viewBox="0 0 180 48" fill="none" className="mt-3 -mx-0.5 w-[calc(100%+4px)]">
+      <path d={path} stroke={color} strokeWidth="1.75" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  description,
+  sparklinePath,
+  isLoading,
+  testId,
+}: {
+  label: string;
+  value: React.ReactNode;
+  description?: string;
+  sparklinePath?: string;
+  isLoading?: boolean;
+  testId?: string;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-[rgb(228,231,236)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <p className="text-sm font-medium text-[rgb(102,112,133)]">{label}</p>
+      <div className="mt-2">
+        {isLoading ? (
+          <Skeleton className="h-9 w-24" />
+        ) : (
+          <p className="text-[2rem] font-semibold tracking-tight text-[rgb(16,24,40)] leading-none" data-testid={testId}>
+            {value}
+          </p>
+        )}
+      </div>
+      {description && (
+        <p className="mt-1.5 text-sm text-[rgb(152,162,179)]">{description}</p>
+      )}
+      {sparklinePath && <Sparkline path={sparklinePath} />}
+    </div>
+  );
+}
+
+const statusStyles: Record<string, string> = {
+  open:      "bg-[rgb(239,248,255)] text-[rgb(21,112,239)] border-[rgb(209,236,255)]",
+  awarded:   "bg-[rgb(236,253,243)] text-[rgb(7,148,85)]  border-[rgb(167,243,208)]",
+  cancelled: "bg-[rgb(255,243,242)] text-[rgb(217,45,32)] border-[rgb(255,196,191)]",
+};
 
 export default function DashboardPage() {
   const [, setLocation] = useLocation();
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
   const { data: rfqsData, isLoading: rfqsLoading } = useListRFQs({}, {
-    query: {
-      queryKey: getListRFQsQueryKey({}),
-    }
+    query: { queryKey: getListRFQsQueryKey({}) },
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'open': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'awarded': return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'cancelled': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
-    }
-  };
+  const rfqs = rfqsData?.data?.slice(0, 6) ?? [];
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome to your procurement overview.</p>
+          <h1 className="text-xl font-semibold text-[rgb(16,24,40)]">Dashboard</h1>
+          <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">Your procurement overview</p>
         </div>
-        <Button onClick={() => setLocation("/catalog")} data-testid="button-new-rfq">
-          <PlusCircle className="mr-2 h-4 w-4" />
+        <Button
+          onClick={() => setLocation("/catalog")}
+          className="gap-2"
+          data-testid="button-new-rfq"
+        >
+          <PlusCircle className="h-4 w-4" />
           New RFQ
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card data-testid="card-open-rfqs">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open RFQs</CardTitle>
-            <File06 className="h-4 w-4 text-color-fg-quaternary" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? <Skeleton className="h-8 w-16" /> : (
-              <div className="text-2xl font-bold" data-testid="text-open-rfqs-count">
-                {stats?.open_rfqs || 0}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <Card data-testid="card-pending-quotes">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Quotes</CardTitle>
-            <Clock className="h-4 w-4 text-color-fg-quaternary" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? <Skeleton className="h-8 w-16" /> : (
-              <div className="text-2xl font-bold" data-testid="text-pending-quotes-count">
-                {stats?.pending_quotes || 0}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <Card data-testid="card-active-orders">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
-            <CheckCircle className="h-4 w-4 text-color-fg-quaternary" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? <Skeleton className="h-8 w-16" /> : (
-              <div className="text-2xl font-bold" data-testid="text-active-orders-count">
-                {stats?.active_orders || 0}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <Card data-testid="card-total-spend">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spend</CardTitle>
-            <TrendUp01 className="h-4 w-4 text-color-fg-quaternary" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? <Skeleton className="h-8 w-24" /> : (
-              <div className="text-2xl font-bold" data-testid="text-total-spend">
-                SAR {stats?.total_spend_sar?.toLocaleString() || "0"}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Metric cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <MetricCard
+          label="Open RFQs"
+          value={stats?.open_rfqs ?? 0}
+          description="Awaiting supplier quotes"
+          sparklinePath={SPARKLINES.grow}
+          isLoading={statsLoading}
+          testId="text-open-rfqs-count"
+        />
+        <MetricCard
+          label="Pending Quotes"
+          value={stats?.pending_quotes ?? 0}
+          description="Under review"
+          sparklinePath={SPARKLINES.flat}
+          isLoading={statsLoading}
+          testId="text-pending-quotes-count"
+        />
+        <MetricCard
+          label="Active Orders"
+          value={stats?.active_orders ?? 0}
+          description="In progress"
+          sparklinePath={SPARKLINES.up}
+          isLoading={statsLoading}
+          testId="text-active-orders-count"
+        />
+        <MetricCard
+          label="Total Spend"
+          value={`SAR ${(stats?.total_spend_sar ?? 0).toLocaleString()}`}
+          description="All time"
+          sparklinePath={SPARKLINES.grow}
+          isLoading={statsLoading}
+          testId="text-total-spend"
+        />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent RFQs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {rfqsLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created At</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rfqsData?.data?.slice(0, 5).map((rfq) => (
-                  <TableRow key={rfq.id}>
-                    <TableCell className="font-medium" data-testid={`text-rfq-title-${rfq.id}`}>
-                      {rfq.title}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(rfq.status)} data-testid={`status-rfq-${rfq.id}`}>
-                        {rfq.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell data-testid={`text-rfq-date-${rfq.id}`}>
-                      {rfq.created_at ? new Date(rfq.created_at).toLocaleDateString() : "N/A"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setLocation(`/rfqs/${rfq.id}`)}
-                        data-testid={`button-view-rfq-${rfq.id}`}
-                      >
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!rfqsData?.data || rfqsData.data.length === 0) && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      No recent RFQs found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {/* Recent RFQs table */}
+      <div className="bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgb(228,231,236)]">
+          <h2 className="text-sm font-semibold text-[rgb(16,24,40)]">Recent RFQs</h2>
+          <button
+            onClick={() => setLocation("/rfqs")}
+            className="text-xs font-medium text-[rgb(255,109,67)] hover:text-[rgb(205,56,22)] flex items-center gap-1 transition-colors"
+          >
+            View all <ArrowUpRight className="h-3 w-3" />
+          </button>
+        </div>
+
+        {rfqsLoading ? (
+          <div className="p-5 space-y-3">
+            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+          </div>
+        ) : rfqs.length === 0 ? (
+          <div className="px-5 py-12 text-center">
+            <File06 className="mx-auto h-8 w-8 text-[rgb(208,213,221)] mb-3" />
+            <p className="text-sm text-[rgb(152,162,179)]">No RFQs yet. Create one to get started.</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[rgb(228,231,236)]">
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Title</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Status</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide hidden sm:table-cell">Date</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[rgb(242,244,247)]">
+              {rfqs.map((rfq) => (
+                <tr key={rfq.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
+                  <td className="px-5 py-3.5 font-medium text-[rgb(16,24,40)]" data-testid={`text-rfq-title-${rfq.id}`}>
+                    {rfq.title}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusStyles[rfq.status] ?? "bg-[rgb(242,244,247)] text-[rgb(102,112,133)] border-[rgb(228,231,236)]"}`}
+                      data-testid={`status-rfq-${rfq.id}`}
+                    >
+                      {rfq.status}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-[rgb(102,112,133)] hidden sm:table-cell" data-testid={`text-rfq-date-${rfq.id}`}>
+                    {rfq.created_at ? new Date(rfq.created_at).toLocaleDateString("en-SA", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                  </td>
+                  <td className="px-5 py-3.5 text-right">
+                    <button
+                      onClick={() => setLocation(`/rfqs/${rfq.id}`)}
+                      className="text-xs font-medium text-[rgb(102,112,133)] hover:text-[rgb(16,24,40)] transition-colors"
+                      data-testid={`button-view-rfq-${rfq.id}`}
+                    >
+                      View →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
