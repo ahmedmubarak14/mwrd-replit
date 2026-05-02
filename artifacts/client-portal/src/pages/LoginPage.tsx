@@ -1,15 +1,13 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useLogin } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { InputField } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, Lock, ShoppingCart } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -25,10 +23,7 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = (values: LoginFormValues) => {
@@ -36,17 +31,14 @@ export default function LoginPage() {
       onSuccess: (response) => {
         if (response.token) {
           localStorage.setItem("mwrd_token", response.token);
-          toast({
-            title: "Login successful",
-            description: "Welcome back to MWRD Client Portal.",
-          });
+          toast({ title: "Welcome back", description: "Redirecting to your dashboard." });
           setLocation("/");
         }
       },
       onError: (error: any) => {
         toast({
           variant: "destructive",
-          title: "Login failed",
+          title: "Sign in failed",
           description: error.message || "Please check your credentials and try again.",
         });
       }
@@ -54,15 +46,45 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">MWRD Client Portal</CardTitle>
-          <CardDescription className="text-center">
-            Enter your credentials to access your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen flex bg-background">
+      <div className="hidden lg:flex lg:w-[45%] bg-sidebar flex-col justify-between p-10">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
+            <ShoppingCart className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="font-semibold text-sidebar-foreground text-lg tracking-tight">MWRD</span>
+        </div>
+        <div className="space-y-4">
+          <blockquote className="text-sidebar-foreground/80 text-base leading-relaxed">
+            "The procurement platform that streamlined our entire supply chain operation."
+          </blockquote>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-xs font-semibold text-primary">AM</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-sidebar-foreground">Ahmed Malik</p>
+              <p className="text-xs text-sidebar-foreground/50">Procurement Manager, Al-Futtaim</p>
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-sidebar-foreground/30">© 2026 MWRD RAKIZ. All rights reserved.</p>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-sm space-y-7">
+          <div className="flex items-center gap-3 lg:hidden">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <ShoppingCart className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-lg">MWRD</span>
+          </div>
+
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-semibold tracking-tight">Sign in to your account</h1>
+            <p className="text-sm text-muted-foreground">Enter your email and password below</p>
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -70,9 +92,15 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email address</FormLabel>
                     <FormControl>
-                      <Input placeholder="name@company.com" {...field} data-testid="input-email" />
+                      <InputField
+                        leadingIcon={<Mail />}
+                        placeholder="name@company.com"
+                        autoComplete="email"
+                        data-testid="input-email"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -83,35 +111,47 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Password</FormLabel>
+                    </div>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} data-testid="input-password" />
+                      <InputField
+                        type="password"
+                        leadingIcon={<Lock />}
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        data-testid="input-password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full mt-2"
                 disabled={loginMutation.isPending}
                 data-testid="button-submit"
               >
-                {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
+                {loginMutation.isPending && <Loader2 className="animate-spin" />}
+                {loginMutation.isPending ? "Signing in…" : "Sign in"}
               </Button>
             </form>
           </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <div className="text-sm text-center text-muted-foreground">
+
+          <p className="text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Button variant="link" className="p-0 h-auto" onClick={() => setLocation("/register")}>
+            <button
+              onClick={() => setLocation("/register")}
+              className="text-primary font-medium hover:underline underline-offset-4"
+            >
               Register now
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+            </button>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

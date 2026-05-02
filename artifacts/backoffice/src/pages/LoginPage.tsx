@@ -11,10 +11,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { InputField } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useBackofficeLogin } from "@workspace/api-client-react";
+import { Loader2, Mail, Lock, LayoutDashboard } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -30,26 +30,20 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = async (values: LoginFormValues) => {
     loginMutation.mutate({ data: values }, {
       onSuccess: (response) => {
         localStorage.setItem("mwrd_bo_token", response.token);
-        toast({
-          title: "Login successful",
-          description: "Welcome back to MWRD Backoffice",
-        });
+        toast({ title: "Welcome back", description: "Redirecting to operations dashboard." });
         setLocation("/");
       },
       onError: (error: any) => {
         toast({
-          title: "Login failed",
-          description: error.message || "Please check your credentials",
+          title: "Authentication failed",
+          description: error.message || "Please check your credentials.",
           variant: "destructive",
         });
       }
@@ -57,15 +51,45 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">MWRD Backoffice</CardTitle>
-          <CardDescription className="text-center">
-            Enter your credentials to access the operations dashboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen flex bg-background">
+      <div className="hidden lg:flex lg:w-[45%] bg-sidebar flex-col justify-between p-10">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
+            <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="font-semibold text-sidebar-foreground text-lg tracking-tight">MWRD Backoffice</span>
+        </div>
+        <div className="space-y-4">
+          <blockquote className="text-sidebar-foreground/80 text-base leading-relaxed">
+            "Full visibility into procurement operations, supplier performance, and financials — all in one place."
+          </blockquote>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-xs font-semibold text-primary">SA</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-sidebar-foreground">Sara Al-Amri</p>
+              <p className="text-xs text-sidebar-foreground/50">Head of Procurement, MWRD</p>
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-sidebar-foreground/30">© 2026 MWRD RAKIZ. All rights reserved.</p>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-sm space-y-7">
+          <div className="flex items-center gap-3 lg:hidden">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <LayoutDashboard className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-lg">MWRD Backoffice</span>
+          </div>
+
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-semibold tracking-tight">Operations sign in</h1>
+            <p className="text-sm text-muted-foreground">Restricted to authorized MWRD staff only</p>
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -73,9 +97,15 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email address</FormLabel>
                     <FormControl>
-                      <Input placeholder="admin@mwrd.com" {...field} data-testid="input-email" />
+                      <InputField
+                        leadingIcon={<Mail />}
+                        placeholder="admin@mwrd.com"
+                        autoComplete="email"
+                        data-testid="input-email"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -88,24 +118,38 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} data-testid="input-password" />
+                      <InputField
+                        type="password"
+                        leadingIcon={<Lock />}
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        data-testid="input-password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full mt-2"
                 disabled={loginMutation.isPending}
                 data-testid="button-submit"
               >
-                {loginMutation.isPending ? "Logging in..." : "Login"}
+                {loginMutation.isPending && <Loader2 className="animate-spin" />}
+                {loginMutation.isPending ? "Signing in…" : "Sign in"}
               </Button>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+
+          <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
+            <p className="text-xs text-muted-foreground font-medium mb-1">Demo credentials</p>
+            <p className="text-xs text-muted-foreground">admin@mwrd.com · admin123</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
