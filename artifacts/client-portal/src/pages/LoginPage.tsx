@@ -29,11 +29,27 @@ export default function LoginPage() {
   const onSubmit = (values: LoginFormValues) => {
     loginMutation.mutate({ data: values }, {
       onSuccess: (response) => {
-        if (response.token) {
+        const role = response.user?.role;
+
+        if (role === "supplier") {
+          localStorage.setItem("mwrd_supplier_token", response.token);
+          toast({ title: "Welcome back", description: "Redirecting to your supplier dashboard." });
+          window.location.replace("/supplier/");
+          return;
+        }
+
+        if (role === "client") {
           localStorage.setItem("mwrd_token", response.token);
           toast({ title: "Welcome back", description: "Redirecting to your dashboard." });
-          setLocation("/");
+          window.location.replace("/");
+          return;
         }
+
+        toast({
+          variant: "destructive",
+          title: "Access denied",
+          description: "Please use the admin portal to sign in with your staff account.",
+        });
       },
       onError: (error: any) => {
         toast({
@@ -41,12 +57,13 @@ export default function LoginPage() {
           title: "Sign in failed",
           description: error.message || "Please check your credentials and try again.",
         });
-      }
+      },
     });
   };
 
   return (
     <div className="min-h-screen flex bg-background">
+      {/* Left panel */}
       <div className="hidden lg:flex lg:w-[45%] bg-sidebar flex-col justify-between p-10">
         <div className="flex items-center">
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-10 w-auto" />
@@ -68,6 +85,7 @@ export default function LoginPage() {
         <p className="text-xs text-sidebar-foreground/30">© 2026 MWRD RAKIZ. All rights reserved.</p>
       </div>
 
+      {/* Right panel */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-7">
           <div className="flex items-center lg:hidden">
@@ -75,8 +93,10 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1.5">
-            <h1 className="text-2xl font-semibold tracking-tight">Sign in to your account</h1>
-            <p className="text-sm text-muted-foreground">Enter your email and password below</p>
+            <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+            <p className="text-sm text-muted-foreground">
+              Enter your email and password to access your account
+            </p>
           </div>
 
           <Form {...form}>
@@ -105,9 +125,7 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
-                    </div>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <InputField
                         type="password"
@@ -136,12 +154,12 @@ export default function LoginPage() {
           </Form>
 
           <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            New client?{" "}
             <button
               onClick={() => setLocation("/register")}
               className="text-primary font-medium hover:underline underline-offset-4"
             >
-              Register now
+              Request access
             </button>
           </p>
         </div>
