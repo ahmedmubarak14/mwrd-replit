@@ -34,7 +34,7 @@ export function Sidebar() {
   const handleLogout = () => {
     logout.mutate(undefined, {
       onSuccess: () => {
-        localStorage.removeItem("mwrd_token");
+        localStorage.removeItem("mwrd_supplier_token");
         setLocation("/login");
       },
     });

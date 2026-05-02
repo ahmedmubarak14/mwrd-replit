@@ -36,7 +36,7 @@ export default function LoginPage() {
   const onSubmit = (data: LoginFormValues) => {
     loginMutation.mutate({ data }, {
       onSuccess: (response) => {
-        localStorage.setItem("mwrd_token", response.token);
+        localStorage.setItem("mwrd_supplier_token", response.token);
         toast({ title: "Welcome back", description: "Redirecting to your supplier dashboard." });
         setLocation("/");
       },
