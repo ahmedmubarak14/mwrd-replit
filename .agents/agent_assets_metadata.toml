@@ -1,0 +1,26 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "T9yvCLr1TYarAURRWpYEj"
+uri = "file://screenshots/client-login.jpg"
+type = "image"
+title = "Client Portal (hero card 1)"
+
+[[outputs]]
+id = "gmy4mtG7qLaKBarV7MbUs"
+uri = "file://screenshots/supplier-login.jpg"
+type = "image"
+title = "Supplier Portal (hero card 2)"
+
+[[outputs]]
+id = "chT6rysAlzjSSKVYlLAq4"
+uri = "file://screenshots/backoffice-login.jpg"
+type = "image"
+title = "Backoffice (main dashboard screenshot)"
+
+[[outputs]]
+id = "FebLdKcgzFb8eN61PSnDg"
+uri = "file://screenshots/landing-page-update.tar.gz"
+type = "unspecified"
+title = "landing-page-update.tar.gz — files to commit"
