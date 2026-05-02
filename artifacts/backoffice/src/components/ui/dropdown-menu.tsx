@@ -12,7 +12,7 @@ import { Check, ChevronRight } from "@untitledui/icons";
 import { cx } from "@/utils/cx";
 
 const DropdownMenu = MenuTrigger;
-const DropdownMenuTrigger = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const DropdownMenuTrigger = ({ children }: { children: React.ReactNode; asChild?: boolean }) => <>{children}</>;
 const DropdownMenuGroup = Section;
 const DropdownMenuPortal = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 const DropdownMenuSub = ({ children }: { children: React.ReactNode }) => <>{children}</>;

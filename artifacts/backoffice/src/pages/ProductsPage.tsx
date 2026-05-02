@@ -118,7 +118,7 @@ export default function ProductsPage() {
                         <DropdownMenuItem
                           className="text-[rgb(217,45,32)]"
                           disabled={product.status === "deprecated"}
-                          onClick={() => handleDeprecate(product.id)}
+                          onSelect={() => handleDeprecate(product.id)}
                         >
                           Deprecate
                         </DropdownMenuItem>

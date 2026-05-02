@@ -26,7 +26,7 @@ interface ToastProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
-  ({ className, variant = "default", ...props }, ref) => (
+  ({ className, variant = "default", open: _open, onOpenChange: _onOpenChange, ...props }, ref) => (
     <div
       ref={ref}
       className={cx(
