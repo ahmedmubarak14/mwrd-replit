@@ -3,6 +3,7 @@ import { useListRFQs, getListRFQsQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlusCircle, File06 } from "@untitledui/icons";
+import { SpecialOrderButton } from "@/components/layout/CustomRequestBanner";
 
 const STATUS_PILL: Record<string, string> = {
   open:      "bg-[rgb(239,248,255)] text-[rgb(21,112,239)]  border-[rgb(209,236,255)]",
@@ -25,9 +26,12 @@ export default function RFQsPage() {
           <h1 className="text-xl font-semibold text-[rgb(16,24,40)]">RFQs</h1>
           <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">Manage your requests for quotation</p>
         </div>
-        <Button onClick={() => setLocation("/catalog")} className="gap-2" data-testid="button-new-rfq">
-          <PlusCircle className="h-4 w-4" /> New RFQ
-        </Button>
+        <div className="flex items-center gap-2">
+          <SpecialOrderButton />
+          <Button onClick={() => setLocation("/catalog")} className="gap-2" data-testid="button-new-rfq">
+            <PlusCircle className="h-4 w-4" /> New RFQ
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">

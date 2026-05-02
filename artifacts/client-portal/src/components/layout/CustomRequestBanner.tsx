@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
-import { ImagePlus, X } from "@untitledui/icons";
+import { ImagePlus, X, Plus } from "@untitledui/icons";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateRFQ } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function CustomRequestBanner() {
+export function SpecialOrderButton({ variant = "outline" }: { variant?: "outline" | "ghost" }) {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -87,22 +87,22 @@ export function CustomRequestBanner() {
   const fieldClass =
     "w-full rounded-full border border-[rgb(228,231,236)] bg-[rgb(249,250,251)] px-4 py-3 text-sm text-[rgb(16,24,40)] placeholder:text-[rgb(152,162,179)] focus:outline-none focus:ring-2 focus:ring-[rgb(255,109,67)] focus:border-[rgb(255,109,67)] transition-colors";
 
+  const triggerClass =
+    variant === "ghost"
+      ? "inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium text-[rgb(52,64,84)] hover:bg-[rgb(242,244,247)] transition-colors"
+      : "inline-flex items-center gap-2 rounded-lg border border-[rgb(228,231,236)] bg-white px-3.5 py-2 text-sm font-medium text-[rgb(52,64,84)] hover:bg-[rgb(249,250,251)] hover:border-[rgb(208,213,221)] transition-colors";
+
   return (
     <>
-      <div className="sticky bottom-0 left-0 right-0 z-20 border-t border-[rgb(228,231,236)] bg-[rgb(249,250,251)] px-6 py-3">
-        <div className="flex items-center justify-between max-w-2xl mx-auto">
-          <span className="text-sm font-semibold text-[rgb(16,24,40)]">
-            Do you have a special order?
-          </span>
-          <button
-            onClick={() => setOpen(true)}
-            data-testid="button-special-order"
-            className="rounded-full border border-[rgb(228,231,236)] bg-white px-5 py-2 text-sm font-medium text-[rgb(52,64,84)] hover:bg-[rgb(242,244,247)] transition-colors"
-          >
-            Click here
-          </button>
-        </div>
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        data-testid="button-special-order"
+        className={triggerClass}
+      >
+        <Plus className="h-4 w-4" />
+        Special order
+      </button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

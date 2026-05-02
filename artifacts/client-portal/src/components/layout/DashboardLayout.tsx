@@ -1,5 +1,4 @@
 import { Sidebar } from "./Sidebar";
-import { CustomRequestBanner } from "./CustomRequestBanner";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -15,7 +14,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {children}
           </div>
         </div>
-        <CustomRequestBanner />
       </main>
     </div>
   );
