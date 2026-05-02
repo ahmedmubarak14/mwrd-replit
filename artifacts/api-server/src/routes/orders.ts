@@ -2,9 +2,11 @@ import { Router } from "express";
 import {
   listPOsForUser, getPO, listMyApprovalTasks, approveOrder, rejectOrder,
   getApprovalChainStatus, createDN, createGRN, generateInvoice, recordPayment,
+  getCompany, getUser,
 } from "@workspace/mwrd-shared";
 import { requirePublicAuth } from "../middleware/auth.js";
 import { qs, pp } from "../lib/qs.js";
+import { createWafeqInvoice } from "../lib/wafeq.js";
 
 const router = Router();
 
@@ -95,9 +97,57 @@ router.post("/orders/:id/grn", requirePublicAuth, async (req, res) => {
 
 router.get("/invoices/:id", requirePublicAuth, async (req, res) => {
   try {
+    const auth = res.locals.auth!;
     const cpo_id = qs(req.query.cpo_id) ?? pp(req.params['id']);
     const grn_id = qs(req.query.grn_id) ?? "";
-    const invoice = await generateInvoice(cpo_id, grn_id);
+
+    const po = await getPO(cpo_id, auth.userId);
+    if (!po) { res.status(404).json({ error: "Order not found" }); return; }
+
+    let wafeqData: { wafeq_invoice_id?: string | null; wafeq_pdf_url?: string | null } | undefined;
+
+    if (process.env['WAFEQ_API_KEY']) {
+      try {
+        const [clientCompany, clientUser] = await Promise.all([
+          getCompany(po.client_company_id),
+          getUser(auth.userId),
+        ]);
+
+        const lineItems = po.items.map((item) => ({
+          name: item.name_en,
+          description: item.name_en,
+          quantity: item.qty,
+          price: item.unit_price_sar,
+        }));
+
+        const invoiceNumber = `MWRD-${po.po_number}`;
+
+        const wafeqResult = await createWafeqInvoice({
+          invoiceNumber,
+          invoiceDate: new Date().toISOString().split('T')[0]!,
+          dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!,
+          contact: {
+            name: clientCompany?.real_name ?? 'MWRD Client',
+            email: clientUser?.email,
+            address: clientCompany?.vat_number ? `VAT: ${clientCompany.vat_number}` : undefined,
+          },
+          lineItems,
+          currency: 'SAR',
+        });
+
+        wafeqData = {
+          wafeq_invoice_id: wafeqResult.id,
+          wafeq_pdf_url: wafeqResult.pdf_url ?? null,
+        };
+
+        req.log.info({ wafeq_invoice_id: wafeqResult.id }, 'Wafeq invoice created');
+      } catch (wafeqErr: unknown) {
+        req.log.warn({ err: (wafeqErr as Error).message }, 'Wafeq invoice creation failed — proceeding without it');
+        wafeqData = { wafeq_invoice_id: `wafeq-error-${Date.now()}`, wafeq_pdf_url: null };
+      }
+    }
+
+    const invoice = await generateInvoice(cpo_id, grn_id, wafeqData);
     res.json(invoice);
   } catch (e: unknown) {
     res.status(404).json({ error: "Not found" });

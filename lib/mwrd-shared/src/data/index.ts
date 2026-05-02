@@ -1006,7 +1006,11 @@ export async function createGRN(clientUserId: string, cpoId: string, dnId: strin
   return grn;
 }
 
-export async function generateInvoice(cpoId: string, grnId: string): Promise<Invoice> {
+export async function generateInvoice(
+  cpoId: string,
+  grnId: string,
+  wafeqData?: { wafeq_invoice_id?: string | null; wafeq_pdf_url?: string | null },
+): Promise<Invoice> {
   const cpo = pos.get(cpoId);
   const grn = grns.get(grnId);
   if (!cpo || !grn) throw new Error('PO or GRN not found');
@@ -1015,7 +1019,14 @@ export async function generateInvoice(cpoId: string, grnId: string): Promise<Inv
   const vatAmount = Math.round(subtotal * vatRate * 100) / 100;
   const total = subtotal + vatAmount;
   const existingInv = [...invoices.values()].find((i) => i.cpo_id === cpoId && i.grn_id === grnId);
-  if (existingInv) return existingInv;
+  if (existingInv) {
+    if (wafeqData && (!existingInv.wafeq_invoice_id || existingInv.wafeq_invoice_id.startsWith('wafeq-error'))) {
+      const updated = { ...existingInv, ...wafeqData };
+      invoices.set(existingInv.id, updated);
+      return updated;
+    }
+    return existingInv;
+  }
   const matchResult: ThreeWayMatchResult = matchPOGRNInvoice(cpo, grn, { id: '', invoice_number: '', cpo_id: cpoId, grn_id: grnId, total_sar: total, vat_amount_sar: vatAmount, status: 'draft', issue_date: nowISO(), due_date: addDays(new Date(), 30) });
   const id = newId();
   const invoice: Invoice = {
@@ -1023,6 +1034,8 @@ export async function generateInvoice(cpoId: string, grnId: string): Promise<Inv
     total_sar: total, vat_amount_sar: vatAmount,
     status: matchResult.matches ? 'issued' : 'draft',
     issue_date: nowISO(), due_date: addDays(new Date(), 30),
+    wafeq_invoice_id: wafeqData?.wafeq_invoice_id ?? null,
+    wafeq_pdf_url: wafeqData?.wafeq_pdf_url ?? null,
   };
   invoices.set(id, invoice);
   return invoice;

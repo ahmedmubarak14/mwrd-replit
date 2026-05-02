@@ -414,6 +414,8 @@ export interface Invoice {
   zatca_uuid?: string | null;
   zatca_qr?: string | null;
   payment_intent_id?: string | null;
+  wafeq_invoice_id?: string | null;
+  wafeq_pdf_url?: string | null;
 }
 
 export type MarginScope = 'global' | 'category' | 'client';
