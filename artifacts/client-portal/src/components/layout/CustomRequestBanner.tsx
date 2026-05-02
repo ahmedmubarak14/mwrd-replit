@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { ImagePlus, X } from "@untitledui/icons";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateRFQ } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function CustomRequestBanner() {
   const [open, setOpen] = useState(false);
@@ -10,9 +12,10 @@ export function CustomRequestBanner() {
   const [description, setDescription] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [sending, setSending] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const createRFQ = useCreateRFQ();
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -31,20 +34,54 @@ export function CustomRequestBanner() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!itemName.trim()) {
       toast({ title: "Item name is required", variant: "destructive" });
       return;
     }
-    setSending(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setSending(false);
-    setOpen(false);
-    resetForm();
-    toast({
-      title: "Request sent",
-      description: "Your special order request has been submitted. We'll be in touch soon.",
-    });
+    const qty = parseInt(quantity || "1", 10) || 1;
+    const expectedPriceNote = expectedPrice ? ` (expected price: ${expectedPrice})` : "";
+    const photoNote = photo ? ` [photo attached: ${photo.name}]` : "";
+    const deliveryDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+    createRFQ.mutate(
+      {
+        data: {
+          title: itemName.trim(),
+          description: `${description.trim() || "Special order request"}${expectedPriceNote}${photoNote}`,
+          delivery_city: "Riyadh",
+          delivery_date: deliveryDate!,
+          items: [
+            {
+              free_text_name: itemName.trim(),
+              description: description.trim() || itemName.trim(),
+              qty,
+              unit: "unit",
+            },
+          ],
+        },
+      },
+      {
+        onSuccess: (rfq: any) => {
+          toast({
+            title: "Request sent",
+            description: `RFQ ${rfq?.rfq_number ?? ""} created. Suppliers and our team have been notified.`,
+          });
+          queryClient.invalidateQueries({
+            predicate: (q) => Array.isArray(q.queryKey) && typeof q.queryKey[0] === "string" && q.queryKey[0].includes("/rfqs"),
+          });
+          setOpen(false);
+          resetForm();
+        },
+        onError: (err: any) => {
+          toast({
+            title: "Could not submit request",
+            description: err?.message ?? "Please try again.",
+            variant: "destructive",
+          });
+        },
+      },
+    );
   };
 
   const fieldClass =
@@ -59,6 +96,7 @@ export function CustomRequestBanner() {
           </span>
           <button
             onClick={() => setOpen(true)}
+            data-testid="button-special-order"
             className="rounded-full border border-[rgb(228,231,236)] bg-white px-5 py-2 text-sm font-medium text-[rgb(52,64,84)] hover:bg-[rgb(242,244,247)] transition-colors"
           >
             Click here
@@ -94,6 +132,7 @@ export function CustomRequestBanner() {
                   placeholder="Item name"
                   value={itemName}
                   onChange={(e) => setItemName(e.target.value)}
+                  data-testid="input-special-item-name"
                 />
               </div>
 
@@ -109,6 +148,7 @@ export function CustomRequestBanner() {
                     min="1"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
+                    data-testid="input-special-qty"
                   />
                 </div>
                 <div>
@@ -173,10 +213,11 @@ export function CustomRequestBanner() {
 
             <button
               onClick={handleSend}
-              disabled={sending}
+              disabled={createRFQ.isPending}
+              data-testid="button-special-send"
               className="mt-5 w-full rounded-full bg-[rgb(255,109,67)] py-3.5 text-sm font-semibold text-white hover:bg-[rgb(236,82,42)] disabled:opacity-60 transition-colors"
             >
-              {sending ? "Sending…" : "Send"}
+              {createRFQ.isPending ? "Sending…" : "Send"}
             </button>
           </div>
         </div>

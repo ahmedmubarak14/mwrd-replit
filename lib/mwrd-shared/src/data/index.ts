@@ -562,16 +562,31 @@ export async function createRFQ(clientUserId: string, input: {
   };
   rfqs.set(id, rfq);
 
-  if (source === 'catalog' && platformSettings.auto_quote_globally_enabled) {
-    await runAutoQuoteEngine(rfq);
+  // Always seed quotes + notify suppliers/admins so RFQs are visible across the platform.
+  // Auto-matching only runs when the catalog flow is enabled; otherwise we still create
+  // draft_manual quotes for active suppliers and notify everyone.
+  const runAutoMatch = source === 'catalog' && platformSettings.auto_quote_globally_enabled;
+  await runAutoQuoteEngine(rfq, runAutoMatch);
+
+  // Notify MWRD admin / ops staff
+  const staff = [...users.values()].filter((u) => u.role === 'admin' || u.role === 'ops');
+  for (const s of staff) {
+    await sendNotification(
+      s.id,
+      'rfq_submitted',
+      'New RFQ Submitted',
+      `${user.email} submitted "${rfq.title}" (${rfq.rfq_number}).`,
+      `/backoffice/rfqs/${rfq.id}`,
+    );
   }
 
   return rfq;
 }
 
-async function runAutoQuoteEngine(rfq: RFQ): Promise<void> {
-  const allOffers = [...offers.values()];
-  const matchMap = matchOffersToRFQ(rfq, allOffers);
+async function runAutoQuoteEngine(rfq: RFQ, runAutoMatch: boolean = true): Promise<void> {
+  const matchMap = runAutoMatch
+    ? matchOffersToRFQ(rfq, [...offers.values()])
+    : new Map<string, { matched_items: Array<{ rfq_item: import('../types/index.js').RFQItem; offer: import('../types/index.js').Offer }>; unmatched_rfq_items: import('../types/index.js').RFQItem[] }>();
 
   for (const [supplierId, { matched_items }] of matchMap.entries()) {
     const supplierCompany = companies.get(supplierId);
@@ -585,10 +600,12 @@ async function runAutoQuoteEngine(rfq: RFQ): Promise<void> {
     quotes.set(quote.id, quote);
     const supplierUser = [...users.values()].find((u) => u.company_id === supplierId);
     if (supplierUser) {
-      await sendNotification(supplierUser.id, 'new_rfq', 'New RFQ Match', `You've been matched to a new RFQ: ${rfq.title}`, `/rfqs/${rfq.id}/quote`);
+      await sendNotification(supplierUser.id, 'new_rfq', 'New RFQ Match', `You've been matched to a new RFQ: ${rfq.title}`, `/rfqs/${rfq.id}`);
     }
   }
 
+  // Every other active supplier gets a manual draft quote so they can submit pricing,
+  // and a notification so they actually know it's there.
   const allActiveSuppliers = [...companies.values()].filter(
     (c) => c.type === 'supplier' && c.status === 'active',
   );
@@ -600,9 +617,31 @@ async function runAutoQuoteEngine(rfq: RFQ): Promise<void> {
       supplier_company_id: supplier.id, status: 'draft_manual', is_auto_generated: false,
       supplier_review_window: '30min', supplier_reviewed_at: null, auto_send_at: null,
       admin_held: false, valid_until: addDays(new Date(), 14), lead_time_days: 7,
-      items: [], notes: '', submitted_at: null,
+      items: rfq.items.map((it) => ({
+        id: newId(),
+        quote_id: manualQuoteId,
+        rfq_item_id: it.id,
+        offer_id: null,
+        supplier_unit_price_sar: 0,
+        final_unit_price_sar: 0,
+        qty_available: it.qty,
+        lead_time_days: 7,
+        notes: '',
+        declined: false,
+      })),
+      notes: '', submitted_at: null,
     };
     quotes.set(manualQuoteId, manualQuote);
+    const supplierUser = [...users.values()].find((u) => u.company_id === supplier.id);
+    if (supplierUser) {
+      await sendNotification(
+        supplierUser.id,
+        'new_rfq',
+        'New RFQ Available',
+        `Quote requested: ${rfq.title} (${rfq.rfq_number}).`,
+        `/rfqs/${rfq.id}`,
+      );
+    }
   }
 }
 
