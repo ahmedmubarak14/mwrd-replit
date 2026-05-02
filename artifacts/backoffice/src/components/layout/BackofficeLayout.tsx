@@ -13,6 +13,7 @@ import {
   LogOut01,
   Menu01,
   Settings01,
+  ChevronDown,
 } from "@untitledui/icons";
 import { useState, useEffect, useRef } from "react";
 import { useGetBackofficeMe } from "@workspace/api-client-react";
@@ -22,70 +23,202 @@ interface BackofficeLayoutProps {
   children: React.ReactNode;
 }
 
-const navGroups = [
-  {
-    label: "Operations",
-    items: [
-      { href: "/", label: "Dashboard", icon: LayoutGrid01 },
-      { href: "/leads", label: "Leads Queue", icon: Users01 },
-      { href: "/kyc", label: "KYC Queue", icon: Shield01 },
-      { href: "/product-requests", label: "Product Requests", icon: File06 },
-      { href: "/offers", label: "Pending Offers", icon: Tag01 },
-      { href: "/quotes", label: "Held Quotes", icon: Receipt },
-    ],
-  },
-  {
-    label: "Management",
-    items: [
-      { href: "/clients", label: "Clients", icon: UserSquare },
-      { href: "/suppliers", label: "Suppliers", icon: ShoppingBag01 },
-      { href: "/products", label: "Product Catalog", icon: Package },
-      { href: "/orders", label: "Orders", icon: File06 },
-    ],
-  },
-  {
-    label: "Finance & Admin",
-    items: [
-      { href: "/margins", label: "Margin Rules", icon: BarChart01 },
-      { href: "/audit-log", label: "Audit Log", icon: File06 },
-      { href: "/settings", label: "Platform Settings", icon: Settings01 },
-      { href: "/internal-users", label: "Internal Users", icon: Shield01 },
-    ],
-  },
+type NavDivider = { divider: true; label?: string };
+type NavLeaf = {
+  href: string;
+  icon: React.ComponentType<any>;
+  label: string;
+  badge?: number;
+};
+type NavGroup = {
+  label: string;
+  icon: React.ComponentType<any>;
+  items: { href: string; label: string; badge?: number }[];
+};
+type NavItem = NavDivider | NavLeaf | NavGroup;
+
+const navConfig: NavItem[] = [
+  { href: "/", icon: LayoutGrid01, label: "Dashboard" },
+  { divider: true, label: "Operations" },
+  { href: "/leads", icon: Users01, label: "Leads Queue" },
+  { href: "/kyc", icon: Shield01, label: "KYC Queue" },
+  { href: "/product-requests", icon: File06, label: "Product Requests" },
+  { href: "/offers", icon: Tag01, label: "Pending Offers" },
+  { href: "/quotes", icon: Receipt, label: "Held Quotes" },
+  { divider: true, label: "Management" },
+  { href: "/clients", icon: UserSquare, label: "Clients" },
+  { href: "/suppliers", icon: ShoppingBag01, label: "Suppliers" },
+  { href: "/products", icon: Package, label: "Product Catalog" },
+  { href: "/orders", icon: File06, label: "Orders" },
+  { divider: true, label: "Finance & Admin" },
+  { href: "/margins", icon: BarChart01, label: "Margin Rules" },
+  { href: "/audit-log", icon: File06, label: "Audit Log" },
+  { href: "/settings", icon: Settings01, label: "Platform Settings" },
+  { href: "/internal-users", icon: Shield01, label: "Internal Users" },
 ];
 
-function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: () => void }) {
+function isDivider(item: NavItem): item is NavDivider {
+  return "divider" in item;
+}
+function isGroup(item: NavItem): item is NavGroup {
+  return "items" in item;
+}
+
+function NavLeafItem({
+  item,
+  location,
+  onNavigate,
+}: {
+  item: NavLeaf;
+  location: string;
+  onNavigate?: () => void;
+}) {
+  const isActive = location === item.href;
   return (
-    <nav className="flex-1 overflow-y-auto px-3 py-4">
-      {navGroups.map((group) => (
-        <div key={group.label} className="mb-4">
-          <p className="px-3 mb-1.5 text-xs font-semibold uppercase tracking-widest text-[rgb(100,90,70)]">
-            {group.label}
-          </p>
-          <div className="space-y-0.5">
-            {group.items.map((item) => {
-              const isActive = location === item.href;
-              return (
-                <Link key={item.href} href={item.href}>
-                  <a
-                    onClick={onNavigate}
-                    className={cx(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-[rgb(50,50,50)] text-[rgb(255,109,67)]"
-                        : "text-[rgb(180,170,150)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)]",
-                    )}
-                    data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    <item.icon className="w-5 h-5 shrink-0" aria-hidden />
-                    <span>{item.label}</span>
-                  </a>
-                </Link>
-              );
-            })}
-          </div>
+    <Link href={item.href}>
+      <a
+        onClick={onNavigate}
+        className={cx(
+          "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+          isActive
+            ? "bg-white/[0.08] text-[#FF6D43]"
+            : "text-[rgb(160,152,138)] hover:bg-white/[0.05] hover:text-[rgb(220,210,190)]",
+        )}
+        data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+      >
+        <item.icon
+          className={cx(
+            "w-[18px] h-[18px] shrink-0 transition-colors",
+            isActive
+              ? "text-[#FF6D43]"
+              : "text-[rgb(120,112,98)] group-hover:text-[rgb(180,170,150)]",
+          )}
+          aria-hidden
+        />
+        <span className="flex-1">{item.label}</span>
+        {item.badge !== undefined && (
+          <span className="ml-auto text-xs font-medium bg-white/[0.08] text-[rgb(140,132,118)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+            {item.badge}
+          </span>
+        )}
+      </a>
+    </Link>
+  );
+}
+
+function NavGroupItem({
+  item,
+  location,
+  onNavigate,
+}: {
+  item: NavGroup;
+  location: string;
+  onNavigate?: () => void;
+}) {
+  const isAnyChildActive = item.items.some((child) => location === child.href);
+  const [open, setOpen] = useState(isAnyChildActive);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={cx(
+          "group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+          isAnyChildActive
+            ? "text-[rgb(220,210,190)]"
+            : "text-[rgb(160,152,138)] hover:bg-white/[0.05] hover:text-[rgb(220,210,190)]",
+        )}
+      >
+        <item.icon
+          className={cx(
+            "w-[18px] h-[18px] shrink-0 transition-colors",
+            isAnyChildActive
+              ? "text-[rgb(200,190,170)]"
+              : "text-[rgb(120,112,98)] group-hover:text-[rgb(180,170,150)]",
+          )}
+          aria-hidden
+        />
+        <span className="flex-1 text-left">{item.label}</span>
+        <ChevronDown
+          className={cx(
+            "w-4 h-4 text-[rgb(100,92,78)] transition-transform duration-200",
+            open ? "rotate-180" : "",
+          )}
+          aria-hidden
+        />
+      </button>
+      {open && (
+        <div className="mt-0.5 ml-[30px] space-y-0.5 border-l border-[rgb(44,44,44)] pl-3">
+          {item.items.map((child) => {
+            const isActive = location === child.href;
+            return (
+              <Link key={child.href} href={child.href}>
+                <a
+                  onClick={onNavigate}
+                  className={cx(
+                    "flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-all duration-150",
+                    isActive
+                      ? "text-[#FF6D43] font-medium"
+                      : "text-[rgb(140,132,118)] hover:text-[rgb(200,190,170)]",
+                  )}
+                >
+                  <span>{child.label}</span>
+                  {child.badge !== undefined && (
+                    <span className="text-xs font-medium bg-white/[0.08] text-[rgb(120,112,98)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+                      {child.badge}
+                    </span>
+                  )}
+                </a>
+              </Link>
+            );
+          })}
         </div>
-      ))}
+      )}
+    </div>
+  );
+}
+
+function SidebarNav({
+  location,
+  onNavigate,
+}: {
+  location: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+      {navConfig.map((item, i) => {
+        if (isDivider(item)) {
+          return (
+            <div key={`divider-${i}`} className="pt-4 pb-1">
+              {item.label && (
+                <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-[rgb(80,74,62)]">
+                  {item.label}
+                </p>
+              )}
+              {!item.label && <div className="border-t border-[rgb(38,38,38)]" />}
+            </div>
+          );
+        }
+        if (isGroup(item)) {
+          return (
+            <NavGroupItem
+              key={item.label}
+              item={item}
+              location={location}
+              onNavigate={onNavigate}
+            />
+          );
+        }
+        return (
+          <NavLeafItem
+            key={item.href}
+            item={item}
+            location={location}
+            onNavigate={onNavigate}
+          />
+        );
+      })}
     </nav>
   );
 }
@@ -123,49 +256,57 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
 
   if (isLoading && location !== "/login") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-color-bg-secondary">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(255,109,67)] border-t-transparent" />
+      <div className="min-h-screen flex items-center justify-center bg-[rgb(12,12,12)]">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#FF6D43] border-t-transparent" />
       </div>
     );
   }
 
+  const sidebarFooter = (
+    <div className="border-t border-[rgb(38,38,38)] p-3 space-y-0.5">
+      {user && (
+        <div className="flex items-center gap-3 px-3 py-2 mb-1">
+          <div className="w-8 h-8 rounded-full bg-[#FF6D43] flex items-center justify-center text-white font-semibold text-sm shrink-0">
+            {user.user?.email?.charAt(0).toUpperCase() || "A"}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate text-[rgb(210,200,180)]">
+              {user.user?.email}
+            </p>
+            <p className="text-xs text-[rgb(100,92,78)] capitalize">{user.user?.role}</p>
+          </div>
+        </div>
+      )}
+      <button
+        onClick={handleLogout}
+        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[rgb(130,122,108)] hover:bg-white/[0.05] hover:text-[rgb(200,190,170)] transition-colors"
+        data-testid="button-logout"
+      >
+        <LogOut01 className="w-[18px] h-[18px] shrink-0" aria-hidden />
+        <span>Log out</span>
+      </button>
+    </div>
+  );
+
   return (
-    <div className="flex min-h-screen w-full bg-color-bg-secondary">
+    <div className="flex min-h-screen w-full bg-[rgb(12,12,12)]">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[rgb(26,26,26)] text-[rgb(220,210,190)] border-r border-[rgb(44,44,44)]">
-        <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
+      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[rgb(18,18,18)] border-r border-[rgb(38,38,38)]">
+        <div className="flex h-16 items-center px-5 border-b border-[rgb(38,38,38)]">
           <button
             onClick={handleLogoClick}
             className="flex items-center cursor-pointer focus:outline-none"
             aria-label="Go to dashboard"
           >
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-9 w-auto" />
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="MWRD"
+              className="h-8 w-auto"
+            />
           </button>
         </div>
-
         <SidebarNav location={location} />
-
-        <div className="px-3 py-4 border-t border-[rgb(44,44,44)]">
-          {user && (
-            <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
-              <div className="w-8 h-8 rounded-full bg-[rgb(255,109,67)] flex items-center justify-center text-white font-semibold text-sm shrink-0">
-                {user.user?.email?.charAt(0).toUpperCase() || "A"}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate text-[rgb(220,210,190)]">{user.user?.email}</p>
-                <p className="text-xs text-[rgb(100,90,70)] capitalize">{user.user?.role}</p>
-              </div>
-            </div>
-          )}
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[rgb(150,140,120)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)] transition-colors"
-            data-testid="button-logout"
-          >
-            <LogOut01 className="w-5 h-5 shrink-0" aria-hidden />
-            <span>Logout</span>
-          </button>
-        </div>
+        {sidebarFooter}
       </aside>
 
       {/* Mobile overlay drawer */}
@@ -175,26 +316,22 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
             className="absolute inset-0 bg-black/60"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex flex-col w-72 bg-[rgb(26,26,26)] text-[rgb(220,210,190)] z-50">
-            <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
+          <aside className="absolute inset-y-0 left-0 flex flex-col w-72 bg-[rgb(18,18,18)] border-r border-[rgb(38,38,38)] z-50">
+            <div className="flex h-16 items-center px-5 border-b border-[rgb(38,38,38)]">
               <button
                 onClick={handleLogoClick}
                 className="flex items-center cursor-pointer focus:outline-none"
                 aria-label="Go to dashboard"
               >
-                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-9 w-auto" />
+                <img
+                  src={`${import.meta.env.BASE_URL}logo.png`}
+                  alt="MWRD"
+                  className="h-8 w-auto"
+                />
               </button>
             </div>
             <SidebarNav location={location} onNavigate={() => setMobileOpen(false)} />
-            <div className="p-3 border-t border-[rgb(44,44,44)]">
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[rgb(150,140,120)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)] transition-colors"
-              >
-                <LogOut01 className="w-5 h-5 shrink-0" aria-hidden />
-                <span>Logout</span>
-              </button>
-            </div>
+            {sidebarFooter}
           </aside>
         </div>
       )}
@@ -202,13 +339,21 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Mobile header */}
-        <header className="h-16 border-b border-color-border-secondary flex items-center px-4 justify-between md:hidden bg-color-bg-primary">
-          <button onClick={handleLogoClick} className="focus:outline-none" aria-label="Go to dashboard">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
+        <header className="h-16 border-b border-[rgb(38,38,38)] flex items-center px-4 justify-between md:hidden bg-[rgb(18,18,18)]">
+          <button
+            onClick={handleLogoClick}
+            className="focus:outline-none"
+            aria-label="Go to dashboard"
+          >
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="MWRD"
+              className="h-8 w-auto"
+            />
           </button>
           <button
             onClick={() => setMobileOpen(true)}
-            className="p-2 rounded-lg text-color-fg-tertiary hover:bg-color-bg-secondary transition-colors"
+            className="p-2 rounded-lg text-[rgb(140,132,118)] hover:bg-white/[0.05] transition-colors"
           >
             <Menu01 className="h-6 w-6" aria-hidden />
           </button>

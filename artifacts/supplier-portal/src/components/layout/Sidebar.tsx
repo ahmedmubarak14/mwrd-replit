@@ -5,26 +5,148 @@ import {
   MessageChatCircle,
   ShoppingCart01,
   Package,
-  PlusCircle,
+  Tag01,
   Bell01,
   User01,
   LogOut01,
+  ChevronDown,
 } from "@untitledui/icons";
-import { cx } from "@/utils/cx";
 import { useGetMe, useLogout } from "@workspace/api-client-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { cx } from "@/utils/cx";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutGrid01 },
-  { href: "/rfqs", label: "RFQs", icon: File06 },
-  { href: "/quotes", label: "Quotes", icon: MessageChatCircle },
-  { href: "/orders", label: "Orders", icon: ShoppingCart01 },
-  { href: "/offers", label: "Offers", icon: Package },
-  { href: "/offers/new", label: "New Offer", icon: PlusCircle },
-  { href: "/product-requests", label: "Product Requests", icon: PlusCircle },
-  { href: "/notifications", label: "Notifications", icon: Bell01 },
-  { href: "/account", label: "Account", icon: User01 },
+type NavDivider = { divider: true };
+type NavLeaf = {
+  href: string;
+  icon: React.ComponentType<any>;
+  label: string;
+  badge?: number;
+};
+type NavGroup = {
+  label: string;
+  icon: React.ComponentType<any>;
+  items: { href: string; label: string; badge?: number }[];
+};
+type NavItem = NavDivider | NavLeaf | NavGroup;
+
+const navConfig: NavItem[] = [
+  { href: "/", icon: LayoutGrid01, label: "Dashboard" },
+  { href: "/rfqs", icon: File06, label: "RFQs" },
+  { href: "/quotes", icon: MessageChatCircle, label: "Quotes" },
+  { divider: true },
+  { href: "/orders", icon: ShoppingCart01, label: "Orders" },
+  {
+    label: "Offers",
+    icon: Tag01,
+    items: [
+      { href: "/offers", label: "All Offers" },
+      { href: "/offers/new", label: "New Offer" },
+    ],
+  },
+  { href: "/product-requests", icon: Package, label: "Product Requests" },
+  { divider: true },
+  { href: "/notifications", icon: Bell01, label: "Notifications" },
+  { href: "/account", icon: User01, label: "Account" },
 ];
+
+function isDivider(item: NavItem): item is NavDivider {
+  return "divider" in item;
+}
+function isGroup(item: NavItem): item is NavGroup {
+  return "items" in item;
+}
+
+function NavLeafItem({ item, location }: { item: NavLeaf; location: string }) {
+  const isActive = location === item.href;
+  return (
+    <Link href={item.href}>
+      <a
+        className={cx(
+          "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+          isActive
+            ? "bg-white/[0.08] text-[#FF6D43]"
+            : "text-[rgb(160,152,138)] hover:bg-white/[0.05] hover:text-[rgb(220,210,190)]",
+        )}
+        data-testid={`link-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+      >
+        <item.icon
+          className={cx(
+            "w-[18px] h-[18px] shrink-0 transition-colors",
+            isActive ? "text-[#FF6D43]" : "text-[rgb(120,112,98)] group-hover:text-[rgb(180,170,150)]",
+          )}
+          aria-hidden
+        />
+        <span className="flex-1">{item.label}</span>
+        {item.badge !== undefined && (
+          <span className="ml-auto text-xs font-medium bg-white/[0.08] text-[rgb(140,132,118)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+            {item.badge}
+          </span>
+        )}
+      </a>
+    </Link>
+  );
+}
+
+function NavGroupItem({ item, location }: { item: NavGroup; location: string }) {
+  const isAnyChildActive = item.items.some((child) => location === child.href);
+  const [open, setOpen] = useState(isAnyChildActive);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={cx(
+          "group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+          isAnyChildActive
+            ? "text-[rgb(220,210,190)]"
+            : "text-[rgb(160,152,138)] hover:bg-white/[0.05] hover:text-[rgb(220,210,190)]",
+        )}
+      >
+        <item.icon
+          className={cx(
+            "w-[18px] h-[18px] shrink-0 transition-colors",
+            isAnyChildActive ? "text-[rgb(200,190,170)]" : "text-[rgb(120,112,98)] group-hover:text-[rgb(180,170,150)]",
+          )}
+          aria-hidden
+        />
+        <span className="flex-1 text-left">{item.label}</span>
+        <ChevronDown
+          className={cx(
+            "w-4 h-4 text-[rgb(100,92,78)] transition-transform duration-200",
+            open ? "rotate-180" : "",
+          )}
+          aria-hidden
+        />
+      </button>
+      {open && (
+        <div className="mt-0.5 ml-[30px] space-y-0.5 border-l border-[rgb(44,44,44)] pl-3">
+          {item.items.map((child) => {
+            const isActive = location === child.href;
+            return (
+              <Link key={child.href} href={child.href}>
+                <a
+                  className={cx(
+                    "flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-all duration-150",
+                    isActive
+                      ? "text-[#FF6D43] font-medium"
+                      : "text-[rgb(140,132,118)] hover:text-[rgb(200,190,170)]",
+                  )}
+                >
+                  <span>{child.label}</span>
+                  {child.badge !== undefined && (
+                    <span className="text-xs font-medium bg-white/[0.08] text-[rgb(120,112,98)] rounded-full px-2 py-0.5 min-w-[22px] text-center">
+                      {child.badge}
+                    </span>
+                  )}
+                </a>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Sidebar() {
   const [location, setLocation] = useLocation();
@@ -49,61 +171,57 @@ export function Sidebar() {
     logout.mutate(undefined, {
       onSuccess: () => {
         localStorage.removeItem("mwrd_supplier_token");
-        setLocation("/login");
+        window.location.replace("/supplier/login");
       },
     });
   };
 
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col bg-[rgb(26,26,26)] text-[rgb(220,210,190)] border-r border-[rgb(44,44,44)]">
-      <div className="flex h-16 items-center px-6 border-b border-[rgb(44,44,44)]">
+    <aside className="flex h-full w-64 shrink-0 flex-col bg-[rgb(18,18,18)] border-r border-[rgb(38,38,38)]">
+      {/* Logo */}
+      <div className="flex h-16 items-center px-5 border-b border-[rgb(38,38,38)]">
         <button
           onClick={handleLogoClick}
           className="flex items-center cursor-pointer focus:outline-none"
           aria-label="Go to dashboard"
         >
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-9 w-auto shrink-0" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
         </button>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-3 py-4 overflow-y-auto">
-        {navItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <a
-              className={cx(
-                "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-                location === item.href
-                  ? "bg-[rgb(50,50,50)] text-[rgb(255,109,67)]"
-                  : "text-[rgb(180,170,150)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)]",
-              )}
-              data-testid={`link-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-            >
-              <item.icon className="h-5 w-5 shrink-0" aria-hidden />
-              {item.label}
-            </a>
-          </Link>
-        ))}
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+        {navConfig.map((item, i) => {
+          if (isDivider(item)) {
+            return <div key={`divider-${i}`} className="my-2 border-t border-[rgb(38,38,38)]" />;
+          }
+          if (isGroup(item)) {
+            return <NavGroupItem key={item.label} item={item} location={location} />;
+          }
+          return <NavLeafItem key={item.href} item={item} location={location} />;
+        })}
       </nav>
 
-      <div className="p-3 border-t border-[rgb(44,44,44)]">
+      {/* Footer */}
+      <div className="border-t border-[rgb(38,38,38)] p-3 space-y-0.5">
         {user && (
-          <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
-            <div className="w-8 h-8 rounded-full bg-[rgb(255,109,67)] flex items-center justify-center text-white font-semibold text-sm shrink-0">
-              {user.user?.real_name?.charAt(0) || "S"}
+          <div className="flex items-center gap-3 px-3 py-2 mb-1">
+            <div className="w-8 h-8 rounded-full bg-[#FF6D43] flex items-center justify-center text-white font-semibold text-sm shrink-0">
+              {(user.user as any)?.real_name?.charAt(0) || "S"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate text-[rgb(220,210,190)]">{user.user?.real_name}</p>
-              <p className="text-xs text-[rgb(120,110,90)] truncate">{user.user?.email}</p>
+              <p className="text-sm font-medium truncate text-[rgb(210,200,180)]">{(user.user as any)?.real_name}</p>
+              <p className="text-xs text-[rgb(100,92,78)] truncate">{user.user?.email}</p>
             </div>
           </div>
         )}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[rgb(150,140,120)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)] transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[rgb(130,122,108)] hover:bg-white/[0.05] hover:text-[rgb(200,190,170)] transition-colors"
           data-testid="button-logout"
         >
-          <LogOut01 className="h-5 w-5 shrink-0" aria-hidden />
-          Logout
+          <LogOut01 className="w-[18px] h-[18px] shrink-0" aria-hidden />
+          <span>Log out</span>
         </button>
       </div>
     </aside>
