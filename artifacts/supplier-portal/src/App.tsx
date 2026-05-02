@@ -1,7 +1,8 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -17,24 +18,71 @@ import ProductRequestsPage from "@/pages/ProductRequestsPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import AccountPage from "@/pages/AccountPage";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
+
+function ProtectedRoute({ component: Component }: { component: React.ComponentType<any> }) {
+  const token = localStorage.getItem("mwrd_supplier_token");
+
+  if (!token) {
+    return <Redirect to="/login" />;
+  }
+
+  return (
+    <DashboardLayout>
+      <Component />
+    </DashboardLayout>
+  );
+}
 
 function Router() {
   return (
     <Switch>
       <Route path="/login" component={LoginPage} />
-      <Route path="/" component={DashboardPage} />
-      <Route path="/rfqs" component={RFQsPage} />
-      <Route path="/rfqs/:id" component={RFQDetailPage} />
-      <Route path="/quotes" component={QuotesPage} />
-      <Route path="/quotes/:id" component={QuoteDetailPage} />
-      <Route path="/orders" component={OrdersPage} />
-      <Route path="/orders/:id" component={OrderDetailPage} />
-      <Route path="/offers" component={OffersPage} />
-      <Route path="/offers/new" component={CreateOfferPage} />
-      <Route path="/product-requests" component={ProductRequestsPage} />
-      <Route path="/notifications" component={NotificationsPage} />
-      <Route path="/account" component={AccountPage} />
+
+      <Route path="/">
+        {() => <ProtectedRoute component={DashboardPage} />}
+      </Route>
+      <Route path="/rfqs">
+        {() => <ProtectedRoute component={RFQsPage} />}
+      </Route>
+      <Route path="/rfqs/:id">
+        {() => <ProtectedRoute component={RFQDetailPage} />}
+      </Route>
+      <Route path="/quotes">
+        {() => <ProtectedRoute component={QuotesPage} />}
+      </Route>
+      <Route path="/quotes/:id">
+        {() => <ProtectedRoute component={QuoteDetailPage} />}
+      </Route>
+      <Route path="/orders">
+        {() => <ProtectedRoute component={OrdersPage} />}
+      </Route>
+      <Route path="/orders/:id">
+        {() => <ProtectedRoute component={OrderDetailPage} />}
+      </Route>
+      <Route path="/offers">
+        {() => <ProtectedRoute component={OffersPage} />}
+      </Route>
+      <Route path="/offers/new">
+        {() => <ProtectedRoute component={CreateOfferPage} />}
+      </Route>
+      <Route path="/product-requests">
+        {() => <ProtectedRoute component={ProductRequestsPage} />}
+      </Route>
+      <Route path="/notifications">
+        {() => <ProtectedRoute component={NotificationsPage} />}
+      </Route>
+      <Route path="/account">
+        {() => <ProtectedRoute component={AccountPage} />}
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );
