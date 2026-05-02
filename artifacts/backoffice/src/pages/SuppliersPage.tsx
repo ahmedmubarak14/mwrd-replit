@@ -1,31 +1,23 @@
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  useListSuppliers, 
-  useSuspendUser, 
-  useReactivateUser, 
-  getListSuppliersQueryKey 
+import {
+  useListSuppliers,
+  useSuspendUser,
+  useReactivateUser,
+  getListSuppliersQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Power01, Power02 } from "@untitledui/icons";
+import { Power01, Power02, Building02 } from "@untitledui/icons";
 
 export default function SuppliersPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const { data: suppliers, isLoading } = useListSuppliers();
   const suspendMutation = useSuspendUser();
   const reactivateMutation = useReactivateUser();
+
+  const rows = suppliers?.data ?? [];
 
   const handleSuspend = (userId: string) => {
     suspendMutation.mutate({ id: userId }, {
@@ -33,9 +25,7 @@ export default function SuppliersPage() {
         toast({ title: "Supplier suspended" });
         queryClient.invalidateQueries({ queryKey: getListSuppliersQueryKey() });
       },
-      onError: (err: any) => {
-        toast({ title: "Error", description: err.message, variant: "destructive" });
-      }
+      onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
     });
   };
 
@@ -45,81 +35,76 @@ export default function SuppliersPage() {
         toast({ title: "Supplier reactivated" });
         queryClient.invalidateQueries({ queryKey: getListSuppliersQueryKey() });
       },
-      onError: (err: any) => {
-        toast({ title: "Error", description: err.message, variant: "destructive" });
-      }
+      onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
     });
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Suppliers</h1>
-        <p className="text-muted-foreground">Manage all registered supplier users.</p>
+        <h1 className="text-xl font-semibold text-[rgb(16,24,40)]">Suppliers</h1>
+        <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">All registered supplier users</p>
       </div>
 
-      <div className="border rounded-lg bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              [...Array(5)].map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell><Skeleton className="h-10 w-48" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
-                </TableRow>
-              ))
-            ) : (
-              suppliers?.data.map((supplier) => (
-                <TableRow key={supplier.id}>
-                  <TableCell>
-                    <div className="font-medium">{supplier.real_name}</div>
-                    <div className="text-xs text-muted-foreground">{supplier.email}</div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={supplier.status === 'active' ? 'default' : 'destructive'} className="capitalize">
+      <div className="bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+        {isLoading ? (
+          <div className="p-5 space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+        ) : rows.length === 0 ? (
+          <div className="py-16 text-center">
+            <Building02 className="mx-auto h-8 w-8 text-[rgb(208,213,221)] mb-3" />
+            <p className="text-sm text-[rgb(152,162,179)]">No suppliers registered yet.</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[rgb(228,231,236)]">
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Supplier</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Status</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[rgb(242,244,247)]">
+              {rows.map((supplier) => (
+                <tr key={supplier.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
+                  <td className="px-5 py-3.5">
+                    <div className="font-medium text-[rgb(16,24,40)]">{supplier.real_name}</div>
+                    <div className="text-xs text-[rgb(102,112,133)] mt-0.5">{supplier.email}</div>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${
+                      supplier.status === "active"
+                        ? "bg-[rgb(236,253,243)] text-[rgb(7,148,85)] border-[rgb(167,243,208)]"
+                        : "bg-[rgb(255,243,242)] text-[rgb(217,45,32)] border-[rgb(255,196,191)]"
+                    }`}>
                       {supplier.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {supplier.status === 'active' ? (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="text-red-500 hover:text-red-600 border-red-200"
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right">
+                    {supplier.status === "active" ? (
+                      <button
                         onClick={() => handleSuspend(supplier.id)}
                         disabled={suspendMutation.isPending}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-[rgb(228,231,236)] text-[rgb(102,112,133)] hover:border-[rgb(217,45,32)] hover:text-[rgb(217,45,32)] transition-colors disabled:opacity-50"
                         data-testid={`button-suspend-${supplier.id}`}
                       >
-                        <Power02 className="h-4 w-4 mr-2" />
-                        Suspend
-                      </Button>
+                        <Power02 className="h-3.5 w-3.5" /> Suspend
+                      </button>
                     ) : (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="text-green-500 hover:text-green-600 border-green-200"
+                      <button
                         onClick={() => handleReactivate(supplier.id)}
                         disabled={reactivateMutation.isPending}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[rgb(236,253,243)] text-[rgb(7,148,85)] border border-[rgb(167,243,208)] hover:bg-[rgb(209,250,229)] transition-colors disabled:opacity-50"
                         data-testid={`button-reactivate-${supplier.id}`}
                       >
-                        <Power01 className="h-4 w-4 mr-2" />
-                        Activate
-                      </Button>
+                        <Power01 className="h-3.5 w-3.5" /> Activate
+                      </button>
                     )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

@@ -79,3 +79,19 @@ Login, Dashboard, Leads Queue, KYC Queue, Clients, Suppliers, Products, Offers Q
 - All data is mock (in-memory) — no database
 - Anonymity: client APIs never expose supplier real_name; supplier APIs never expose client real_name; backoffice sees both
 - Margin % never sent to client or supplier portals
+
+## Design System (Untitled UI dashboard look)
+
+Brand: **Vibrant Carrot `#FF6D43` / `rgb(255,109,67)`** (hover `rgb(205,56,22)`).
+
+All list pages (supplier portal: RFQs/Offers/Quotes/Orders/Notifications/Account; backoffice: Clients/Suppliers/Products/Margins/AuditLog/KYC/Leads/ProductRequests) follow this pattern:
+
+- **Page header**: `text-xl font-semibold text-[rgb(16,24,40)]` + subtitle `text-sm text-[rgb(102,112,133)]`
+- **Card**: `bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]`
+- **Table headers**: small uppercase `text-xs uppercase tracking-wide text-[rgb(102,112,133)]`
+- **Table body**: `divide-y divide-[rgb(242,244,247)]` rows, hover `bg-[rgb(249,250,251)]`
+- **Status pills**: `rounded-full px-2 py-0.5 text-xs font-medium border` with semantic soft colors (green/red/blue/amber/gray/purple), with a fallback gray for unknown statuses
+- **Brand CTA**: `bg-[rgb(255,109,67)] text-white hover:bg-[rgb(205,56,22)]`
+- **Tabs (AccountPage)**: WAI-ARIA `role="tablist"`/`role="tab"`/`aria-selected` + arrow-key navigation
+- **Dates**: always render via `safeFormat` / `safeFromNow` / `safeLocaleDate` helpers in each portal's `src/lib/utils.ts` (returns `"—"` for null/invalid timestamps; never throws)
+- Icons come from `@untitledui/icons` (the only Untitled UI package installed); other primitives are custom Tailwind, not shadcn `Button`/`Table`
