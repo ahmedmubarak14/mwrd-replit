@@ -53,9 +53,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex bg-background">
       <div className="hidden lg:flex lg:w-[45%] bg-sidebar flex-col justify-between p-10">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center">
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-10 w-auto" />
-          <span className="font-semibold text-sidebar-foreground text-lg tracking-tight">MWRD Supplier</span>
         </div>
         <div className="space-y-4">
           <blockquote className="text-sidebar-foreground/80 text-base leading-relaxed">
@@ -76,9 +75,8 @@ export default function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-7">
-          <div className="flex items-center gap-3 lg:hidden">
+          <div className="flex items-center lg:hidden">
             <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
-            <span className="font-semibold text-lg">MWRD Supplier</span>
           </div>
 
           <div className="space-y-1.5">

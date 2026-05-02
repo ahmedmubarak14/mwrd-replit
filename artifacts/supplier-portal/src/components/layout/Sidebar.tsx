@@ -12,6 +12,7 @@ import {
 } from "@untitledui/icons";
 import { cx } from "@/utils/cx";
 import { useGetMe, useLogout } from "@workspace/api-client-react";
+import { useRef } from "react";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutGrid01 },
@@ -29,6 +30,20 @@ export function Sidebar() {
   const [location, setLocation] = useLocation();
   const { data: user } = useGetMe();
   const logout = useLogout();
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleLogoClick = () => {
+    if (clickTimerRef.current !== null) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+      window.location.href = "/landing/";
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickTimerRef.current = null;
+        setLocation("/");
+      }, 260);
+    }
+  };
 
   const handleLogout = () => {
     logout.mutate(undefined, {
@@ -41,9 +56,14 @@ export function Sidebar() {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col bg-[rgb(26,26,26)] text-[rgb(220,210,190)] border-r border-[rgb(44,44,44)]">
-      <div className="flex h-16 items-center gap-2.5 px-6 border-b border-[rgb(44,44,44)]">
-        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto shrink-0" />
-        <span className="text-sm font-bold text-[rgb(255,109,67)]">MWRD Supplier</span>
+      <div className="flex h-16 items-center px-6 border-b border-[rgb(44,44,44)]">
+        <button
+          onClick={handleLogoClick}
+          className="flex items-center cursor-pointer focus:outline-none"
+          aria-label="Go to dashboard"
+        >
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-9 w-auto shrink-0" />
+        </button>
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3 py-4 overflow-y-auto">

@@ -14,7 +14,7 @@ import {
   Menu01,
   Settings01,
 } from "@untitledui/icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGetBackofficeMe } from "@workspace/api-client-react";
 import { cx } from "@/utils/cx";
 
@@ -94,6 +94,20 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
   const [location, setLocation] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: user, isLoading } = useGetBackofficeMe();
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleLogoClick = () => {
+    if (clickTimerRef.current !== null) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+      window.location.href = "/landing/";
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickTimerRef.current = null;
+        setLocation("/");
+      }, 260);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("mwrd_bo_token");
@@ -120,13 +134,13 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[rgb(26,26,26)] text-[rgb(220,210,190)] border-r border-[rgb(44,44,44)]">
         <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
-          <div className="flex items-center gap-2.5">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
-            <div>
-              <h1 className="text-sm font-bold text-[rgb(255,109,67)] leading-none">MWRD</h1>
-              <p className="text-xs text-[rgb(100,90,70)] mt-0.5">Backoffice</p>
-            </div>
-          </div>
+          <button
+            onClick={handleLogoClick}
+            className="flex items-center cursor-pointer focus:outline-none"
+            aria-label="Go to dashboard"
+          >
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-9 w-auto" />
+          </button>
         </div>
 
         <SidebarNav location={location} />
@@ -163,7 +177,13 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
           />
           <aside className="absolute inset-y-0 left-0 flex flex-col w-72 bg-[rgb(26,26,26)] text-[rgb(220,210,190)] z-50">
             <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
-              <h1 className="text-sm font-bold text-[rgb(255,109,67)]">MWRD Backoffice</h1>
+              <button
+                onClick={handleLogoClick}
+                className="flex items-center cursor-pointer focus:outline-none"
+                aria-label="Go to dashboard"
+              >
+                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-9 w-auto" />
+              </button>
             </div>
             <SidebarNav location={location} onNavigate={() => setMobileOpen(false)} />
             <div className="p-3 border-t border-[rgb(44,44,44)]">
@@ -183,7 +203,9 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
       <main className="flex-1 flex flex-col min-w-0">
         {/* Mobile header */}
         <header className="h-16 border-b border-color-border-secondary flex items-center px-4 justify-between md:hidden bg-color-bg-primary">
-          <h1 className="text-lg font-bold text-color-text-primary">MWRD Backoffice</h1>
+          <button onClick={handleLogoClick} className="focus:outline-none" aria-label="Go to dashboard">
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
+          </button>
           <button
             onClick={() => setMobileOpen(true)}
             className="p-2 rounded-lg text-color-fg-tertiary hover:bg-color-bg-secondary transition-colors"
