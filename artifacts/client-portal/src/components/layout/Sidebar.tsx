@@ -49,8 +49,13 @@ export function Sidebar({ className }: SidebarProps) {
       )}
     >
       <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
-        <h1 className="text-xl font-bold tracking-tight text-[rgb(252,204,57)]">MWRD</h1>
-        <p className="text-xs text-[rgb(160,150,130)] mt-0.5">Client Portal</p>
+        <div className="flex items-center gap-2.5">
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
+          <div>
+            <h1 className="text-sm font-bold tracking-tight text-[rgb(255,109,67)] leading-none">MWRD</h1>
+            <p className="text-xs text-[rgb(160,150,130)] mt-0.5">Client Portal</p>
+          </div>
+        </div>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -62,7 +67,7 @@ export function Sidebar({ className }: SidebarProps) {
                 className={cx(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium",
                   isActive
-                    ? "bg-[rgb(50,50,50)] text-[rgb(252,204,57)]"
+                    ? "bg-[rgb(50,50,50)] text-[rgb(255,109,67)]"
                     : "text-[rgb(180,170,150)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)]",
                 )}
                 data-testid={`link-${item.label.toLowerCase()}`}
@@ -78,7 +83,7 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="px-3 py-4 border-t border-[rgb(44,44,44)]">
         {user && (
           <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
-            <div className="w-8 h-8 rounded-full bg-[rgb(252,204,57)] flex items-center justify-center text-[rgb(26,26,26)] font-semibold text-sm shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[rgb(255,109,67)] flex items-center justify-center text-white font-semibold text-sm shrink-0">
               {user.user?.full_name?.charAt(0) || "U"}
             </div>
             <div className="flex-1 min-w-0">

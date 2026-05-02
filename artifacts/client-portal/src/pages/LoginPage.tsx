@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loading01, Mail01, Lock01, ShoppingCart01 } from "@untitledui/icons";
+import { Loading01, Mail01, Lock01 } from "@untitledui/icons";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -49,9 +49,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex bg-background">
       <div className="hidden lg:flex lg:w-[45%] bg-sidebar flex-col justify-between p-10">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <ShoppingCart01 className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-10 w-auto" />
           <span className="font-semibold text-sidebar-foreground text-lg tracking-tight">MWRD</span>
         </div>
         <div className="space-y-4">
@@ -74,9 +72,7 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-7">
           <div className="flex items-center gap-3 lg:hidden">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <ShoppingCart01 className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
             <span className="font-semibold text-lg">MWRD</span>
           </div>
 

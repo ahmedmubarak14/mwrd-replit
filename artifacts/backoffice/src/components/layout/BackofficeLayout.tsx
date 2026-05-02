@@ -72,7 +72,7 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
                     className={cx(
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                       isActive
-                        ? "bg-[rgb(50,50,50)] text-[rgb(252,204,57)]"
+                        ? "bg-[rgb(50,50,50)] text-[rgb(255,109,67)]"
                         : "text-[rgb(180,170,150)] hover:bg-[rgb(38,38,38)] hover:text-[rgb(220,210,190)]",
                     )}
                     data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
@@ -110,7 +110,7 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
   if (isLoading && location !== "/login") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-color-bg-secondary">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(252,204,57)] border-t-transparent" />
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(255,109,67)] border-t-transparent" />
       </div>
     );
   }
@@ -120,8 +120,13 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[rgb(26,26,26)] text-[rgb(220,210,190)] border-r border-[rgb(44,44,44)]">
         <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
-          <h1 className="text-xl font-bold text-[rgb(252,204,57)]">MWRD</h1>
-          <p className="text-xs text-[rgb(100,90,70)] mt-0.5">Backoffice</p>
+          <div className="flex items-center gap-2.5">
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
+            <div>
+              <h1 className="text-sm font-bold text-[rgb(255,109,67)] leading-none">MWRD</h1>
+              <p className="text-xs text-[rgb(100,90,70)] mt-0.5">Backoffice</p>
+            </div>
+          </div>
         </div>
 
         <SidebarNav location={location} />
@@ -129,7 +134,7 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
         <div className="px-3 py-4 border-t border-[rgb(44,44,44)]">
           {user && (
             <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
-              <div className="w-8 h-8 rounded-full bg-[rgb(252,204,57)] flex items-center justify-center text-[rgb(26,26,26)] font-semibold text-sm shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[rgb(255,109,67)] flex items-center justify-center text-white font-semibold text-sm shrink-0">
                 {user.user?.email?.charAt(0).toUpperCase() || "A"}
               </div>
               <div className="flex-1 min-w-0">
@@ -158,7 +163,7 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
           />
           <aside className="absolute inset-y-0 left-0 flex flex-col w-72 bg-[rgb(26,26,26)] text-[rgb(220,210,190)] z-50">
             <div className="px-6 py-5 border-b border-[rgb(44,44,44)]">
-              <h1 className="text-xl font-bold text-[rgb(252,204,57)]">MWRD Backoffice</h1>
+              <h1 className="text-sm font-bold text-[rgb(255,109,67)]">MWRD Backoffice</h1>
             </div>
             <SidebarNav location={location} onNavigate={() => setMobileOpen(false)} />
             <div className="p-3 border-t border-[rgb(44,44,44)]">

@@ -60,18 +60,18 @@
   --shadow-skeuomorphic: 0px 0px 0px 1px rgba(0, 0, 0, 0.18) inset, 0px -2px 0px 0px rgba(0, 0, 0, 0.05) inset;
   --shadow-xs-skeuomorphic: var(--shadow-skeuomorphic), var(--shadow-xs);
 
-  /* MWRD Golden Pollen brand scale */
-  --color-brand-50: rgb(255 252 235);
-  --color-brand-100: rgb(255 248 204);
-  --color-brand-200: rgb(255 238 153);
-  --color-brand-300: rgb(253 224 90);
-  --color-brand-400: rgb(252 204 57);
-  --color-brand-500: rgb(240 180 20);
-  --color-brand-600: rgb(210 150 8);
-  --color-brand-700: rgb(175 120 4);
-  --color-brand-800: rgb(135 90 2);
-  --color-brand-900: rgb(95 60 0);
-  --color-brand-950: rgb(55 34 0);
+  /* MWRD Vibrant Carrot brand scale */
+  --color-brand-50: rgb(255 243 239);
+  --color-brand-100: rgb(255 224 212);
+  --color-brand-200: rgb(255 192 172);
+  --color-brand-300: rgb(255 152 120);
+  --color-brand-400: rgb(255 109 67);
+  --color-brand-500: rgb(236 82 42);
+  --color-brand-600: rgb(205 56 22);
+  --color-brand-700: rgb(165 40 12);
+  --color-brand-800: rgb(128 30 8);
+  --color-brand-900: rgb(90 22 5);
+  --color-brand-950: rgb(52 12 2);
 
   /* Neutral scale */
   --color-neutral-25: rgb(252 252 253);
