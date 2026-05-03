@@ -103,9 +103,28 @@
     document.querySelectorAll('.mwrd-signin-link').forEach(bind);
     return menus.length>0;
   }
+  // Run a few bounded times to cover (a) initial DOM, (b) Webflow IX2 init that may
+  // re-render the navbar, and (c) the language switcher swapping menu contents.
+  // A subtree MutationObserver on <body> was previously used here, but Webflow's IX2
+  // mutates the DOM dozens of times per second during init (class toggles for hover/
+  // scroll animations, attribute flips for transitions). Each mutation re-ran
+  // ensureSignIn → three full-document querySelectorAll calls → main thread
+  // saturated → "Page Unresponsive" tab crash.
   ensureSignIn();
-  var obs=new MutationObserver(function(){ ensureSignIn(); });
-  obs.observe(document.body,{childList:true,subtree:true});
-  setTimeout(function(){ obs.disconnect(); },8000);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',ensureSignIn,{once:true});
+  }
+  setTimeout(ensureSignIn,500);
+  setTimeout(ensureSignIn,2000);
+  // Language switcher updates: re-run when the body lang class flips so the label
+  // re-localizes. Listen for our own custom event if dispatched, fall back to a
+  // single short observer scoped to the body's class attribute only (cheap, no subtree).
+  document.addEventListener('mwrd:lang-change',ensureSignIn);
+  try{
+    var langObs=new MutationObserver(ensureSignIn);
+    langObs.observe(document.body,{attributes:true,attributeFilter:['class','dir']});
+    langObs.observe(document.documentElement,{attributes:true,attributeFilter:['dir','lang']});
+    setTimeout(function(){ langObs.disconnect(); },10000);
+  }catch(_){}
 })();
 </script></body></html>
