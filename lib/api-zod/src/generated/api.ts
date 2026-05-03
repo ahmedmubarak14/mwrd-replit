@@ -1079,6 +1079,30 @@ export const ListOrdersResponseItem = zod.object({
       }),
     )
     .optional(),
+  delivery_notes: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        dn_number: zod.string(),
+        spo_id: zod.string(),
+        courier: zod.string().optional(),
+        tracking_number: zod.string().optional(),
+        dispatch_date: zod.string().optional(),
+        expected_delivery_date: zod.string().optional(),
+        items: zod
+          .array(
+            zod.object({
+              id: zod.string().optional(),
+              master_product_id: zod.string().optional(),
+              name_en: zod.string(),
+              qty_dispatched: zod.number(),
+              notes: zod.string().optional(),
+            }),
+          )
+          .optional(),
+      }),
+    )
+    .optional(),
   created_at: zod.string().optional(),
 });
 export const ListOrdersResponse = zod.array(ListOrdersResponseItem);
@@ -1118,6 +1142,30 @@ export const ListPendingApprovalResponseItem = zod.object({
         }),
       )
       .optional(),
+    delivery_notes: zod
+      .array(
+        zod.object({
+          id: zod.string(),
+          dn_number: zod.string(),
+          spo_id: zod.string(),
+          courier: zod.string().optional(),
+          tracking_number: zod.string().optional(),
+          dispatch_date: zod.string().optional(),
+          expected_delivery_date: zod.string().optional(),
+          items: zod
+            .array(
+              zod.object({
+                id: zod.string().optional(),
+                master_product_id: zod.string().optional(),
+                name_en: zod.string(),
+                qty_dispatched: zod.number(),
+                notes: zod.string().optional(),
+              }),
+            )
+            .optional(),
+        }),
+      )
+      .optional(),
     created_at: zod.string().optional(),
   }),
 });
@@ -1151,6 +1199,30 @@ export const GetOrderResponse = zod.object({
         pack_type: zod.string().optional(),
         unit_price_sar: zod.number(),
         total_sar: zod.number(),
+      }),
+    )
+    .optional(),
+  delivery_notes: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        dn_number: zod.string(),
+        spo_id: zod.string(),
+        courier: zod.string().optional(),
+        tracking_number: zod.string().optional(),
+        dispatch_date: zod.string().optional(),
+        expected_delivery_date: zod.string().optional(),
+        items: zod
+          .array(
+            zod.object({
+              id: zod.string().optional(),
+              master_product_id: zod.string().optional(),
+              name_en: zod.string(),
+              qty_dispatched: zod.number(),
+              notes: zod.string().optional(),
+            }),
+          )
+          .optional(),
       }),
     )
     .optional(),
@@ -1607,6 +1679,30 @@ export const GetBackofficeDashboardStatsResponse = zod.object({
               pack_type: zod.string().optional(),
               unit_price_sar: zod.number(),
               total_sar: zod.number(),
+            }),
+          )
+          .optional(),
+        delivery_notes: zod
+          .array(
+            zod.object({
+              id: zod.string(),
+              dn_number: zod.string(),
+              spo_id: zod.string(),
+              courier: zod.string().optional(),
+              tracking_number: zod.string().optional(),
+              dispatch_date: zod.string().optional(),
+              expected_delivery_date: zod.string().optional(),
+              items: zod
+                .array(
+                  zod.object({
+                    id: zod.string().optional(),
+                    master_product_id: zod.string().optional(),
+                    name_en: zod.string(),
+                    qty_dispatched: zod.number(),
+                    notes: zod.string().optional(),
+                  }),
+                )
+                .optional(),
             }),
           )
           .optional(),
@@ -2481,6 +2577,30 @@ export const ListLogisticsResponseItem = zod.object({
         pack_type: zod.string().optional(),
         unit_price_sar: zod.number(),
         total_sar: zod.number(),
+      }),
+    )
+    .optional(),
+  delivery_notes: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        dn_number: zod.string(),
+        spo_id: zod.string(),
+        courier: zod.string().optional(),
+        tracking_number: zod.string().optional(),
+        dispatch_date: zod.string().optional(),
+        expected_delivery_date: zod.string().optional(),
+        items: zod
+          .array(
+            zod.object({
+              id: zod.string().optional(),
+              master_product_id: zod.string().optional(),
+              name_en: zod.string(),
+              qty_dispatched: zod.number(),
+              notes: zod.string().optional(),
+            }),
+          )
+          .optional(),
       }),
     )
     .optional(),

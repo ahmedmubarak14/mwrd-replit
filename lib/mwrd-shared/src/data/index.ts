@@ -1118,6 +1118,21 @@ export async function createDN(supplierUserId: string, spoId: string, input: Omi
   return dn;
 }
 
+// Resolve every delivery note tied to a CPO. DNs are addressed by SPO; the
+// CPO/SPO pair shares a transaction_ref, so we hop through that.
+export async function listDNsForCPO(cpoId: string): Promise<DN[]> {
+  const cpo = pos.get(cpoId);
+  if (!cpo) return [];
+  const spoIds = new Set(
+    [...pos.values()]
+      .filter((p) => p.type === 'SPO' && p.transaction_ref === cpo.transaction_ref)
+      .map((p) => p.id),
+  );
+  return [...dns.values()]
+    .filter((d) => spoIds.has(d.spo_id))
+    .sort((a, b) => b.dispatch_date.localeCompare(a.dispatch_date));
+}
+
 export async function createGRN(clientUserId: string, cpoId: string, dnId: string, input: { items: Omit<GRNItem, 'id' | 'grn_id'>[]; notes: string }): Promise<GRN> {
   const id = newId();
   const grn: GRN = { id, grn_number: generateDocNumber('GRN'), cpo_id: cpoId, dn_id: dnId, received_by_user_id: clientUserId, received_at: nowISO(), items: input.items.map((i) => ({ ...i, id: newId(), grn_id: id })), notes: input.notes };

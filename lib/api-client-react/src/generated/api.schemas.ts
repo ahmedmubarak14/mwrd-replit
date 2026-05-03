@@ -376,6 +376,25 @@ export interface POItem {
   total_sar: number;
 }
 
+export interface DNItem {
+  id?: string;
+  master_product_id?: string;
+  name_en: string;
+  qty_dispatched: number;
+  notes?: string;
+}
+
+export interface Dn {
+  id: string;
+  dn_number: string;
+  spo_id: string;
+  courier?: string;
+  tracking_number?: string;
+  dispatch_date?: string;
+  expected_delivery_date?: string;
+  items?: DNItem[];
+}
+
 export interface Po {
   id: string;
   po_number: string;
@@ -386,6 +405,7 @@ export interface Po {
   status: string;
   total_sar: number;
   items?: POItem[];
+  delivery_notes?: Dn[];
   created_at?: string;
 }
 
@@ -422,25 +442,6 @@ export interface ApproveOrderBody {
 export interface RejectOrderBody {
   task_id: string;
   note: string;
-}
-
-export interface DNItem {
-  id?: string;
-  master_product_id?: string;
-  name_en: string;
-  qty_dispatched: number;
-  notes?: string;
-}
-
-export interface Dn {
-  id: string;
-  dn_number: string;
-  spo_id: string;
-  courier?: string;
-  tracking_number?: string;
-  dispatch_date?: string;
-  expected_delivery_date?: string;
-  items?: DNItem[];
 }
 
 export type CreateDNBodyItemsItem = {

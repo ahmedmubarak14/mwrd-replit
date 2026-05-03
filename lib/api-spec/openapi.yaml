@@ -2815,6 +2815,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/POItem"
+        delivery_notes:
+          type: array
+          items:
+            $ref: "#/components/schemas/DN"
         created_at:
           type: string
       required: [id, po_number, type, status, total_sar]

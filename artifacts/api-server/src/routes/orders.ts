@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   listPOsForUser, getPO, listMyApprovalTasks, approveOrder, rejectOrder,
   getApprovalChainStatus, createDN, createGRN, generateInvoice, recordPayment,
-  getCompany, getUser,
+  getCompany, getUser, listDNsForCPO,
 } from "@workspace/mwrd-shared";
 import { requirePublicAuth } from "../middleware/auth.js";
 import { qs, pp } from "../lib/qs.js";
@@ -37,7 +37,10 @@ router.get("/orders/:id", requirePublicAuth, async (req, res) => {
     const auth = res.locals.auth!;
     const po = await getPO(pp(req.params['id']), auth.userId);
     if (!po) { res.status(404).json({ error: "Not found" }); return; }
-    res.json(po);
+    // Attach delivery notes so the client can confirm receipt without a
+    // second round-trip and so the GRN form can default to the latest DN.
+    const delivery_notes = po.type === "CPO" ? await listDNsForCPO(po.id) : [];
+    res.json({ ...po, delivery_notes });
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });
   }

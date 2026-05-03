@@ -5,6 +5,7 @@
  * mwrd B2B Procurement Platform API
  * OpenAPI spec version: 0.2.0
  */
+import type { Dn } from "./dn";
 import type { POItem } from "./pOItem";
 
 export interface Po {
@@ -17,5 +18,6 @@ export interface Po {
   status: string;
   total_sar: number;
   items?: POItem[];
+  delivery_notes?: Dn[];
   created_at?: string;
 }
