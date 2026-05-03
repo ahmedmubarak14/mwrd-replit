@@ -32,14 +32,15 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
+    // NOTE: @replit/vite-plugin-cartographer is intentionally disabled for the landing
+    // page. It injects a ~46KB inline `<script type="module">` after our bundle script,
+    // and its bundled source contains a literal `</script>` substring (from html-to-image)
+    // that closes the script tag prematurely. The HTML parser then re-enters body context
+    // and dumps the rest of the cartographer source as visible text on the page,
+    // producing a phantom `<body>` and a blank/broken landing render.
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
           await import("@replit/vite-plugin-dev-banner").then((m) =>
             m.devBanner(),
           ),

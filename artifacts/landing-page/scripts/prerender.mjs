@@ -93,11 +93,15 @@ async function main() {
     console.warn(`[prerender] WARNING: still found ${groviaCount} 'Grovia' occurrences in body text — bundle may not have finished`);
   }
 
-  // Re-add the module script tag so interactivity (lang switch, accordion, mobile menu)
-  // still works on the live page. The bundle re-running is idempotent for content.
+  // Re-add the bundle script so interactivity (lang switch, accordion, mobile menu) still
+  // works on the live page. The bundle is a self-contained IIFE with no top-level
+  // import/export, so we load it as a classic `defer` script instead of `type=module`.
+  // This avoids Vite's HTML import-analysis pipeline, which otherwise injects a
+  // cartographer plugin script right after our tag — that injected script contains a
+  // literal `</script>` inside its source and breaks HTML parsing, producing a phantom
+  // `<body>` and dumping the rest of the bundle as visible text on the page.
   const liveScript = document.createElement("script");
-  liveScript.setAttribute("type", "module");
-  liveScript.setAttribute("crossorigin", "");
+  liveScript.setAttribute("defer", "");
   liveScript.setAttribute("src", `./assets/${bundleName}`);
   document.head.appendChild(liveScript);
 
@@ -112,6 +116,24 @@ async function main() {
   // The bundle re-adds it on hydration as an idempotency guard.
   if (document.body.classList.contains("mwrd-enhanced")) {
     document.body.classList.remove("mwrd-enhanced");
+  }
+
+  // Defer all synchronous external <script src="…"> tags so they don't block the HTML
+  // parser / DOMContentLoaded. Webflow ships jquery + webflow.js as render-blocking
+  // sync scripts in the head and body; with the page fully prerendered we don't need
+  // them inline, only by the time the DOM is interactive. Module scripts and the
+  // Replit dev banner are left alone.
+  let deferred = 0;
+  for (const s of document.querySelectorAll("script[src]")) {
+    const type = s.getAttribute("type") || "";
+    if (type === "module") continue; // already deferred
+    if (s.hasAttribute("defer") || s.hasAttribute("async")) continue;
+    if (s.id === "replit-dev-banner") continue; // dev-only injected by vite plugin
+    s.setAttribute("defer", "");
+    deferred++;
+  }
+  if (deferred > 0) {
+    console.log(`[prerender] added defer to ${deferred} sync external scripts`);
   }
 
   // Serialize
