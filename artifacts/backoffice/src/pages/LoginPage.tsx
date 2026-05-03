@@ -48,14 +48,14 @@ export default function LoginPage() {
       {/* Left — form */}
       <div className="flex flex-col w-full lg:w-1/2 px-6 sm:px-12 lg:px-20 py-8">
         <div className="flex items-center">
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-9 w-auto" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="mwrd" className="h-9 w-auto" />
         </div>
 
         <div className="flex-1 flex items-center">
           <div className="w-full max-w-sm mx-auto lg:mx-0 space-y-8">
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold tracking-tight text-[rgb(16,24,40)]">Operations sign in</h1>
-              <p className="text-sm text-[rgb(102,112,133)]">Restricted to authorized MWRD staff only.</p>
+              <p className="text-sm text-[rgb(102,112,133)]">Restricted to authorized mwrd staff only.</p>
             </div>
 
             <Form {...form}>
@@ -151,7 +151,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-xs text-[rgb(152,162,179)]">© 2026 MWRD RAKIZ. All rights reserved.</p>
+        <p className="text-xs text-[rgb(152,162,179)]">© 2026 mwrd RAKIZ. All rights reserved.</p>
       </div>
 
       {/* Right — operations preview */}

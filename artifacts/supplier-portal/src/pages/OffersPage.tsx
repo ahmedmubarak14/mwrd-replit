@@ -21,7 +21,7 @@ export default function OffersPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl font-semibold text-[rgb(16,24,40)]">My Offers</h1>
-            <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">Product offers you've submitted to MWRD</p>
+            <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">Product offers you've submitted to mwrd</p>
           </div>
           <Link
             href="/offers/new"

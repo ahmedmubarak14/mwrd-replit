@@ -389,7 +389,7 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
                 <span className="text-white text-base font-bold">M</span>
               </div>
             ) : (
-              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
+              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="mwrd" className="h-8 w-auto" />
             )}
           </button>
         </div>
@@ -419,7 +419,7 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
                 className="flex items-center cursor-pointer rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(255,109,67)]/40"
                 aria-label="Go to dashboard"
               >
-                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
+                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="mwrd" className="h-8 w-auto" />
               </button>
             </div>
             <SidebarNav location={location} collapsed={false} onNavigate={() => setMobileOpen(false)} />
@@ -432,7 +432,7 @@ export default function BackofficeLayout({ children }: BackofficeLayoutProps) {
       <main className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b border-[rgb(228,231,236)] flex items-center px-4 justify-between md:hidden bg-white">
           <button onClick={handleLogoClick} className="rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(255,109,67)]/40" aria-label="Go to dashboard">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="mwrd" className="h-8 w-auto" />
           </button>
           <button
             onClick={() => setMobileOpen(true)}

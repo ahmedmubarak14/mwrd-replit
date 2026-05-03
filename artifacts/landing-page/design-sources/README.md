@@ -1,7 +1,7 @@
 # Landing page hero mockups
 
 Standalone HTML mockups used to generate the marketing imagery on the landing page.
-They render isolated dashboard/cards inspired by the actual MWRD app UIs (Inter font,
+They render isolated dashboard/cards inspired by the actual mwrd app UIs (Inter font,
 carrot orange #FF6D43, Untitled UI tokens).
 
 ## How to regenerate the JPGs

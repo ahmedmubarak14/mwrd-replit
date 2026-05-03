@@ -120,14 +120,14 @@ router.get("/invoices/:id", requirePublicAuth, async (req, res) => {
           price: item.unit_price_sar,
         }));
 
-        const invoiceNumber = `MWRD-${po.po_number}`;
+        const invoiceNumber = `mwrd-${po.po_number}`;
 
         const wafeqResult = await createWafeqInvoice({
           invoiceNumber,
           invoiceDate: new Date().toISOString().split('T')[0]!,
           dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!,
           contact: {
-            name: clientCompany?.real_name ?? 'MWRD Client',
+            name: clientCompany?.real_name ?? 'mwrd Client',
             email: clientUser?.email,
             address: clientCompany?.vat_number ? `VAT: ${clientCompany.vat_number}` : undefined,
           },

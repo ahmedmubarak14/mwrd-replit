@@ -62,8 +62,8 @@ export async function createWafeqInvoice(payload: WafeqInvoicePayload): Promise<
       {
         medium: 'email',
         data: {
-          subject: `Invoice ${payload.invoiceNumber} from MWRD`,
-          message: '<p>Please find attached your invoice from MWRD. Thank you for your business.</p>',
+          subject: `Invoice ${payload.invoiceNumber} from mwrd`,
+          message: '<p>Please find attached your invoice from mwrd. Thank you for your business.</p>',
           recipients: {
             to: payload.recipientEmail ? [payload.recipientEmail] : [MWRD_SENDER_EMAIL],
             cc: [],

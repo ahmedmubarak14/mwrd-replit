@@ -15,12 +15,12 @@ const COPY = {
     hero: {
       title: ["Procure for your", "business smarter and", "without the friction"],
       subtitle:
-        "MWRD connects you with verified suppliers, unlocks competitive pricing, and manages every purchase request from one place.",
+        "mwrd connects you with verified suppliers, unlocks competitive pricing, and manages every purchase request from one place.",
       ctaPrimary: "Register your interest",
       ctaSecondary: "Learn more",
     },
     process: {
-      heading: "How MWRD works",
+      heading: "How mwrd works",
       sub: "From request to delivery in three clean steps.",
       steps: [
         { n: "01", t: "Submit your RFQ", d: "Describe what you need or pick from our catalog. Approvals route automatically." },
@@ -128,7 +128,7 @@ function Header({
       <div className="mx-auto max-w-[1180px]">
         <div className="bg-white rounded-full shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_rgba(16,24,40,0.06)] border border-black/5 px-3 py-2 flex items-center justify-between gap-3">
           <a href="#top" className="flex items-center gap-2 px-3 shrink-0">
-            <img src="logo.png" alt="MWRD" className="h-8 w-auto" />
+            <img src="logo.png" alt="mwrd" className="h-8 w-auto" />
           </a>
 
           <nav className="hidden lg:flex items-center gap-7 text-[15px] font-medium text-neutral-800">
@@ -306,7 +306,7 @@ function DashboardMock() {
       <div className="mx-auto max-w-[1180px]">
         <img
           src="images/dashboard.jpg"
-          alt="MWRD dashboard preview"
+          alt="mwrd dashboard preview"
           className="w-full rounded-3xl shadow-[0_40px_80px_-30px_rgba(16,24,40,0.25)] border border-black/5"
         />
       </div>
@@ -511,10 +511,10 @@ function Footer({ t }: { t: typeof COPY.en }) {
     <footer className="py-10 bg-[rgb(245,242,237)] border-t border-black/5">
       <div className="mx-auto max-w-[1180px] px-6 lg:px-10 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <img src="logo.png" alt="MWRD" className="h-8 w-auto" />
+          <img src="logo.png" alt="mwrd" className="h-8 w-auto" />
         </div>
         <p className="text-xs text-neutral-500">
-          © {new Date().getFullYear()} MWRD. {t.footer.rights}
+          © {new Date().getFullYear()} mwrd. {t.footer.rights}
         </p>
       </div>
     </footer>

@@ -46,7 +46,7 @@ export default function RegisterPage() {
       {/* Left — form */}
       <div className="flex flex-col w-full lg:w-1/2 px-6 sm:px-12 lg:px-20 py-8">
         <div className="flex items-center">
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-9 w-auto" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="mwrd" className="h-9 w-auto" />
         </div>
 
         <div className="flex-1 flex items-center">
@@ -73,7 +73,7 @@ export default function RegisterPage() {
               <>
                 <div className="space-y-2">
                   <h1 className="text-3xl font-semibold tracking-tight text-[rgb(16,24,40)]">Sign up</h1>
-                  <p className="text-sm text-[rgb(102,112,133)]">Apply for access to MWRD's B2B procurement platform.</p>
+                  <p className="text-sm text-[rgb(102,112,133)]">Apply for access to mwrd's B2B procurement platform.</p>
                 </div>
 
                 <Form {...form}>
@@ -193,7 +193,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <p className="text-xs text-[rgb(152,162,179)]">© 2026 MWRD RAKIZ. All rights reserved.</p>
+        <p className="text-xs text-[rgb(152,162,179)]">© 2026 mwrd RAKIZ. All rights reserved.</p>
       </div>
 
       {/* Right — dashboard preview */}
@@ -214,7 +214,7 @@ function DashboardPreview() {
             <div className="h-7 w-7 rounded-md bg-[rgb(255,109,67)] flex items-center justify-center">
               <span className="text-white text-xs font-bold">M</span>
             </div>
-            <span className="text-sm font-semibold text-[rgb(16,24,40)]">MWRD</span>
+            <span className="text-sm font-semibold text-[rgb(16,24,40)]">mwrd</span>
           </div>
           <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-[rgb(228,231,236)] bg-[rgb(249,250,251)]">
             <SearchMd className="h-3 w-3 text-[rgb(152,162,179)]" />

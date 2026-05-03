@@ -50,7 +50,7 @@
   --shadow-skeuomorphic: 0px 0px 0px 1px rgba(0, 0, 0, 0.18) inset, 0px -2px 0px 0px rgba(0, 0, 0, 0.05) inset;
   --shadow-xs-skeuomorphic: var(--shadow-skeuomorphic), var(--shadow-xs);
 
-  /* MWRD Vibrant Carrot brand scale */
+  /* mwrd Vibrant Carrot brand scale */
   --color-brand-50: rgb(255 243 239);
   --color-brand-100: rgb(255 224 212);
   --color-brand-200: rgb(255 192 172);

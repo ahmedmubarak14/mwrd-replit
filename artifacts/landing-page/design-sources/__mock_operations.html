@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>mwrd Operations</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { background: #F4F1EB; font-family: 'Inter', system-ui, sans-serif; }
+  .shadow-card { box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 12px 32px rgba(16,24,40,.08); }
+</style>
+</head>
+<body class="p-12">
+  <div class="mx-auto w-[1320px] rounded-[20px] bg-white shadow-card overflow-hidden">
+    <div class="flex">
+      <!-- Sidebar -->
+      <aside class="w-[230px] border-r border-[rgb(234,236,240)] p-5">
+        <div class="flex items-center gap-2.5">
+          <div class="h-8 w-8 rounded-[8px] bg-[#101010] text-white grid place-items-center text-[13px] font-bold">M</div>
+          <div>
+            <div class="text-[13px] font-semibold text-[rgb(16,24,40)] leading-none">mwrd Operations</div>
+            <div class="text-[10.5px] text-[rgb(102,112,133)] mt-1">Internal · staff only</div>
+          </div>
+        </div>
+        <div class="mt-5 flex items-center gap-2 rounded-[10px] bg-[rgb(249,250,251)] border border-[rgb(234,236,240)] px-2.5 py-1.5">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgb(102,112,133)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <div class="text-[11px] text-[rgb(102,112,133)]">Search clients, RFQs…</div>
+          <span class="ml-auto text-[10px] text-[rgb(152,162,179)]">⌘K</span>
+        </div>
+        <nav class="mt-4 space-y-0.5 text-[12.5px]">
+          <div class="flex items-center gap-2 rounded-[8px] bg-[#FFF1EB] text-[#FF6D43] px-2.5 py-2 font-medium">
+            <span class="h-1.5 w-1.5 rounded-full bg-[#FF6D43]"></span> Operations
+          </div>
+          <div class="flex items-center justify-between rounded-[8px] px-2.5 py-2 text-[rgb(71,84,103)] hover:bg-[rgb(249,250,251)]"><span>Clients</span><span class="text-[10.5px] text-[rgb(152,162,179)]">412</span></div>
+          <div class="flex items-center justify-between rounded-[8px] px-2.5 py-2 text-[rgb(71,84,103)]"><span>Suppliers</span><span class="text-[10.5px] text-[rgb(152,162,179)]">187</span></div>
+          <div class="flex items-center justify-between rounded-[8px] px-2.5 py-2 text-[rgb(71,84,103)]"><span>KYC queue</span><span class="rounded-full bg-[#FF6D43] text-white text-[10px] px-1.5 py-0.5 font-semibold">10</span></div>
+          <div class="rounded-[8px] px-2.5 py-2 text-[rgb(71,84,103)]">Margins</div>
+          <div class="rounded-[8px] px-2.5 py-2 text-[rgb(71,84,103)]">Audit log</div>
+        </nav>
+      </aside>
+      <!-- Main -->
+      <main class="flex-1 p-7">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="text-[10.5px] font-semibold tracking-wider text-[#FF6D43]">OPERATIONS OVERVIEW</div>
+            <h1 class="mt-2 text-[26px] font-semibold leading-tight text-[rgb(16,24,40)]">Today · Sunday, May 3, 2026</h1>
+            <p class="mt-1 text-[12.5px] text-[rgb(102,112,133)]">Live snapshot of the marketplace · auto-refreshing every 30s</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="rounded-[10px] border border-[rgb(234,236,240)] px-3.5 py-2 text-[12px] font-medium text-[rgb(52,64,84)]">Export</button>
+            <button class="rounded-[10px] bg-[#101010] px-3.5 py-2 text-[12px] font-medium text-white">Run audit</button>
+          </div>
+        </div>
+
+        <div class="mt-5 grid grid-cols-4 gap-4">
+          <div class="rounded-[12px] border border-[rgb(234,236,240)] p-4">
+            <div class="flex items-center justify-between text-[10px] font-semibold tracking-wider text-[rgb(102,112,133)]"><span>PENDING KYC</span><span class="text-[rgb(217,45,32)]">●</span></div>
+            <div class="mt-2 flex items-end gap-2"><div class="text-[28px] font-semibold text-[rgb(16,24,40)]">14</div><div class="text-[10.5px] font-medium text-[#079455] mb-1.5">▲ 8.1%</div></div>
+            <div class="mt-1 text-[10.5px] text-[rgb(102,112,133)]">3 over SLA</div>
+          </div>
+          <div class="rounded-[12px] border border-[rgb(234,236,240)] p-4">
+            <div class="flex items-center justify-between text-[10px] font-semibold tracking-wider text-[rgb(102,112,133)]"><span>OPEN LEADS</span><span class="text-[#079455]">⚡</span></div>
+            <div class="mt-2 flex items-end gap-2"><div class="text-[28px] font-semibold text-[rgb(16,24,40)]">32</div><div class="text-[10.5px] font-medium text-[#079455] mb-1.5">▲ 4.6%</div></div>
+            <div class="mt-1 text-[10.5px] text-[rgb(102,112,133)]">Avg response 2h 20m</div>
+          </div>
+          <div class="rounded-[12px] border border-[rgb(234,236,240)] p-4">
+            <div class="flex items-center justify-between text-[10px] font-semibold tracking-wider text-[rgb(102,112,133)]"><span>HELD QUOTES</span><span class="text-[#F79009]">●</span></div>
+            <div class="mt-2 text-[28px] font-semibold text-[rgb(16,24,40)]">06</div>
+            <div class="mt-1 text-[10.5px] text-[rgb(102,112,133)]">awaiting margin</div>
+            <div class="text-[10.5px] text-[rgb(102,112,133)]">SAR 412k value</div>
+          </div>
+          <div class="rounded-[12px] bg-[#101010] text-white p-4">
+            <div class="flex items-center justify-between text-[10px] font-semibold tracking-wider text-[rgb(208,213,221)]"><span>GMV TODAY</span><span>↑</span></div>
+            <div class="mt-2 text-[28px] font-semibold">SAR 1.84M</div>
+            <div class="mt-1 text-[10.5px] text-[#F2BCAA]">▲ 12.4% vs yesterday</div>
+          </div>
+        </div>
+
+        <div class="mt-5 grid grid-cols-3 gap-4">
+          <div class="col-span-2 rounded-[12px] border border-[rgb(234,236,240)] p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-[13px] font-semibold text-[rgb(16,24,40)]">GMV trend (SAR)</div>
+                <div class="text-[10.5px] text-[rgb(102,112,133)] mt-0.5">Last 6 months · all categories</div>
+              </div>
+              <div class="flex items-center gap-3 text-[10.5px] text-[rgb(102,112,133)]">
+                <span class="flex items-center gap-1"><span class="h-1.5 w-3 rounded bg-[#FF6D43]"></span>GMV</span>
+                <span class="flex items-center gap-1"><span class="h-1.5 w-3 rounded bg-[#9DBCFF]"></span>Take rate</span>
+              </div>
+            </div>
+            <svg viewBox="0 0 600 200" class="mt-3 w-full h-[180px]">
+              <defs>
+                <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="#FF6D43" stop-opacity="0.28"/>
+                  <stop offset="1" stop-color="#FF6D43" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0 160 L100 145 L200 138 L300 110 L400 95 L500 60 L600 45 L600 200 L0 200 Z" fill="url(#g)"/>
+              <path d="M0 160 L100 145 L200 138 L300 110 L400 95 L500 60 L600 45" fill="none" stroke="#FF6D43" stroke-width="2.5"/>
+              <path d="M0 175 L100 168 L200 162 L300 150 L400 145 L500 138 L600 132" fill="none" stroke="#9DBCFF" stroke-width="2" stroke-dasharray="4 4"/>
+              <circle cx="400" cy="95" r="5" fill="#fff" stroke="#FF6D43" stroke-width="2.5"/>
+              <g transform="translate(360 60)">
+                <rect width="120" height="32" rx="8" fill="#101010"/>
+                <text x="10" y="14" font-size="10.5" fill="#fff" font-family="Inter">Apr · SAR 1.62M</text>
+                <text x="10" y="26" font-size="9" fill="#9CA3AF" font-family="Inter">take 4.8%</text>
+              </g>
+            </svg>
+          </div>
+          <div class="rounded-[12px] border border-[rgb(234,236,240)] p-4">
+            <div class="flex items-center justify-between">
+              <div class="text-[13px] font-semibold text-[rgb(16,24,40)]">Audit feed</div>
+              <span class="text-[10.5px] text-[#FF6D43] font-medium">Live</span>
+            </div>
+            <div class="mt-3 space-y-2.5 text-[11.5px]">
+              <div class="flex gap-2"><span class="rounded-md bg-[#ECFDF3] text-[#079455] px-1.5 py-0.5 text-[10px] font-semibold">approve</span><div><div class="text-[rgb(16,24,40)] font-medium">KYC approved · Al-Rajhi Trading</div><div class="text-[rgb(152,162,179)] text-[10px]">Sara · 2 min ago</div></div></div>
+              <div class="flex gap-2"><span class="rounded-md bg-[#EFF8FF] text-[#175CD3] px-1.5 py-0.5 text-[10px] font-semibold">update</span><div><div class="text-[rgb(16,24,40)] font-medium">Margin rule updated · Electronics</div><div class="text-[rgb(152,162,179)] text-[10px]">12% → 14% · Mohamed · 6 min ago</div></div></div>
+              <div class="flex gap-2"><span class="rounded-md bg-[#F4F3FF] text-[#5925DC] px-1.5 py-0.5 text-[10px] font-semibold">create</span><div><div class="text-[rgb(16,24,40)] font-medium">Lead callback completed</div><div class="text-[rgb(152,162,179)] text-[10px]">Salama Foods · 18 min ago</div></div></div>
+              <div class="flex gap-2"><span class="rounded-md bg-[#FFFAEB] text-[#B54708] px-1.5 py-0.5 text-[10px] font-semibold">hold</span><div><div class="text-[rgb(16,24,40)] font-medium">Quote held for review · RQ-2104</div><div class="text-[rgb(152,162,179)] text-[10px]">SAR 18,400 · margin 8% · 26 min ago</div></div></div>
+              <div class="flex gap-2"><span class="rounded-md bg-[#ECFDF3] text-[#079455] px-1.5 py-0.5 text-[10px] font-semibold">approve</span><div><div class="text-[rgb(16,24,40)] font-medium">New supplier onboarded · Qubit MEA</div><div class="text-[rgb(152,162,179)] text-[10px]">Catalog · 24 SKUs · 1h ago</div></div></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

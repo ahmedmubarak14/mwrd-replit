@@ -253,7 +253,7 @@ export function Sidebar() {
               <span className="text-white text-base font-bold">M</span>
             </div>
           ) : (
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MWRD" className="h-8 w-auto" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="mwrd" className="h-8 w-auto" />
           )}
         </button>
       </div>
