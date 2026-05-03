@@ -458,6 +458,7 @@ export interface PlatformSettings {
   rfq_expiry_days: number;
   auto_quote_admin_hold_threshold_sar: number;
   auto_quote_globally_enabled: boolean;
+  platform_vat_number?: string;
 }
 
 export interface ThreeWayMatchResult {

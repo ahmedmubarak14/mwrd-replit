@@ -24,7 +24,8 @@ import { generateDocNumber, newId, nowISO, addDays } from '../utils/numbers.js';
 import { matchOffersToRFQ, generateAutoQuote, processAutoSendQueue } from '../utils/auto-quote.js';
 import { computeApprovalChain, detectCycle } from '../utils/approval-chain.js';
 import { matchPOGRNInvoice } from '../utils/three-way-match.js';
-import { createPaymentIntent } from '../utils/payments.js';
+import { createMoyasarPaymentIntent } from '../utils/moyasar.js';
+import { issueWafeqInvoice } from '../utils/wafeq.js';
 
 const users = new Map<string, User>(seedUsers.map((u) => [u.id, u]));
 const companies = new Map<string, Company>(seedCompanies.map((c) => [c.id, c]));
@@ -648,6 +649,56 @@ async function runAutoQuoteEngine(rfq: RFQ, runAutoMatch: boolean = true): Promi
   }
 }
 
+/**
+ * Process the auto-send queue: any draft_auto quote whose supplier review
+ * window has expired gets margin applied and is either sent to the client
+ * or held for admin review based on the platform threshold.
+ *
+ * Called on a periodic tick from the API server (Phase 1) and intended to
+ * become a Supabase scheduled function in Phase 2.
+ */
+export async function tickAutoSendQueue(now: Date = new Date()): Promise<{ sent: number; held: number }> {
+  const all = [...quotes.values()];
+  const { to_send_to_client, to_hold_for_admin } = processAutoSendQueue(
+    all,
+    now,
+    platformSettings.auto_quote_admin_hold_threshold_sar,
+  );
+  for (const quote of to_send_to_client) {
+    const rfq = rfqs.get(quote.rfq_id);
+    const marginPct = resolveMargin([...margins.values()], rfq?.category_id ?? '', rfq?.client_company_id ?? '');
+    const updated: Quote = {
+      ...quote,
+      status: 'submitted_to_client',
+      submitted_at: nowISO(),
+      items: quote.items.map((i) => ({ ...i, final_unit_price_sar: applyMargin(i.supplier_unit_price_sar, marginPct) })),
+    };
+    quotes.set(quote.id, updated);
+    if (rfq) {
+      rfqs.set(rfq.id, { ...rfq, status: 'quoted' });
+      const clientUser = [...users.values()].find((u) => u.company_id === rfq.client_company_id);
+      if (clientUser) await sendNotification(clientUser.id, 'quote_received', 'Quote Received', `A quote has been submitted for your RFQ: ${rfq.title}`, `/rfqs/${rfq.id}`);
+    }
+  }
+  for (const quote of to_hold_for_admin) {
+    const rfq = rfqs.get(quote.rfq_id);
+    const marginPct = resolveMargin([...margins.values()], rfq?.category_id ?? '', rfq?.client_company_id ?? '');
+    const updated: Quote = {
+      ...quote,
+      status: 'pending_admin_review',
+      admin_held: true,
+      submitted_at: nowISO(),
+      items: quote.items.map((i) => ({ ...i, final_unit_price_sar: applyMargin(i.supplier_unit_price_sar, marginPct) })),
+    };
+    quotes.set(quote.id, updated);
+    const adminStaff = [...users.values()].filter((u) => u.role === 'admin' || u.role === 'ops');
+    for (const a of adminStaff) {
+      await sendNotification(a.id, 'quote_admin_review', 'Quote Awaiting Review', `Auto-quote ${quote.quote_number} exceeds threshold and needs admin review.`, `/backoffice/quote-manager`);
+    }
+  }
+  return { sent: to_send_to_client.length, held: to_hold_for_admin.length };
+}
+
 export async function listRFQsForClient(clientCompanyId: string, filters: { status?: string; page?: number } = {}): Promise<{ data: RFQ[]; total: number }> {
   let data = [...rfqs.values()].filter((r) => {
     if (r.client_company_id !== clientCompanyId) return false;
@@ -800,7 +851,10 @@ function createPOPair(rfq: RFQ, quote: Quote, selectedItems: QuoteItem[], client
     id: spoId, po_number: generateDocNumber('SPO'), type: 'SPO', transaction_ref: txnRef,
     rfq_id: rfq.id, source_quote_id: quote.id,
     client_company_id: clientCompanyId, supplier_company_id: supplierCompanyId,
-    status: 'awaiting_approval', total_sar: supplierTotal,
+    // SPO stays in 'draft' while the client-side approval chain runs.
+    // Flips to 'confirmed' alongside the CPO when the final approver signs off
+    // (see approveOrder). Keeps suppliers from seeing WIP client approvals.
+    status: 'draft', total_sar: supplierTotal,
     items: poItems.map((i) => ({ ...i, po_id: spoId, unit_price_sar: i.unit_price_sar / (1 + marginPct / 100), total_sar: (i.unit_price_sar / (1 + marginPct / 100)) * i.qty })),
     created_at: nowISO(),
   };
@@ -884,7 +938,13 @@ export async function approveOrder(taskId: string, note: string, userId: string)
     if (!nextTask) {
       pos.set(po.id, { ...po, status: 'confirmed' });
       const spoPair = [...pos.values()].find((p) => p.transaction_ref === po.transaction_ref && p.type === 'SPO');
-      if (spoPair) pos.set(spoPair.id, { ...spoPair, status: 'confirmed' });
+      if (spoPair) {
+        pos.set(spoPair.id, { ...spoPair, status: 'confirmed' });
+        const supplierUser = [...users.values()].find((u) => u.company_id === spoPair.supplier_company_id);
+        if (supplierUser) {
+          await sendNotification(supplierUser.id, 'order_confirmed', 'New Order Confirmed', `Order ${spoPair.po_number} is ready to fulfil.`, `/orders/${spoPair.id}`);
+        }
+      }
     }
   }
   return updated;
@@ -897,7 +957,11 @@ export async function rejectOrder(taskId: string, note: string, userId: string):
   const updated = { ...task, status: 'rejected' as const, decided_at: nowISO(), note };
   approvalTasks.set(taskId, updated);
   const po = pos.get(task.po_id);
-  if (po) pos.set(po.id, { ...po, status: 'cancelled' });
+  if (po) {
+    pos.set(po.id, { ...po, status: 'cancelled' });
+    const spoPair = [...pos.values()].find((p) => p.transaction_ref === po.transaction_ref && p.type === 'SPO');
+    if (spoPair) pos.set(spoPair.id, { ...spoPair, status: 'cancelled' });
+  }
   return updated;
 }
 
@@ -1071,7 +1135,7 @@ export async function generateInvoice(
   }
   const matchResult: ThreeWayMatchResult = matchPOGRNInvoice(cpo, grn, { id: '', invoice_number: '', cpo_id: cpoId, grn_id: grnId, total_sar: total, vat_amount_sar: vatAmount, status: 'draft', issue_date: nowISO(), due_date: addDays(new Date(), 30) });
   const id = newId();
-  const invoice: Invoice = {
+  const invoiceDraft: Invoice = {
     id, invoice_number: generateDocNumber('INV'), cpo_id: cpoId, grn_id: grnId,
     total_sar: total, vat_amount_sar: vatAmount,
     status: matchResult.matches ? 'issued' : 'draft',
@@ -1079,6 +1143,20 @@ export async function generateInvoice(
     wafeq_invoice_id: wafeqData?.wafeq_invoice_id ?? null,
     wafeq_pdf_url: wafeqData?.wafeq_pdf_url ?? null,
   };
+  // Issue via Wafeq when caller didn't pre-supply a wafeq id and the invoice
+  // is in an issuable state. Wafeq submits to ZATCA Fatoora upstream and
+  // returns the ZATCA UUID + QR (Phase 3 wires the real client; today nulls).
+  let invoice = invoiceDraft;
+  if (!wafeqData?.wafeq_invoice_id && invoiceDraft.status === 'issued') {
+    const seller = { name: 'MWRD', vat_number: platformSettings.platform_vat_number ?? '' };
+    const wafeqResult = await issueWafeqInvoice(invoiceDraft, seller);
+    invoice = {
+      ...invoiceDraft,
+      wafeq_invoice_id: wafeqResult.wafeq_invoice_id,
+      zatca_uuid: wafeqResult.zatca_uuid,
+      zatca_qr: wafeqResult.zatca_qr,
+    };
+  }
   invoices.set(id, invoice);
   return invoice;
 }
@@ -1086,7 +1164,7 @@ export async function generateInvoice(
 export async function recordPayment(invoiceId: string, paymentIntentId?: string): Promise<Invoice> {
   const invoice = invoices.get(invoiceId);
   if (!invoice) throw new Error('Invoice not found');
-  const intent = paymentIntentId ?? (await createPaymentIntent(invoiceId, invoice.total_sar, 'mock')).intent_id;
+  const intent = paymentIntentId ?? (await createMoyasarPaymentIntent(invoiceId, invoice.total_sar, 'mock')).intent_id;
   const updated = { ...invoice, status: 'paid' as const, payment_intent_id: intent };
   invoices.set(invoiceId, updated);
   const cpo = pos.get(invoice.cpo_id);
