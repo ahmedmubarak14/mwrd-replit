@@ -149,6 +149,14 @@ async function main() {
     document.body.classList.remove("mwrd-enhanced");
   }
 
+  // Drop `w-mod-ix` from <html>. The Webflow IX2 chunk loaded later (webflow.d688….js)
+  // sets this class itself once it has bound interactions to elements with `data-w-id`.
+  // If we leave it in the static HTML, IX2 sees the marker and skips initialization,
+  // and on-scroll/hover animations never fire.
+  if (htmlEl.classList.contains("w-mod-ix")) {
+    htmlEl.classList.remove("w-mod-ix");
+  }
+
   // Defer all synchronous external <script src="…"> tags so they don't block the HTML
   // parser / DOMContentLoaded. Webflow ships jquery + webflow.js as render-blocking
   // sync scripts in the head and body; with the page fully prerendered we don't need
@@ -198,9 +206,13 @@ async function main() {
   let out = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
 
   // Strip the prerender-time origin baked in by the bundle's `new URL(..., document.baseURI)`
-  // calls. The page is served under /landing/ at runtime, so leave path-relative.
+  // calls. We strip to an empty string (not `/landing/`) so the resulting paths are
+  // document-relative. Vite's HTML transform re-prepends the configured base to absolute
+  // paths starting with `/`, which would otherwise double the prefix to `/landing/landing/…`
+  // for asset URLs that React renders. Document-relative paths resolve correctly under both
+  // the dev server and the published static site (where the document URL ends in `/landing/`).
   const beforeStrip = (out.match(/http:\/\/localhost\/landing\//g) || []).length;
-  out = out.replaceAll("http://localhost/landing/", "/landing/");
+  out = out.replaceAll("http://localhost/landing/", "");
   if (beforeStrip > 0) {
     console.log(`[prerender] stripped ${beforeStrip} baked-in localhost origins`);
   }

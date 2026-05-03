@@ -57,6 +57,10 @@ lib/
 ### Landing Page (/landing/)
 Public marketing site (Webflow template, mwrd-rebranded). **Statically pre-rendered** at build time — `index.html` ships with mwrd content (no runtime text replacement, no Webflow flash). The runtime bundle (`public/assets/index-*.js`) only handles interactivity (language switcher, mobile menu, accordions). The bundle is ESM with top-level `await` (i18next init); we cannot load it as `<script type="module">` from `/public` (Vite refuses to transform it) nor as a classic `<script defer>` (top-level await is a syntax error in classic scripts). Workaround: prerender writes a sibling `index-*.classic.js` that wraps the original bundle in an `(async function(){…})()` IIFE and references that as a classic deferred script. Edits to the bundle or template require running `pnpm --filter @workspace/landing-page run prerender` (also runs automatically as part of `build`). Source template lives at `index.template.html`; never edit `index.html` directly — it is regenerated.
 
+**Prerender invariants** (regressions break logos and/or animations):
+- Strip the prerender origin (`http://localhost/landing/`) to an **empty string**, not `/landing/`. Vite's HTML transform re-prepends the configured `base` to absolute paths starting with `/`, so leaving `/landing/...` in the static HTML produces doubled `/landing/landing/client-logos/...` URLs in dev (which the SPA fallback silently serves as `text/html`, breaking all images). Document-relative paths (`client-logos/zid.webp`) resolve correctly under both Vite dev and the published static host (because the document URL ends in `/landing/` — keep the trailing slash canonical).
+- Strip `class="w-mod-ix"` from `<html>` before serializing. Webflow's IX2 runtime (`webflow.d688f257.*.js` from cdn.prod.website-files.com) sets that class itself once it has bound interactions; if it's already present in the static HTML, IX2 skips initialization and on-scroll/hover animations never fire.
+
 ### Client Portal (/client/)
 Login, Register, Dashboard, Catalog, Cart, RFQs, RFQ Detail, Orders, Order Detail, Notifications, Account
 
