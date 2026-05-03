@@ -816,12 +816,17 @@ export async function approveAdminHeldQuote(quoteId: string, finalMarginPct: num
   return updated;
 }
 
-export async function listQuotesForRFQ(rfqId: string, viewerId: string): Promise<Quote[]> {
+export async function listQuotesForRFQ(rfqId: string, viewerId: string): Promise<Array<Quote & { supplier_alias?: string }>> {
   const viewer = users.get(viewerId);
   const isAdmin = viewer && ['admin', 'ops', 'finance'].includes(viewer.role);
   return [...quotes.values()]
     .filter((q) => q.rfq_id === rfqId && (isAdmin || q.status === 'submitted_to_client' || q.status === 'accepted' || q.status === 'partially_accepted'))
-    .map((q) => isAdmin ? q : { ...q, items: q.items.map((i) => ({ ...i, supplier_unit_price_sar: 0 })) });
+    .map((q) => {
+      const supplier = companies.get(q.supplier_company_id);
+      const supplier_alias = supplier?.platform_alias;
+      if (isAdmin) return { ...q, supplier_alias };
+      return { ...q, supplier_alias, items: q.items.map((i) => ({ ...i, supplier_unit_price_sar: 0 })) };
+    });
 }
 
 function createPOPair(rfq: RFQ, quote: Quote, selectedItems: QuoteItem[], clientCompanyId: string, supplierCompanyId: string, quoteLineSelections?: string[]) {

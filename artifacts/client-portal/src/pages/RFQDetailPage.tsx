@@ -1,6 +1,6 @@
-import { useRoute } from "wouter";
-import { 
-  useGetRFQ, 
+import { useRoute, Link } from "wouter";
+import {
+  useGetRFQ,
   getGetRFQQueryKey,
   useListQuotesForRFQ,
   getListQuotesForRFQQueryKey,
@@ -87,6 +87,13 @@ export default function RFQDetailPage() {
           </div>
           <p className="text-muted-foreground mt-1">RFQ #{rfq.id.slice(0, 8)} • Created {rfq.created_at ? new Date(rfq.created_at).toLocaleDateString() : "N/A"}</p>
         </div>
+        {(quotesData?.length ?? 0) > 0 && (
+          <Link href={`/rfqs/${rfq.id}/compare`}>
+            <Button data-testid="button-open-compare">
+              Compare quotes ({quotesData?.length})
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">

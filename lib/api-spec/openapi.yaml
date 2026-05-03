@@ -2637,6 +2637,9 @@ components:
           nullable: true
         admin_held:
           type: boolean
+        supplier_alias:
+          type: string
+          description: Anonymized supplier alias for client-facing displays
       required: [id, quote_number, rfq_id, status]
 
     QuoteListResponse:

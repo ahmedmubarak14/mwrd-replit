@@ -20,4 +20,6 @@ export interface Quote {
   notes?: string;
   submitted_at?: string | null;
   admin_held?: boolean;
+  /** Anonymized supplier alias for client-facing displays */
+  supplier_alias?: string;
 }

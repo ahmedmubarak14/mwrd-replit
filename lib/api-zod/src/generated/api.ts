@@ -833,6 +833,10 @@ export const ListQuotesForRFQResponseItem = zod.object({
   notes: zod.string().optional(),
   submitted_at: zod.string().nullish(),
   admin_held: zod.boolean().optional(),
+  supplier_alias: zod
+    .string()
+    .optional()
+    .describe("Anonymized supplier alias for client-facing displays"),
 });
 export const ListQuotesForRFQResponse = zod.array(ListQuotesForRFQResponseItem);
 
@@ -900,6 +904,10 @@ export const ListMyQuotesResponse = zod.object({
       notes: zod.string().optional(),
       submitted_at: zod.string().nullish(),
       admin_held: zod.boolean().optional(),
+      supplier_alias: zod
+        .string()
+        .optional()
+        .describe("Anonymized supplier alias for client-facing displays"),
     }),
   ),
   total: zod.number(),
@@ -939,6 +947,10 @@ export const GetQuoteResponse = zod.object({
   notes: zod.string().optional(),
   submitted_at: zod.string().nullish(),
   admin_held: zod.boolean().optional(),
+  supplier_alias: zod
+    .string()
+    .optional()
+    .describe("Anonymized supplier alias for client-facing displays"),
 });
 
 /**
@@ -991,6 +1003,10 @@ export const EditQuoteResponse = zod.object({
   notes: zod.string().optional(),
   submitted_at: zod.string().nullish(),
   admin_held: zod.boolean().optional(),
+  supplier_alias: zod
+    .string()
+    .optional()
+    .describe("Anonymized supplier alias for client-facing displays"),
 });
 
 /**
@@ -1027,6 +1043,10 @@ export const SendQuoteResponse = zod.object({
   notes: zod.string().optional(),
   submitted_at: zod.string().nullish(),
   admin_held: zod.boolean().optional(),
+  supplier_alias: zod
+    .string()
+    .optional()
+    .describe("Anonymized supplier alias for client-facing displays"),
 });
 
 /**
@@ -2064,6 +2084,10 @@ export const ListHeldQuotesResponseItem = zod.object({
   notes: zod.string().optional(),
   submitted_at: zod.string().nullish(),
   admin_held: zod.boolean().optional(),
+  supplier_alias: zod
+    .string()
+    .optional()
+    .describe("Anonymized supplier alias for client-facing displays"),
 });
 export const ListHeldQuotesResponse = zod.array(ListHeldQuotesResponseItem);
 
@@ -2097,6 +2121,10 @@ export const ListPendingAutoQuotesResponseItem = zod.object({
   notes: zod.string().optional(),
   submitted_at: zod.string().nullish(),
   admin_held: zod.boolean().optional(),
+  supplier_alias: zod
+    .string()
+    .optional()
+    .describe("Anonymized supplier alias for client-facing displays"),
 });
 export const ListPendingAutoQuotesResponse = zod.array(
   ListPendingAutoQuotesResponseItem,
@@ -2140,6 +2168,10 @@ export const AdminApproveHeldQuoteResponse = zod.object({
   notes: zod.string().optional(),
   submitted_at: zod.string().nullish(),
   admin_held: zod.boolean().optional(),
+  supplier_alias: zod
+    .string()
+    .optional()
+    .describe("Anonymized supplier alias for client-facing displays"),
 });
 
 /**
