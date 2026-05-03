@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>MWRD Client Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  html, body { background: transparent; font-family: 'Inter', system-ui, sans-serif; }
+  .num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="m-0 p-10" style="width:1200px;height:800px;background:#ffffff;">
+  <div class="w-full h-full rounded-2xl bg-white border border-[rgb(228,231,236)] shadow-[0_24px_60px_-12px_rgba(16,24,40,0.16)] overflow-hidden flex">
+    <!-- Sidebar -->
+    <aside class="w-[230px] border-r border-[rgb(228,231,236)] p-5 flex flex-col gap-4 bg-[rgb(252,252,253)]">
+      <div class="flex items-center gap-2.5">
+        <div class="h-9 w-9 rounded-lg bg-[rgb(255,109,67)] flex items-center justify-center text-white text-base font-bold shadow-sm">M</div>
+        <div>
+          <div class="text-[14px] font-semibold text-[rgb(16,24,40)] leading-none">MWRD</div>
+          <div class="text-[10px] text-[rgb(102,112,133)] mt-1">Client portal</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-[rgb(228,231,236)] bg-white">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(152,162,179)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span class="text-[12px] text-[rgb(152,162,179)]">Search anything…</span>
+        <span class="ml-auto text-[10px] text-[rgb(152,162,179)] font-mono px-1.5 py-0.5 rounded border border-[rgb(228,231,236)] bg-white">⌘K</span>
+      </div>
+      <nav class="space-y-1">
+        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[rgb(255,247,242)] text-[rgb(255,109,67)] font-medium text-[13px]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          Dashboard
+        </div>
+        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[rgb(71,84,103)] text-[13px]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Catalog
+          <span class="ml-auto text-[10px] text-[rgb(102,112,133)]">128</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[rgb(71,84,103)] text-[13px]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          RFQs
+          <span class="ml-auto text-[10px] font-semibold text-white bg-[rgb(255,109,67)] rounded-full px-1.5">12</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[rgb(71,84,103)] text-[13px]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+          Orders
+        </div>
+        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[rgb(71,84,103)] text-[13px]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          Notifications
+        </div>
+      </nav>
+      <div class="mt-auto rounded-xl border border-[rgb(228,231,236)] p-3 bg-white">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-[rgb(255,109,67)] to-[rgb(205,56,22)] flex items-center justify-center text-white text-xs font-semibold">AH</div>
+          <div class="leading-tight">
+            <div class="text-[12px] font-semibold text-[rgb(16,24,40)]">Ahmed Hassan</div>
+            <div class="text-[10px] text-[rgb(102,112,133)]">Al-Rajhi Trading</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 p-7 flex flex-col gap-5 bg-white overflow-hidden">
+      <!-- Header -->
+      <div class="flex items-start justify-between">
+        <div>
+          <h1 class="text-[22px] font-semibold text-[rgb(16,24,40)] tracking-tight">My dashboard</h1>
+          <p class="text-[13px] text-[rgb(102,112,133)] mt-1">Welcome back, Ahmed · Today, May 3 2026</p>
+        </div>
+        <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[rgb(255,109,67)] text-white text-[13px] font-semibold shadow-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          New RFQ
+        </button>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="grid grid-cols-4 gap-3">
+        <!-- Card -->
+        <div class="rounded-xl border border-[rgb(228,231,236)] p-3.5 bg-white">
+          <div class="text-[10px] uppercase tracking-wider font-semibold text-[rgb(102,112,133)]">Open RFQs</div>
+          <div class="flex items-baseline gap-2 mt-1.5">
+            <span class="text-[24px] font-semibold text-[rgb(16,24,40)] num">12</span>
+            <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[rgb(7,148,85)]">▲ 2.4%</span>
+          </div>
+          <svg viewBox="0 0 80 24" class="w-full h-6 mt-2"><path d="M0,18 L13,15 L26,17 L40,10 L53,12 L66,6 L80,8" stroke="rgb(7,148,85)" stroke-width="1.5" fill="none"/></svg>
+        </div>
+        <div class="rounded-xl border border-[rgb(228,231,236)] p-3.5 bg-white">
+          <div class="text-[10px] uppercase tracking-wider font-semibold text-[rgb(102,112,133)]">Pending quotes</div>
+          <div class="flex items-baseline gap-2 mt-1.5">
+            <span class="text-[24px] font-semibold text-[rgb(16,24,40)] num">07</span>
+            <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[rgb(255,109,67)]">▲ 12%</span>
+          </div>
+          <svg viewBox="0 0 80 24" class="w-full h-6 mt-2"><path d="M0,20 L13,18 L26,12 L40,14 L53,8 L66,10 L80,4" stroke="rgb(255,109,67)" stroke-width="1.5" fill="none"/></svg>
+        </div>
+        <div class="rounded-xl border border-[rgb(228,231,236)] p-3.5 bg-white">
+          <div class="text-[10px] uppercase tracking-wider font-semibold text-[rgb(102,112,133)]">Active orders</div>
+          <div class="flex items-baseline gap-2 mt-1.5">
+            <span class="text-[24px] font-semibold text-[rgb(16,24,40)] num">08</span>
+            <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[rgb(7,148,85)]">▲ 6.2%</span>
+          </div>
+          <svg viewBox="0 0 80 24" class="w-full h-6 mt-2"><path d="M0,16 L13,14 L26,16 L40,12 L53,14 L66,8 L80,10" stroke="rgb(7,148,85)" stroke-width="1.5" fill="none"/></svg>
+        </div>
+        <div class="rounded-xl border border-[rgb(228,231,236)] p-3.5 bg-white">
+          <div class="text-[10px] uppercase tracking-wider font-semibold text-[rgb(102,112,133)]">Total spend</div>
+          <div class="flex items-baseline gap-2 mt-1.5">
+            <span class="text-[24px] font-semibold text-[rgb(16,24,40)] num">SAR 248k</span>
+          </div>
+          <svg viewBox="0 0 80 24" class="w-full h-6 mt-2"><path d="M0,18 L13,16 L26,12 L40,10 L53,8 L66,5 L80,3" stroke="rgb(255,109,67)" stroke-width="1.5" fill="none"/></svg>
+        </div>
+      </div>
+
+      <!-- Spend chart -->
+      <div class="rounded-xl border border-[rgb(228,231,236)] p-5 bg-white flex-1 min-h-0 flex flex-col">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[13px] font-semibold text-[rgb(16,24,40)]">Spend trend</div>
+            <div class="text-[11px] text-[rgb(102,112,133)] mt-0.5">Last 6 months · SAR thousands</div>
+          </div>
+          <div class="flex items-center gap-1 text-[11px]">
+            <span class="px-2 py-1 rounded-md bg-[rgb(249,250,251)] border border-[rgb(228,231,236)] font-medium text-[rgb(52,64,84)]">6M</span>
+            <span class="px-2 py-1 rounded-md text-[rgb(102,112,133)]">12M</span>
+            <span class="px-2 py-1 rounded-md text-[rgb(102,112,133)]">YTD</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 600 180" class="w-full flex-1 mt-3" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="rgb(255,109,67)" stop-opacity="0.28" />
+              <stop offset="100%" stop-color="rgb(255,109,67)" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="40" x2="600" y2="40" stroke="rgb(240,241,243)" stroke-dasharray="3 4"/>
+          <line x1="0" y1="90" x2="600" y2="90" stroke="rgb(240,241,243)" stroke-dasharray="3 4"/>
+          <line x1="0" y1="140" x2="600" y2="140" stroke="rgb(240,241,243)" stroke-dasharray="3 4"/>
+          <path d="M0,130 C60,118 90,96 150,86 C200,78 240,108 300,90 C360,72 400,52 450,46 C510,40 560,30 600,18 L600,180 L0,180 Z" fill="url(#g1)"/>
+          <path d="M0,130 C60,118 90,96 150,86 C200,78 240,108 300,90 C360,72 400,52 450,46 C510,40 560,30 600,18" stroke="rgb(255,109,67)" stroke-width="2.5" fill="none"/>
+          <circle cx="450" cy="46" r="5" fill="white" stroke="rgb(255,109,67)" stroke-width="2.5"/>
+        </svg>
+        <div class="grid grid-cols-6 text-center text-[10px] text-[rgb(152,162,179)] mt-1">
+          <span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span class="font-semibold text-[rgb(255,109,67)]">May</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

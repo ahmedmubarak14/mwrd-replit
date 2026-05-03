@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>MWRD Supplier Pipeline</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  html, body { background: transparent; font-family: 'Inter', system-ui, sans-serif; }
+  .num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="m-0 p-10" style="width:900px;height:700px;background:#ffffff;">
+  <div class="w-full h-full rounded-2xl bg-white border border-[rgb(228,231,236)] shadow-[0_24px_60px_-12px_rgba(16,24,40,0.18)] overflow-hidden flex flex-col">
+    <!-- Top bar -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[rgb(228,231,236)]">
+      <div class="flex items-center gap-2.5">
+        <div class="h-8 w-8 rounded-md bg-[rgb(16,24,40)] flex items-center justify-center text-white text-sm font-bold">M</div>
+        <div class="leading-tight">
+          <div class="text-[13px] font-semibold text-[rgb(16,24,40)]">MWRD</div>
+          <div class="text-[10px] text-[rgb(102,112,133)]">Supplier portal</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[rgb(236,253,243)] border border-[rgb(167,243,208)]">
+          <div class="h-1.5 w-1.5 rounded-full bg-[rgb(7,148,85)]"></div>
+          <span class="text-[10px] font-semibold text-[rgb(7,148,85)]">Verified supplier</span>
+        </div>
+        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-[rgb(255,109,67)] to-[rgb(205,56,22)] flex items-center justify-center text-white text-xs font-semibold">KA</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="flex-1 p-5 flex flex-col gap-4 overflow-hidden">
+      <div>
+        <h2 class="text-[18px] font-semibold text-[rgb(16,24,40)] tracking-tight">Pipeline this month</h2>
+        <p class="text-[12px] text-[rgb(102,112,133)] mt-0.5">Welcome back, Khalid</p>
+      </div>
+
+      <!-- KPIs -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="rounded-xl border border-[rgb(228,231,236)] p-3 bg-white">
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-[rgb(102,112,133)]">Open RFQs</div>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="text-[20px] font-semibold text-[rgb(16,24,40)] num">42</span>
+            <span class="text-[10px] text-[rgb(7,148,85)] font-semibold">+8</span>
+          </div>
+        </div>
+        <div class="rounded-xl border border-[rgb(228,231,236)] p-3 bg-white">
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-[rgb(102,112,133)]">Submitted</div>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="text-[20px] font-semibold text-[rgb(16,24,40)] num">24</span>
+            <span class="text-[10px] text-[rgb(255,109,67)] font-semibold">+3</span>
+          </div>
+        </div>
+        <div class="rounded-xl border border-[rgb(228,231,236)] p-3 bg-[rgb(255,247,242)]">
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-[rgb(193,53,15)]">Win rate</div>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="text-[20px] font-semibold text-[rgb(16,24,40)] num">38%</span>
+            <span class="text-[10px] text-[rgb(7,148,85)] font-semibold">▲ 4pp</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="rounded-xl border border-[rgb(228,231,236)] p-4 bg-white">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <div class="text-[12px] font-semibold text-[rgb(16,24,40)]">Daily quotes</div>
+            <div class="text-[10px] text-[rgb(102,112,133)]">Mon — Sun</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[14px] font-semibold text-[rgb(16,24,40)] num">2h 20m</div>
+            <div class="text-[9px] text-[rgb(102,112,133)]">avg response time <span class="text-[rgb(255,109,67)] font-semibold">+30m</span></div>
+          </div>
+        </div>
+        <div class="flex items-end justify-between gap-2 h-[70px]">
+          <!-- bars: each is a stack -->
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full flex flex-col gap-0.5">
+              <div class="w-full rounded-sm bg-[rgb(125,211,252)]" style="height:8px"></div>
+              <div class="w-full rounded-sm bg-[rgb(254,176,25)]" style="height:14px"></div>
+              <div class="w-full rounded-sm bg-[rgb(248,113,113)]" style="height:8px"></div>
+            </div>
+            <span class="text-[9px] text-[rgb(152,162,179)]">M</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full flex flex-col gap-0.5">
+              <div class="w-full rounded-sm bg-[rgb(125,211,252)]" style="height:14px"></div>
+              <div class="w-full rounded-sm bg-[rgb(254,176,25)]" style="height:18px"></div>
+              <div class="w-full rounded-sm bg-[rgb(248,113,113)]" style="height:10px"></div>
+            </div>
+            <span class="text-[9px] text-[rgb(152,162,179)]">T</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full flex flex-col gap-0.5">
+              <div class="w-full rounded-sm bg-[rgb(125,211,252)]" style="height:18px"></div>
+              <div class="w-full rounded-sm bg-[rgb(254,176,25)]" style="height:16px"></div>
+              <div class="w-full rounded-sm bg-[rgb(248,113,113)]" style="height:8px"></div>
+            </div>
+            <span class="text-[9px] text-[rgb(152,162,179)]">W</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full flex flex-col gap-0.5">
+              <div class="w-full rounded-sm bg-[rgb(125,211,252)]" style="height:12px"></div>
+              <div class="w-full rounded-sm bg-[rgb(254,176,25)]" style="height:20px"></div>
+              <div class="w-full rounded-sm bg-[rgb(248,113,113)]" style="height:14px"></div>
+            </div>
+            <span class="text-[9px] text-[rgb(152,162,179)]">T</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full flex flex-col gap-0.5">
+              <div class="w-full rounded-sm bg-[rgb(125,211,252)]" style="height:6px"></div>
+              <div class="w-full rounded-sm bg-[rgb(254,176,25)]" style="height:12px"></div>
+              <div class="w-full rounded-sm bg-[rgb(248,113,113)]" style="height:6px"></div>
+            </div>
+            <span class="text-[9px] text-[rgb(152,162,179)]">F</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full flex flex-col gap-0.5">
+              <div class="w-full rounded-sm bg-[rgb(125,211,252)]" style="height:10px"></div>
+              <div class="w-full rounded-sm bg-[rgb(254,176,25)]" style="height:14px"></div>
+              <div class="w-full rounded-sm bg-[rgb(248,113,113)]" style="height:8px"></div>
+            </div>
+            <span class="text-[9px] text-[rgb(152,162,179)]">S</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full flex flex-col gap-0.5">
+              <div class="w-full rounded-sm bg-[rgb(125,211,252)]" style="height:8px"></div>
+              <div class="w-full rounded-sm bg-[rgb(254,176,25)]" style="height:10px"></div>
+              <div class="w-full rounded-sm bg-[rgb(248,113,113)]" style="height:6px"></div>
+            </div>
+            <span class="text-[9px] text-[rgb(152,162,179)]">S</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent quotes -->
+      <div class="rounded-xl border border-[rgb(228,231,236)] bg-white">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-[rgb(228,231,236)]">
+          <div class="text-[12px] font-semibold text-[rgb(16,24,40)]">Recent quotes</div>
+          <span class="text-[10px] text-[rgb(255,109,67)] font-semibold">View all →</span>
+        </div>
+        <div class="divide-y divide-[rgb(240,241,243)]">
+          <div class="flex items-center justify-between px-4 py-2.5">
+            <div class="flex items-center gap-3">
+              <div class="h-8 w-8 rounded-lg bg-[rgb(255,247,242)] flex items-center justify-center">
+                <span class="text-[10px] font-bold text-[rgb(255,109,67)]">RFQ</span>
+              </div>
+              <div class="leading-tight">
+                <div class="text-[12px] font-semibold text-[rgb(16,24,40)]">#Q-2104 · Office printers ×6</div>
+                <div class="text-[10px] text-[rgb(102,112,133)]">Sent 12 min ago</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[rgb(255,247,242)] text-[rgb(193,53,15)] border border-[rgb(255,228,217)]">Submitted</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-2.5">
+            <div class="flex items-center gap-3">
+              <div class="h-8 w-8 rounded-lg bg-[rgb(236,253,243)] flex items-center justify-center">
+                <span class="text-[10px] font-bold text-[rgb(7,148,85)]">RFQ</span>
+              </div>
+              <div class="leading-tight">
+                <div class="text-[12px] font-semibold text-[rgb(16,24,40)]">#Q-2103 · Industrial cleaning kit</div>
+                <div class="text-[10px] text-[rgb(102,112,133)]">Awarded · SAR 18,400</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[rgb(236,253,243)] text-[rgb(7,148,85)] border border-[rgb(167,243,208)]">Accepted</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-2.5">
+            <div class="flex items-center gap-3">
+              <div class="h-8 w-8 rounded-lg bg-[rgb(249,250,251)] flex items-center justify-center">
+                <span class="text-[10px] font-bold text-[rgb(102,112,133)]">RFQ</span>
+              </div>
+              <div class="leading-tight">
+                <div class="text-[12px] font-semibold text-[rgb(16,24,40)]">#Q-2099 · Network switches</div>
+                <div class="text-[10px] text-[rgb(102,112,133)]">Drafted 2h ago</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[rgb(249,250,251)] text-[rgb(102,112,133)] border border-[rgb(228,231,236)]">Draft</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
