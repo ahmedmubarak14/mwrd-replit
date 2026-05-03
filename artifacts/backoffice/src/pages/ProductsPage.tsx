@@ -218,6 +218,8 @@ export default function ProductsPage() {
               <tr className="border-b border-[rgb(228,231,236)]">
                 <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Product</th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide hidden sm:table-cell">SKU</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide hidden md:table-cell">Category</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Active offers</th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Status</th>
                 <th className="px-5 py-3 text-right text-xs font-medium text-[rgb(102,112,133)] uppercase tracking-wide">Actions</th>
               </tr>
@@ -230,6 +232,18 @@ export default function ProductsPage() {
                     <div className="text-xs text-[rgb(102,112,133)] truncate max-w-[300px] mt-0.5">{product.description_en}</div>
                   </td>
                   <td className="px-5 py-3.5 font-mono text-xs text-[rgb(102,112,133)] hidden sm:table-cell">{product.master_product_code}</td>
+                  <td className="px-5 py-3.5 text-[rgb(102,112,133)] hidden md:table-cell">
+                    {cats.find((c) => c.id === product.category_id)?.name_en ?? "—"}
+                  </td>
+                  <td className="px-5 py-3.5 text-right" data-testid={`offers-count-${product.id}`}>
+                    {product.active_offers_count === 0 ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border bg-[rgb(254,243,242)] text-[rgb(180,35,24)] border-[rgb(254,205,202)]">
+                        No offers
+                      </span>
+                    ) : (
+                      <span className="font-medium text-[rgb(16,24,40)]">{product.active_offers_count ?? "—"}</span>
+                    )}
+                  </td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${
                       product.status === "deprecated"

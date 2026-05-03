@@ -280,6 +280,20 @@ export async function getMasterProduct(id: string): Promise<MasterProduct | null
   return masterProducts.get(id) ?? null;
 }
 
+// Active = approved AND status active. Used by the admin Master Products
+// table to flag products no supplier has stocked yet.
+export async function countActiveOffersByProduct(productIds: string[]): Promise<Record<string, number>> {
+  const ids = new Set(productIds);
+  const counts: Record<string, number> = {};
+  for (const id of productIds) counts[id] = 0;
+  for (const o of offers.values()) {
+    if (!ids.has(o.master_product_id)) continue;
+    if (o.approval_status !== 'approved' || o.status !== 'active') continue;
+    counts[o.master_product_id] = (counts[o.master_product_id] ?? 0) + 1;
+  }
+  return counts;
+}
+
 export async function createMasterProduct(actorAdminId: string, input: Omit<MasterProduct, 'id' | 'master_product_code' | 'created_by_admin_id' | 'created_at' | 'updated_at'>): Promise<MasterProduct> {
   const id = newId();
   const seq = masterProducts.size + 1;

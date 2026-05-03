@@ -4,6 +4,7 @@ import {
   markCallbackComplete, approveKYC, rejectKYC,
   listLeadsQueue, listKycQueue,
   listMasterProducts, createMasterProduct, updateMasterProduct, deprecateMasterProduct,
+  countActiveOffersByProduct,
   createCategory, updateCategory, deleteCategory,
   listPendingOffers, approveOffer, rejectOffer,
   listAllProductAdditionRequests, approveProductAdditionRequest, rejectProductAdditionRequest,
@@ -153,7 +154,9 @@ router.get("/backoffice/products", requireBackofficeAuth, async (req, res) => {
       page: qn(req.query.page),
       status: qs(req.query.status) as "active" | "deprecated" | undefined,
     });
-    res.json(result);
+    const counts = await countActiveOffersByProduct(result.data.map((p) => p.id));
+    const data = result.data.map((p) => ({ ...p, active_offers_count: counts[p.id] ?? 0 }));
+    res.json({ data, total: result.total });
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });
   }

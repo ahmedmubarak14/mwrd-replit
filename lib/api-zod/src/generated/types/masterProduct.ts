@@ -20,5 +20,7 @@ export interface MasterProduct {
   pack_types?: string[];
   default_unit?: string;
   status: string;
+  /** Approved + active offers attached to this product. Populated by admin endpoints only. */
+  active_offers_count?: number;
   created_at?: string;
 }

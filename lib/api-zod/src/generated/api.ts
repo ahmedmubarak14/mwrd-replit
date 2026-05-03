@@ -254,6 +254,12 @@ export const ListMasterProductsResponse = zod.object({
       pack_types: zod.array(zod.string()).optional(),
       default_unit: zod.string().optional(),
       status: zod.string(),
+      active_offers_count: zod
+        .number()
+        .optional()
+        .describe(
+          "Approved + active offers attached to this product. Populated by admin endpoints only.",
+        ),
       created_at: zod.string().optional(),
     }),
   ),
@@ -280,6 +286,12 @@ export const GetMasterProductResponse = zod.object({
   pack_types: zod.array(zod.string()).optional(),
   default_unit: zod.string().optional(),
   status: zod.string(),
+  active_offers_count: zod
+    .number()
+    .optional()
+    .describe(
+      "Approved + active offers attached to this product. Populated by admin endpoints only.",
+    ),
   created_at: zod.string().optional(),
 });
 
@@ -1866,6 +1878,12 @@ export const AdminListProductsResponse = zod.object({
       pack_types: zod.array(zod.string()).optional(),
       default_unit: zod.string().optional(),
       status: zod.string(),
+      active_offers_count: zod
+        .number()
+        .optional()
+        .describe(
+          "Approved + active offers attached to this product. Populated by admin endpoints only.",
+        ),
       created_at: zod.string().optional(),
     }),
   ),
@@ -1921,6 +1939,12 @@ export const AdminUpdateProductResponse = zod.object({
   pack_types: zod.array(zod.string()).optional(),
   default_unit: zod.string().optional(),
   status: zod.string(),
+  active_offers_count: zod
+    .number()
+    .optional()
+    .describe(
+      "Approved + active offers attached to this product. Populated by admin endpoints only.",
+    ),
   created_at: zod.string().optional(),
 });
 
@@ -1944,6 +1968,12 @@ export const AdminDeprecateProductResponse = zod.object({
   pack_types: zod.array(zod.string()).optional(),
   default_unit: zod.string().optional(),
   status: zod.string(),
+  active_offers_count: zod
+    .number()
+    .optional()
+    .describe(
+      "Approved + active offers attached to this product. Populated by admin endpoints only.",
+    ),
   created_at: zod.string().optional(),
 });
 
@@ -2157,6 +2187,12 @@ export const AdminApproveProductRequestResponse = zod.object({
     pack_types: zod.array(zod.string()).optional(),
     default_unit: zod.string().optional(),
     status: zod.string(),
+    active_offers_count: zod
+      .number()
+      .optional()
+      .describe(
+        "Approved + active offers attached to this product. Populated by admin endpoints only.",
+      ),
     created_at: zod.string().optional(),
   }),
 });

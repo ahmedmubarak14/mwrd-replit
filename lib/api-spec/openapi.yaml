@@ -2277,6 +2277,9 @@ components:
           type: string
         status:
           type: string
+        active_offers_count:
+          type: integer
+          description: Approved + active offers attached to this product. Populated by admin endpoints only.
         created_at:
           type: string
       required: [id, name_en, name_ar, category_id, status]
