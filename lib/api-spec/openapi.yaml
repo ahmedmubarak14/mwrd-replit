@@ -1911,6 +1911,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
 
+  /backoffice/three-way-match:
+    get:
+      operationId: listThreeWayMatch
+      tags: [backoffice]
+      summary: List CPOs in the three-way match queue (PO + GRN + projected invoice)
+      responses:
+        "200":
+          description: Match queue rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ThreeWayMatchRow"
+
+  /backoffice/three-way-match/{cpoId}/issue-invoice:
+    post:
+      operationId: issueThreeWayMatchInvoice
+      tags: [backoffice]
+      summary: Generate or finalize the invoice for a CPO after finance review
+      parameters:
+        - name: cpoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Invoice issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
   /backoffice/audit-log:
     get:
       operationId: listAuditLog
@@ -2969,6 +3003,70 @@ components:
           type: string
           nullable: true
       required: [id, invoice_number, total_sar, status]
+
+    ThreeWayMatchRow:
+      type: object
+      properties:
+        cpo_id:
+          type: string
+        cpo_number:
+          type: string
+        transaction_ref:
+          type: string
+        cpo_total_sar:
+          type: number
+        cpo_status:
+          type: string
+        client_company_id:
+          type: string
+        client_real_name:
+          type: string
+        supplier_company_id:
+          type: string
+        supplier_real_name:
+          type: string
+        grn_id:
+          type: string
+        grn_number:
+          type: string
+        received_at:
+          type: string
+        invoice_id:
+          type: string
+          nullable: true
+        invoice_number:
+          type: string
+          nullable: true
+        invoice_status:
+          type: string
+          nullable: true
+        invoice_total_sar:
+          type: number
+        variance_pct:
+          type: number
+        matches:
+          type: boolean
+        discrepancies:
+          type: array
+          items:
+            type: string
+      required:
+        - cpo_id
+        - cpo_number
+        - transaction_ref
+        - cpo_total_sar
+        - cpo_status
+        - client_company_id
+        - client_real_name
+        - supplier_company_id
+        - supplier_real_name
+        - grn_id
+        - grn_number
+        - received_at
+        - invoice_total_sar
+        - variance_pct
+        - matches
+        - discrepancies
 
     PayInvoiceBody:
       type: object

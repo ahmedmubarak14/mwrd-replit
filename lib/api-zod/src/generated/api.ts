@@ -1410,6 +1410,8 @@ export const ListAddressesResponseItem = zod.object({
   label: zod.string(),
   full_address: zod.string(),
   phone: zod.string().optional(),
+  national_address_code: zod.string().optional(),
+  address_code: zod.string().optional(),
   is_default: zod.boolean().optional(),
 });
 export const ListAddressesResponse = zod.array(ListAddressesResponseItem);
@@ -1451,6 +1453,8 @@ export const UpdateAddressResponse = zod.object({
   label: zod.string(),
   full_address: zod.string(),
   phone: zod.string().optional(),
+  national_address_code: zod.string().optional(),
+  address_code: zod.string().optional(),
   is_default: zod.boolean().optional(),
 });
 
@@ -2331,6 +2335,41 @@ export const ReactivateUserResponse = zod.object({
   language: zod.string().optional(),
   onboarding_completed: zod.boolean().optional(),
   created_at: zod.string().optional(),
+});
+
+/**
+ * @summary List CPOs in the three-way match queue (PO + GRN + projected invoice)
+ */
+export const ListThreeWayMatchResponseItem = zod.object({
+  cpo_id: zod.string(),
+  cpo_number: zod.string(),
+  transaction_ref: zod.string(),
+  cpo_total_sar: zod.number(),
+  cpo_status: zod.string(),
+  client_company_id: zod.string(),
+  client_real_name: zod.string(),
+  supplier_company_id: zod.string(),
+  supplier_real_name: zod.string(),
+  grn_id: zod.string(),
+  grn_number: zod.string(),
+  received_at: zod.string(),
+  invoice_id: zod.string().nullish(),
+  invoice_number: zod.string().nullish(),
+  invoice_status: zod.string().nullish(),
+  invoice_total_sar: zod.number(),
+  variance_pct: zod.number(),
+  matches: zod.boolean(),
+  discrepancies: zod.array(zod.string()),
+});
+export const ListThreeWayMatchResponse = zod.array(
+  ListThreeWayMatchResponseItem,
+);
+
+/**
+ * @summary Generate or finalize the invoice for a CPO after finance review
+ */
+export const IssueThreeWayMatchInvoiceParams = zod.object({
+  cpoId: zod.coerce.string(),
 });
 
 /**

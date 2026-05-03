@@ -14,6 +14,8 @@ import {
   inviteInternalUser,
   listPOsForUser,
   getDashboardStats,
+  listThreeWayMatchQueue,
+  issueInvoiceForCpo,
 } from "@workspace/mwrd-shared";
 import { requireBackofficeAuth } from "../middleware/auth.js";
 import { qs, qn, pp } from "../lib/qs.js";
@@ -348,6 +350,26 @@ router.get("/backoffice/orders", requireBackofficeAuth, async (req, res) => {
     res.json(filtered);
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+router.get("/backoffice/three-way-match", requireBackofficeAuth, async (_req, res) => {
+  try {
+    const auth = res.locals.auth!;
+    const rows = await listThreeWayMatchQueue(auth.userId);
+    res.json(rows);
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+router.post("/backoffice/three-way-match/:cpoId/issue-invoice", requireBackofficeAuth, async (req, res) => {
+  try {
+    const auth = res.locals.auth!;
+    const invoice = await issueInvoiceForCpo(pp(req.params['cpoId']), auth.userId);
+    res.status(201).json(invoice);
+  } catch (e: unknown) {
+    res.status(400).json({ error: (e as Error).message });
   }
 });
 

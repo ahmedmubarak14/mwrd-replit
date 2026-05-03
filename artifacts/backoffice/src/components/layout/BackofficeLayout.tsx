@@ -55,6 +55,7 @@ const navConfig: NavItem[] = [
   { href: "/products", icon: Package, label: "Product Catalog" },
   { href: "/orders", icon: File06, label: "Orders" },
   { divider: true, label: "Finance & Admin" },
+  { href: "/three-way-match", icon: Receipt, label: "Three-Way Match" },
   { href: "/margins", icon: BarChart01, label: "Margin Rules" },
   { href: "/audit-log", icon: File06, label: "Audit Log" },
   { href: "/settings", icon: Settings01, label: "Platform Settings" },

@@ -511,6 +511,28 @@ export interface Invoice {
   zatca_qr?: string | null;
 }
 
+export interface ThreeWayMatchRow {
+  cpo_id: string;
+  cpo_number: string;
+  transaction_ref: string;
+  cpo_total_sar: number;
+  cpo_status: string;
+  client_company_id: string;
+  client_real_name: string;
+  supplier_company_id: string;
+  supplier_real_name: string;
+  grn_id: string;
+  grn_number: string;
+  received_at: string;
+  invoice_id?: string | null;
+  invoice_number?: string | null;
+  invoice_status?: string | null;
+  invoice_total_sar: number;
+  variance_pct: number;
+  matches: boolean;
+  discrepancies: string[];
+}
+
 export interface PayInvoiceBody {
   invoice_id: string;
   payment_method?: string;

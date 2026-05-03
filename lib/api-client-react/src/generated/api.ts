@@ -102,6 +102,7 @@ import type {
   SetApproverBody,
   SetMarginBody,
   SubmitCartAsRFQBody,
+  ThreeWayMatchRow,
   UpdateCartItemBody,
   UpdateOfferBody,
   UpdatePlatformSettingsBody,
@@ -8307,6 +8308,165 @@ export const useReactivateUser = <
   TContext
 > => {
   return useMutation(getReactivateUserMutationOptions(options));
+};
+
+/**
+ * @summary List CPOs in the three-way match queue (PO + GRN + projected invoice)
+ */
+export const getListThreeWayMatchUrl = () => {
+  return `/api/backoffice/three-way-match`;
+};
+
+export const listThreeWayMatch = async (
+  options?: RequestInit,
+): Promise<ThreeWayMatchRow[]> => {
+  return customFetch<ThreeWayMatchRow[]>(getListThreeWayMatchUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListThreeWayMatchQueryKey = () => {
+  return [`/api/backoffice/three-way-match`] as const;
+};
+
+export const getListThreeWayMatchQueryOptions = <
+  TData = Awaited<ReturnType<typeof listThreeWayMatch>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listThreeWayMatch>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListThreeWayMatchQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listThreeWayMatch>>
+  > = ({ signal }) => listThreeWayMatch({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listThreeWayMatch>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListThreeWayMatchQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listThreeWayMatch>>
+>;
+export type ListThreeWayMatchQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List CPOs in the three-way match queue (PO + GRN + projected invoice)
+ */
+
+export function useListThreeWayMatch<
+  TData = Awaited<ReturnType<typeof listThreeWayMatch>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listThreeWayMatch>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListThreeWayMatchQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Generate or finalize the invoice for a CPO after finance review
+ */
+export const getIssueThreeWayMatchInvoiceUrl = (cpoId: string) => {
+  return `/api/backoffice/three-way-match/${cpoId}/issue-invoice`;
+};
+
+export const issueThreeWayMatchInvoice = async (
+  cpoId: string,
+  options?: RequestInit,
+): Promise<Invoice> => {
+  return customFetch<Invoice>(getIssueThreeWayMatchInvoiceUrl(cpoId), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getIssueThreeWayMatchInvoiceMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof issueThreeWayMatchInvoice>>,
+    TError,
+    { cpoId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof issueThreeWayMatchInvoice>>,
+  TError,
+  { cpoId: string },
+  TContext
+> => {
+  const mutationKey = ["issueThreeWayMatchInvoice"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof issueThreeWayMatchInvoice>>,
+    { cpoId: string }
+  > = (props) => {
+    const { cpoId } = props ?? {};
+
+    return issueThreeWayMatchInvoice(cpoId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type IssueThreeWayMatchInvoiceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof issueThreeWayMatchInvoice>>
+>;
+
+export type IssueThreeWayMatchInvoiceMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Generate or finalize the invoice for a CPO after finance review
+ */
+export const useIssueThreeWayMatchInvoice = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof issueThreeWayMatchInvoice>>,
+    TError,
+    { cpoId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof issueThreeWayMatchInvoice>>,
+  TError,
+  { cpoId: string },
+  TContext
+> => {
+  return useMutation(getIssueThreeWayMatchInvoiceMutationOptions(options));
 };
 
 /**

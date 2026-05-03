@@ -13,6 +13,7 @@ import OffersQueuePage from "@/pages/OffersQueuePage";
 import ProductRequestsPage from "@/pages/ProductRequestsPage";
 import QuotesReviewPage from "@/pages/QuotesReviewPage";
 import OrdersPage from "@/pages/OrdersPage";
+import ThreeWayMatchPage from "@/pages/ThreeWayMatchPage";
 import MarginsPage from "@/pages/MarginsPage";
 import AuditLogPage from "@/pages/AuditLogPage";
 import SettingsPage from "@/pages/SettingsPage";
@@ -79,6 +80,9 @@ function Router() {
       </Route>
       <Route path="/orders">
         {() => <ProtectedRoute component={OrdersPage} path="/orders" />}
+      </Route>
+      <Route path="/three-way-match">
+        {() => <ProtectedRoute component={ThreeWayMatchPage} path="/three-way-match" />}
       </Route>
       <Route path="/margins">
         {() => <ProtectedRoute component={MarginsPage} path="/margins" />}

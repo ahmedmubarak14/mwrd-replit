@@ -1406,3 +1406,83 @@ export async function getDashboardStats(companyId: string, role: string): Promis
   }
   return { open_rfqs: 0, pending_quotes: 0, active_orders: 0, total_spend_sar: 0 };
 }
+
+export interface ThreeWayMatchRow {
+  cpo_id: string;
+  cpo_number: string;
+  transaction_ref: string;
+  cpo_total_sar: number;
+  cpo_status: string;
+  client_company_id: string;
+  client_real_name: string;
+  supplier_company_id: string;
+  supplier_real_name: string;
+  grn_id: string;
+  grn_number: string;
+  received_at: string;
+  invoice_id: string | null;
+  invoice_number: string | null;
+  invoice_status: string | null;
+  invoice_total_sar: number;
+  variance_pct: number;
+  matches: boolean;
+  discrepancies: string[];
+}
+
+// Finance-side three-way match queue. Includes every CPO that has a GRN
+// but no payment yet, so finance can review variance/discrepancies and
+// promote the projected invoice to issued.
+export async function listThreeWayMatchQueue(actorAdminId: string): Promise<ThreeWayMatchRow[]> {
+  void actorAdminId;
+  const rows: ThreeWayMatchRow[] = [];
+  for (const cpo of pos.values()) {
+    if (cpo.type !== 'CPO') continue;
+    const grn = [...grns.values()].find((g) => g.cpo_id === cpo.id);
+    if (!grn) continue;
+    const existingInvoice = [...invoices.values()].find((i) => i.cpo_id === cpo.id);
+    if (existingInvoice && existingInvoice.status === 'paid') continue;
+
+    const vatRate = platformSettings.vat_rate;
+    const projectedTotal = existingInvoice?.total_sar ?? cpo.total_sar + Math.round(cpo.total_sar * vatRate * 100) / 100;
+    const projectedInvoice: Invoice = existingInvoice ?? {
+      id: '', invoice_number: '', cpo_id: cpo.id, grn_id: grn.id,
+      total_sar: projectedTotal, vat_amount_sar: Math.round(cpo.total_sar * vatRate * 100) / 100,
+      status: 'draft', issue_date: nowISO(), due_date: addDays(new Date(), 30),
+    };
+    const match = matchPOGRNInvoice(cpo, grn, projectedInvoice);
+
+    rows.push({
+      cpo_id: cpo.id,
+      cpo_number: cpo.po_number,
+      transaction_ref: cpo.transaction_ref,
+      cpo_total_sar: cpo.total_sar,
+      cpo_status: cpo.status,
+      client_company_id: cpo.client_company_id,
+      client_real_name: companies.get(cpo.client_company_id)?.real_name ?? cpo.client_company_id,
+      supplier_company_id: cpo.supplier_company_id,
+      supplier_real_name: companies.get(cpo.supplier_company_id)?.real_name ?? cpo.supplier_company_id,
+      grn_id: grn.id,
+      grn_number: grn.grn_number,
+      received_at: grn.received_at,
+      invoice_id: existingInvoice?.id ?? null,
+      invoice_number: existingInvoice?.invoice_number ?? null,
+      invoice_status: existingInvoice?.status ?? null,
+      invoice_total_sar: projectedTotal,
+      variance_pct: match.variance_pct,
+      matches: match.matches,
+      discrepancies: match.discrepancies,
+    });
+  }
+  return rows.sort((a, b) => b.received_at.localeCompare(a.received_at));
+}
+
+export async function issueInvoiceForCpo(cpoId: string, actorAdminId: string): Promise<Invoice> {
+  const cpo = pos.get(cpoId);
+  if (!cpo) throw new Error('PO not found');
+  const grn = [...grns.values()].find((g) => g.cpo_id === cpoId);
+  if (!grn) throw new Error('GRN not found for this PO');
+  const before = [...invoices.values()].find((i) => i.cpo_id === cpoId)?.status ?? null;
+  const invoice = await generateInvoice(cpoId, grn.id);
+  recordAudit(actorAdminId, 'INVOICE_ISSUED_BY_FINANCE', 'Invoice', invoice.id, { status: before }, { status: invoice.status });
+  return invoice;
+}
