@@ -1560,7 +1560,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/MasterProduct"
 
-  /backoffice/catalog/categories:
+  /backoffice/categories:
     post:
       operationId: adminCreateCategory
       tags: [backoffice]
@@ -1578,6 +1578,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Category"
+
+  /backoffice/categories/{id}:
+    patch:
+      operationId: adminUpdateCategory
+      tags: [backoffice]
+      summary: Update a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCategoryBody"
+      responses:
+        "200":
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: adminDeleteCategory
+      tags: [backoffice]
+      summary: Delete a category (blocked if it has active products or sub-categories)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Category deleted
 
   /backoffice/offer-approvals:
     get:
@@ -3396,6 +3434,21 @@ components:
         sort_order:
           type: integer
       required: [name_en, name_ar, slug]
+
+    UpdateCategoryBody:
+      type: object
+      properties:
+        name_en:
+          type: string
+        name_ar:
+          type: string
+        slug:
+          type: string
+        parent_id:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
 
     RejectOfferBody:
       type: object

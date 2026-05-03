@@ -715,6 +715,14 @@ export interface CreateCategoryBody {
   sort_order?: number;
 }
 
+export interface UpdateCategoryBody {
+  name_en?: string;
+  name_ar?: string;
+  slug?: string;
+  parent_id?: string | null;
+  sort_order?: number;
+}
+
 export interface RejectOfferBody {
   reason: string;
 }

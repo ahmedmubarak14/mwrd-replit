@@ -1863,6 +1863,38 @@ export const AdminCreateCategoryBody = zod.object({
 });
 
 /**
+ * @summary Update a category
+ */
+export const AdminUpdateCategoryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminUpdateCategoryBody = zod.object({
+  name_en: zod.string().optional(),
+  name_ar: zod.string().optional(),
+  slug: zod.string().optional(),
+  parent_id: zod.string().nullish(),
+  sort_order: zod.number().optional(),
+});
+
+export const AdminUpdateCategoryResponse = zod.object({
+  id: zod.string(),
+  name_en: zod.string(),
+  name_ar: zod.string(),
+  slug: zod.string(),
+  parent_id: zod.string().nullish(),
+  icon_url: zod.string().optional(),
+  sort_order: zod.number(),
+});
+
+/**
+ * @summary Delete a category (blocked if it has active products or sub-categories)
+ */
+export const AdminDeleteCategoryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
  * @summary List pending offer approvals
  */
 export const ListPendingOffersResponseItem = zod.object({

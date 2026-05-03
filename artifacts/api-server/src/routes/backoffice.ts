@@ -4,7 +4,7 @@ import {
   markCallbackComplete, approveKYC, rejectKYC,
   listLeadsQueue, listKycQueue,
   listMasterProducts, createMasterProduct, updateMasterProduct, deprecateMasterProduct,
-  createCategory,
+  createCategory, updateCategory, deleteCategory,
   listPendingOffers, approveOffer, rejectOffer,
   listAllProductAdditionRequests, approveProductAdditionRequest, rejectProductAdditionRequest,
   listAdminHeldQuotes, listPendingAutoQuotes, approveAdminHeldQuote,
@@ -194,6 +194,26 @@ router.post("/backoffice/categories", requireBackofficeAuth, async (req, res) =>
     const auth = res.locals.auth!;
     const cat = await createCategory(req.body, auth.userId);
     res.status(201).json(cat);
+  } catch (e: unknown) {
+    res.status(400).json({ error: (e as Error).message });
+  }
+});
+
+router.patch("/backoffice/categories/:id", requireBackofficeAuth, async (req, res) => {
+  try {
+    const auth = res.locals.auth!;
+    const cat = await updateCategory(pp(req.params['id']), req.body, auth.userId);
+    res.json(cat);
+  } catch (e: unknown) {
+    res.status(400).json({ error: (e as Error).message });
+  }
+});
+
+router.delete("/backoffice/categories/:id", requireBackofficeAuth, async (req, res) => {
+  try {
+    const auth = res.locals.auth!;
+    await deleteCategory(pp(req.params['id']), auth.userId);
+    res.status(204).end();
   } catch (e: unknown) {
     res.status(400).json({ error: (e as Error).message });
   }

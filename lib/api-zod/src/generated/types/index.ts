@@ -118,6 +118,7 @@ export * from "./setMarginBodyScope";
 export * from "./submitCartAsRFQBody";
 export * from "./threeWayMatchRow";
 export * from "./updateCartItemBody";
+export * from "./updateCategoryBody";
 export * from "./updateOfferBody";
 export * from "./updatePlatformSettingsBody";
 export * from "./userListResponse";

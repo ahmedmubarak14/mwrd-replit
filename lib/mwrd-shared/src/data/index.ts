@@ -319,6 +319,18 @@ export async function updateCategory(id: string, patch: Partial<Category>, actor
   return updated;
 }
 
+export async function deleteCategory(id: string, actorAdminId: string): Promise<void> {
+  const cat = categories.get(id);
+  if (!cat) throw new Error('Category not found');
+  // Block deletion when products or sub-categories still reference this category.
+  const productInUse = [...masterProducts.values()].some((p) => p.category_id === id && p.status !== 'deprecated');
+  if (productInUse) throw new Error('Category has active products. Deprecate or reassign them first.');
+  const childExists = [...categories.values()].some((c) => c.parent_id === id);
+  if (childExists) throw new Error('Category has sub-categories. Remove or reparent them first.');
+  categories.delete(id);
+  recordAudit(actorAdminId, 'CATEGORY_DELETED', 'Category', id, cat, null);
+}
+
 export async function listOffersForSupplier(supplierCompanyId: string, filters: {
   master_product_id?: string;
   category?: string;
