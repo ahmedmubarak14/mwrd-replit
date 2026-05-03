@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useListNotifications,
   useMarkNotificationRead,
+  useMarkAllNotificationsRead,
   getListNotificationsQueryKey,
 } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -41,6 +42,7 @@ export default function NotificationsPage() {
 
   const { data: notifications, isLoading } = useListNotifications();
   const markRead = useMarkNotificationRead();
+  const markAll = useMarkAllNotificationsRead();
 
   const items = notifications ?? [];
   const unread = useMemo(() => items.filter((n) => !n.read_at), [items]);
@@ -53,18 +55,10 @@ export default function NotificationsPage() {
     );
   };
 
-  const handleMarkAll = async () => {
-    // Server doesn't expose a bulk endpoint yet, so fan out the per-item
-    // mutation. Invalidate once at the end so the list doesn't flicker.
-    await Promise.all(
-      unread.map(
-        (n) =>
-          new Promise<void>((resolve) => {
-            markRead.mutate({ id: n.id }, { onSettled: () => resolve() });
-          }),
-      ),
-    );
-    queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey() });
+  const handleMarkAll = () => {
+    markAll.mutate(undefined, {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey() }),
+    });
   };
 
   return (
@@ -105,7 +99,7 @@ export default function NotificationsPage() {
                 size="sm"
                 variant="outline"
                 onClick={handleMarkAll}
-                disabled={markRead.isPending}
+                disabled={markAll.isPending}
                 data-testid="button-mark-all-read"
               >
                 <Check className="mr-1.5 h-3.5 w-3.5" /> Mark all read

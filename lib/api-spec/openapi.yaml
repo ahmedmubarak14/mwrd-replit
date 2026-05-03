@@ -1348,6 +1348,23 @@ paths:
         "204":
           description: Marked read
 
+  /notifications/mark-all-read:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark every unread notification for the current user as read
+      responses:
+        "200":
+          description: Count of notifications marked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  marked:
+                    type: integer
+                required: [marked]
+
   /backoffice/dashboard-stats:
     get:
       operationId: getBackofficeDashboardStats

@@ -82,6 +82,7 @@ export * from "./listSuppliersParams";
 export * from "./loginBody";
 export * from "./margin";
 export * from "./marginScope";
+export * from "./markAllNotificationsRead200";
 export * from "./masterProduct";
 export * from "./masterProductListResponse";
 export * from "./masterProductSpecs";

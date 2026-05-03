@@ -829,6 +829,10 @@ export const ListAddressesType = {
   billing: "billing",
 } as const;
 
+export type MarkAllNotificationsRead200 = {
+  marked: number;
+};
+
 export type ListLeadsParams = {
   account_type?: ListLeadsAccountType;
   page?: number;

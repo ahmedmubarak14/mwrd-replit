@@ -1660,6 +1660,13 @@ export const MarkNotificationReadParams = zod.object({
 });
 
 /**
+ * @summary Mark every unread notification for the current user as read
+ */
+export const MarkAllNotificationsReadResponse = zod.object({
+  marked: zod.number(),
+});
+
+/**
  * @summary Backoffice dashboard stats
  */
 export const GetBackofficeDashboardStatsResponse = zod.object({

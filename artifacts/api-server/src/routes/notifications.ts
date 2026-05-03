@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { listNotifications, markNotificationRead } from "@workspace/mwrd-shared";
+import { listNotifications, markNotificationRead, markAllNotificationsRead } from "@workspace/mwrd-shared";
 import { requirePublicAuth } from "../middleware/auth.js";
 import { pp } from "../lib/qs.js";
 
@@ -10,6 +10,16 @@ router.get("/notifications", requirePublicAuth, async (_req, res) => {
     const auth = res.locals.auth!;
     const notifications = await listNotifications(auth.userId);
     res.json(notifications);
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+router.post("/notifications/mark-all-read", requirePublicAuth, async (_req, res) => {
+  try {
+    const auth = res.locals.auth!;
+    const result = await markAllNotificationsRead(auth.userId);
+    res.json(result);
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });
   }

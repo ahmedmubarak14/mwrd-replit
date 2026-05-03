@@ -1329,6 +1329,17 @@ export async function markNotificationRead(notificationId: string, userId: strin
   if (n && n.user_id === userId) notifications.set(notificationId, { ...n, read_at: nowISO() });
 }
 
+export async function markAllNotificationsRead(userId: string): Promise<{ marked: number }> {
+  const now = nowISO();
+  let marked = 0;
+  for (const n of notifications.values()) {
+    if (n.user_id !== userId || n.read_at) continue;
+    notifications.set(n.id, { ...n, read_at: now });
+    marked += 1;
+  }
+  return { marked };
+}
+
 export async function getFavourites(userId: string): Promise<FavouriteList> {
   return favouriteLists.get(userId) ?? { id: newId(), user_id: userId, master_product_ids: [] };
 }
