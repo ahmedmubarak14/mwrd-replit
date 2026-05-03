@@ -136,15 +136,24 @@ export default function CatalogPage() {
                 Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-9 w-full" />)
               ) : (
                 categories?.map((cat) => (
-                  <Button 
-                    key={cat.id} 
-                    variant={selectedCategory === cat.id ? "secondary" : "ghost"} 
-                    className="w-full justify-start"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    data-testid={`button-category-${cat.id}`}
-                  >
-                    {cat.name_en}
-                  </Button>
+                  <div key={cat.id} className="flex items-center gap-1">
+                    <Button
+                      variant={selectedCategory === cat.id ? "secondary" : "ghost"}
+                      className="flex-1 justify-start"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      data-testid={`button-category-${cat.id}`}
+                    >
+                      {cat.name_en}
+                    </Button>
+                    <Link
+                      href={`/catalog/categories/${cat.slug}`}
+                      className="text-xs text-[rgb(102,112,133)] hover:text-[rgb(255,109,67)] px-2"
+                      title={`Open ${cat.name_en} page`}
+                      data-testid={`link-category-${cat.slug}`}
+                    >
+                      View
+                    </Link>
+                  </div>
                 ))
               )}
             </div>
@@ -171,11 +180,11 @@ export default function CatalogPage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {productsData?.data?.map((product) => (
                 <Card key={product.id} className="overflow-hidden flex flex-col" data-testid={`card-product-${product.id}`}>
-                  <div className="aspect-square bg-muted relative">
+                  <Link href={`/catalog/products/${product.id}`} className="aspect-square bg-muted relative block">
                     {product.images && product.images.length > 0 ? (
-                      <img 
-                        src={product.images[0]} 
-                        alt={product.name_en} 
+                      <img
+                        src={product.images[0]}
+                        alt={product.name_en}
                         className="object-cover w-full h-full"
                       />
                     ) : (
@@ -183,9 +192,11 @@ export default function CatalogPage() {
                         No image
                       </div>
                     )}
-                  </div>
+                  </Link>
                   <CardHeader className="p-4">
-                    <CardTitle className="text-lg" data-testid={`text-product-name-${product.id}`}>{product.name_en}</CardTitle>
+                    <Link href={`/catalog/products/${product.id}`} data-testid={`link-product-${product.id}`}>
+                      <CardTitle className="text-lg hover:text-[rgb(255,109,67)] transition-colors" data-testid={`text-product-name-${product.id}`}>{product.name_en}</CardTitle>
+                    </Link>
                     <Badge variant="outline" className="w-fit">{product.category_id}</Badge>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 flex-1">
