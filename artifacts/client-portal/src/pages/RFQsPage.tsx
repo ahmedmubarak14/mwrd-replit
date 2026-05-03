@@ -28,6 +28,14 @@ export default function RFQsPage() {
         </div>
         <div className="flex items-center gap-2">
           <SpecialOrderButton />
+          <Button
+            variant="outline"
+            onClick={() => setLocation("/rfqs/new/custom")}
+            className="gap-2"
+            data-testid="button-custom-request"
+          >
+            <PlusCircle className="h-4 w-4" /> Custom request
+          </Button>
           <Button onClick={() => setLocation("/catalog")} className="gap-2" data-testid="button-new-rfq">
             <PlusCircle className="h-4 w-4" /> New RFQ
           </Button>

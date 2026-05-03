@@ -205,8 +205,11 @@ export default function CatalogPage() {
                 </Card>
               ))}
               {(!productsData?.data || productsData.data.length === 0) && (
-                <div className="col-span-full py-20 text-center text-muted-foreground">
-                  No products found in this category.
+                <div className="col-span-full py-20 text-center space-y-4">
+                  <p className="text-muted-foreground">Can't find what you need?</p>
+                  <Link href="/rfqs/new/custom">
+                    <Button data-testid="link-custom-request-empty">Submit a custom request</Button>
+                  </Link>
                 </div>
               )}
             </div>

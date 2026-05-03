@@ -16,6 +16,7 @@ import CartPage from "@/pages/CartPage";
 import RFQsPage from "@/pages/RFQsPage";
 import RFQDetailPage from "@/pages/RFQDetailPage";
 import RFQComparePage from "@/pages/RFQComparePage";
+import CustomRequestPage from "@/pages/CustomRequestPage";
 import OrdersPage from "@/pages/OrdersPage";
 import OrderDetailPage from "@/pages/OrderDetailPage";
 import NotificationsPage from "@/pages/NotificationsPage";
@@ -69,6 +70,9 @@ function Router() {
       </Route>
       <Route path="/rfqs">
         {(params) => <ProtectedRoute component={RFQsPage} path="/rfqs" {...params} />}
+      </Route>
+      <Route path="/rfqs/new/custom">
+        {(params) => <ProtectedRoute component={CustomRequestPage} path="/rfqs/new/custom" {...params} />}
       </Route>
       <Route path="/rfqs/:id/compare">
         {(params) => <ProtectedRoute component={RFQComparePage} path="/rfqs/:id/compare" {...params} />}
