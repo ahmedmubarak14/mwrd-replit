@@ -24,6 +24,8 @@ import OrdersPage from "@/pages/OrdersPage";
 import OrderDetailPage from "@/pages/OrderDetailPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import AccountPage from "@/pages/AccountPage";
+import OnboardingPage from "@/pages/OnboardingPage";
+import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,9 +38,17 @@ const queryClient = new QueryClient({
 
 function ProtectedRoute({ component: Component, ...rest }: { component: React.ComponentType<any>, path: string }) {
   const token = localStorage.getItem("mwrd_token");
-  
+  const { data: me, isLoading } = useGetMe({
+    query: { enabled: !!token, queryKey: getGetMeQueryKey() },
+  });
+
   if (!token) {
     return <Redirect to="/login" />;
+  }
+  // Don't flash the dashboard before we know whether onboarding is done.
+  if (isLoading) return null;
+  if (me?.company && me.company.onboarding_completed === false) {
+    return <Redirect to="/onboarding" />;
   }
 
   return (
@@ -48,12 +58,19 @@ function ProtectedRoute({ component: Component, ...rest }: { component: React.Co
   );
 }
 
+function OnboardingRoute() {
+  const token = localStorage.getItem("mwrd_token");
+  if (!token) return <Redirect to="/login" />;
+  return <OnboardingPage />;
+}
+
 function Router() {
   return (
     <Switch>
       {/* Public Routes */}
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
+      <Route path="/onboarding" component={OnboardingRoute} />
 
       {/* Protected Routes */}
       <Route path="/">

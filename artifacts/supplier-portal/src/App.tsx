@@ -16,6 +16,8 @@ import CreateOfferPage from "@/pages/CreateOfferPage";
 import ProductRequestsPage from "@/pages/ProductRequestsPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import AccountPage from "@/pages/AccountPage";
+import OnboardingPage from "@/pages/OnboardingPage";
+import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,18 +30,29 @@ const queryClient = new QueryClient({
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType<any> }) {
   const token = localStorage.getItem("mwrd_supplier_token");
+  const { data: me, isLoading } = useGetMe({
+    query: { enabled: !!token, queryKey: getGetMeQueryKey() },
+  });
 
-  if (!token) {
-    return <Redirect to="/login" />;
+  if (!token) return <Redirect to="/login" />;
+  if (isLoading) return null;
+  if (me?.company && me.company.onboarding_completed === false) {
+    return <Redirect to="/onboarding" />;
   }
-
   return <Component />;
+}
+
+function OnboardingRoute() {
+  const token = localStorage.getItem("mwrd_supplier_token");
+  if (!token) return <Redirect to="/login" />;
+  return <OnboardingPage />;
 }
 
 function Router() {
   return (
     <Switch>
       <Route path="/login" component={LoginPage} />
+      <Route path="/onboarding" component={OnboardingRoute} />
 
       <Route path="/">
         {() => <ProtectedRoute component={DashboardPage} />}
