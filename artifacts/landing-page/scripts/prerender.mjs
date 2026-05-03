@@ -101,6 +101,19 @@ async function main() {
   liveScript.setAttribute("src", `./assets/${bundleName}`);
   document.head.appendChild(liveScript);
 
+  // Strip Webflow template attribution attributes from <html> (data-wf-domain="grovia-…",
+  // data-wf-page, data-wf-site). They are template metadata, not needed at runtime.
+  const htmlEl = document.documentElement;
+  for (const attr of [...htmlEl.attributes]) {
+    if (attr.name.startsWith("data-wf-")) htmlEl.removeAttribute(attr.name);
+  }
+
+  // Drop the `mwrd-enhanced` marker class from the static HTML so the source looks clean.
+  // The bundle re-adds it on hydration as an idempotency guard.
+  if (document.body.classList.contains("mwrd-enhanced")) {
+    document.body.classList.remove("mwrd-enhanced");
+  }
+
   // Serialize
   let out = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
 
