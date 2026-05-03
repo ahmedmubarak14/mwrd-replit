@@ -157,6 +157,23 @@ async function main() {
     htmlEl.classList.remove("w-mod-ix");
   }
 
+  // Visibility safety net. The Webflow template ships an inline <style> block that hides
+  // every animated element (`html.w-mod-js:not(.w-mod-ix) [data-w-id="…"] { opacity:0 }`)
+  // until IX2 binds interactions and adds `w-mod-ix` to <html>. Above-the-fold elements
+  // (hero H1, subtitle, buttons, hero card images, ticker) are all in that gate. If IX2
+  // fails to load — slow CDN, ad-blocker, corp proxy, network hiccup — the entire hero
+  // stays invisible and the page reads as a blank white screen.
+  //
+  // Inject a fallback timer that adds `w-mod-ix` after 1500ms if IX2 hasn't already done
+  // so. The page always becomes visible; animations still play normally when IX2 loads
+  // in time (the typical case). Placed at the very end of <head> so it runs before any
+  // animation gate could matter and after the inline `w-mod-js` adder so the order is
+  // deterministic.
+  const fallback = document.createElement("script");
+  fallback.textContent =
+    "(function(d){var h=d.documentElement,t=setTimeout(function(){if(!h.classList.contains('w-mod-ix'))h.classList.add('w-mod-ix');},1500);var o=new MutationObserver(function(){if(h.classList.contains('w-mod-ix')){clearTimeout(t);o.disconnect();}});o.observe(h,{attributes:true,attributeFilter:['class']});})(document);";
+  document.head.appendChild(fallback);
+
   // Defer all synchronous external <script src="…"> tags so they don't block the HTML
   // parser / DOMContentLoaded. Webflow ships jquery + webflow.js as render-blocking
   // sync scripts in the head and body; with the page fully prerendered we don't need
