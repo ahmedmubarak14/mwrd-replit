@@ -1,48 +1,43 @@
-import { useLocation } from "wouter";
+import { useMemo } from "react";
+import { Link, useLocation } from "wouter";
 import {
   useGetDashboardStats,
   useListRFQs,
+  useListOrders,
   getListRFQsQueryKey,
+  getListOrdersQueryKey,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { PlusCircle, ArrowUpRight, File06, Clock, CheckCircle, CurrencyDollarCircle } from "@untitledui/icons";
-
-// Sparkline SVG paths (pre-computed smooth curves)
-const SPARKLINES = {
-  up: "M0,36 C20,34 40,30 60,26 C80,22 100,16 120,12 C140,8 160,5 180,3",
-  down: "M0,3 C20,6 40,10 60,16 C80,22 100,28 120,32 C140,36 160,38 180,36",
-  flat: "M0,20 C30,18 60,23 90,20 C120,17 150,22 180,20",
-  grow: "M0,32 C30,30 60,27 90,23 C120,18 150,12 180,8",
-};
-
-function Sparkline({ path = SPARKLINES.up, color = "#FF6D43" }: { path?: string; color?: string }) {
-  return (
-    <svg width="100%" height="48" viewBox="0 0 180 48" fill="none" className="mt-3 -mx-0.5 w-[calc(100%+4px)]">
-      <path d={path} stroke={color} strokeWidth="1.75" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
+import {
+  PlusCircle,
+  ArrowUpRight,
+  File06,
+  ChevronRight,
+  AlertCircle,
+} from "@untitledui/icons";
 
 function MetricCard({
   label,
   value,
   description,
-  sparklinePath,
+  href,
   isLoading,
   testId,
 }: {
   label: string;
   value: React.ReactNode;
   description?: string;
-  sparklinePath?: string;
+  href?: string;
   isLoading?: boolean;
   testId?: string;
 }) {
-  return (
-    <div className="bg-white rounded-xl border border-[rgb(228,231,236)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <p className="text-sm font-medium text-[rgb(102,112,133)]">{label}</p>
+  const inner = (
+    <div className="bg-white rounded-xl border border-[rgb(228,231,236)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[rgb(208,213,221)] transition-colors h-full">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium text-[rgb(102,112,133)]">{label}</p>
+        {href && <ChevronRight className="h-4 w-4 text-[rgb(208,213,221)] shrink-0 mt-0.5" />}
+      </div>
       <div className="mt-2">
         {isLoading ? (
           <Skeleton className="h-9 w-24" />
@@ -55,51 +50,100 @@ function MetricCard({
       {description && (
         <p className="mt-1.5 text-sm text-[rgb(152,162,179)]">{description}</p>
       )}
-      {sparklinePath && <Sparkline path={sparklinePath} />}
     </div>
+  );
+  if (!href) return inner;
+  return (
+    <Link href={href} data-testid={testId ? `link-${testId}` : undefined}>
+      {inner}
+    </Link>
   );
 }
 
 const statusStyles: Record<string, string> = {
-  open:      "bg-[rgb(239,248,255)] text-[rgb(21,112,239)] border-[rgb(209,236,255)]",
-  awarded:   "bg-[rgb(236,253,243)] text-[rgb(7,148,85)]  border-[rgb(167,243,208)]",
-  cancelled: "bg-[rgb(255,243,242)] text-[rgb(217,45,32)] border-[rgb(255,196,191)]",
+  open:               "bg-[rgb(239,248,255)] text-[rgb(21,112,239)] border-[rgb(209,236,255)]",
+  quoted:             "bg-[rgb(255,247,237)] text-[rgb(194,84,28)] border-[rgb(254,215,170)]",
+  awarded:            "bg-[rgb(236,253,243)] text-[rgb(7,148,85)]  border-[rgb(167,243,208)]",
+  partially_awarded:  "bg-[rgb(236,253,243)] text-[rgb(7,148,85)]  border-[rgb(167,243,208)]",
+  cancelled:          "bg-[rgb(255,243,242)] text-[rgb(217,45,32)] border-[rgb(255,196,191)]",
 };
 
 export default function DashboardPage() {
   const [, setLocation] = useLocation();
+
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
   const { data: rfqsData, isLoading: rfqsLoading } = useListRFQs({}, {
     query: { queryKey: getListRFQsQueryKey({}) },
   });
+  const { data: ordersData } = useListOrders({}, {
+    query: { queryKey: getListOrdersQueryKey({}) },
+  });
 
   const rfqs = rfqsData?.data?.slice(0, 6) ?? [];
+  const ordersAwaitingApproval = useMemo(
+    () => (ordersData ?? []).filter((o) => o.status === "awaiting_approval"),
+    [ordersData],
+  );
+  const ordersAwaitingGRN = useMemo(
+    () => (ordersData ?? []).filter((o) => o.status === "in_transit" || o.status === "delivered"),
+    [ordersData],
+  );
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-semibold text-[rgb(16,24,40)]">Dashboard</h1>
           <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">Your procurement overview</p>
         </div>
-        <Button
-          onClick={() => setLocation("/catalog")}
-          className="gap-2"
-          data-testid="button-new-rfq"
-        >
-          <PlusCircle className="h-4 w-4" />
-          New RFQ
+        <Button onClick={() => setLocation("/catalog")} className="gap-2" data-testid="button-new-rfq">
+          <PlusCircle className="h-4 w-4" /> New RFQ
         </Button>
       </div>
 
-      {/* Metric cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Pending actions */}
+      {(ordersAwaitingApproval.length > 0 || ordersAwaitingGRN.length > 0) && (
+        <div className="bg-[rgb(255,247,237)] border border-[rgb(254,215,170)] rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-[rgb(194,84,28)] shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[rgb(124,45,18)]">Needs your attention</p>
+              <ul className="mt-1.5 space-y-1 text-sm text-[rgb(124,45,18)]">
+                {ordersAwaitingApproval.length > 0 && (
+                  <li>
+                    <Link
+                      href="/orders"
+                      className="hover:underline"
+                      data-testid="link-pending-approvals"
+                    >
+                      {ordersAwaitingApproval.length} order{ordersAwaitingApproval.length === 1 ? "" : "s"} awaiting approval →
+                    </Link>
+                  </li>
+                )}
+                {ordersAwaitingGRN.length > 0 && (
+                  <li>
+                    <Link
+                      href="/orders"
+                      className="hover:underline"
+                      data-testid="link-pending-grn"
+                    >
+                      {ordersAwaitingGRN.length} order{ordersAwaitingGRN.length === 1 ? "" : "s"} ready to receive →
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Metric tiles — clickable, no fake sparklines */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label="Open RFQs"
           value={stats?.open_rfqs ?? 0}
           description="Awaiting supplier quotes"
-          sparklinePath={SPARKLINES.grow}
+          href="/rfqs"
           isLoading={statsLoading}
           testId="text-open-rfqs-count"
         />
@@ -107,7 +151,7 @@ export default function DashboardPage() {
           label="Pending Quotes"
           value={stats?.pending_quotes ?? 0}
           description="Under review"
-          sparklinePath={SPARKLINES.flat}
+          href="/rfqs"
           isLoading={statsLoading}
           testId="text-pending-quotes-count"
         />
@@ -115,7 +159,7 @@ export default function DashboardPage() {
           label="Active Orders"
           value={stats?.active_orders ?? 0}
           description="In progress"
-          sparklinePath={SPARKLINES.up}
+          href="/orders"
           isLoading={statsLoading}
           testId="text-active-orders-count"
         />
@@ -123,22 +167,22 @@ export default function DashboardPage() {
           label="Total Spend"
           value={`SAR ${(stats?.total_spend_sar ?? 0).toLocaleString()}`}
           description="All time"
-          sparklinePath={SPARKLINES.grow}
+          href="/orders"
           isLoading={statsLoading}
           testId="text-total-spend"
         />
       </div>
 
-      {/* Recent RFQs table */}
+      {/* Recent RFQs */}
       <div className="bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgb(228,231,236)]">
           <h2 className="text-sm font-semibold text-[rgb(16,24,40)]">Recent RFQs</h2>
-          <button
-            onClick={() => setLocation("/rfqs")}
+          <Link
+            href="/rfqs"
             className="text-xs font-medium text-[rgb(255,109,67)] hover:text-[rgb(205,56,22)] flex items-center gap-1 transition-colors"
           >
             View all <ArrowUpRight className="h-3 w-3" />
-          </button>
+          </Link>
         </div>
 
         {rfqsLoading ? (
@@ -148,7 +192,16 @@ export default function DashboardPage() {
         ) : rfqs.length === 0 ? (
           <div className="px-5 py-12 text-center">
             <File06 className="mx-auto h-8 w-8 text-[rgb(208,213,221)] mb-3" />
-            <p className="text-sm text-[rgb(152,162,179)]">No RFQs yet. Create one to get started.</p>
+            <p className="text-sm text-[rgb(152,162,179)]">No RFQs yet. Browse the catalog to create one.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/catalog")}
+              className="mt-4"
+              data-testid="button-empty-browse-catalog"
+            >
+              Browse catalog
+            </Button>
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -162,29 +215,27 @@ export default function DashboardPage() {
             </thead>
             <tbody className="divide-y divide-[rgb(242,244,247)]">
               {rfqs.map((rfq) => (
-                <tr key={rfq.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
+                <tr
+                  key={rfq.id}
+                  onClick={() => setLocation(`/rfqs/${rfq.id}`)}
+                  className="hover:bg-[rgb(249,250,251)] transition-colors cursor-pointer"
+                >
                   <td className="px-5 py-3.5 font-medium text-[rgb(16,24,40)]" data-testid={`text-rfq-title-${rfq.id}`}>
                     {rfq.title}
                   </td>
                   <td className="px-5 py-3.5">
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusStyles[rfq.status] ?? "bg-[rgb(242,244,247)] text-[rgb(102,112,133)] border-[rgb(228,231,236)]"}`}
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${statusStyles[rfq.status] ?? "bg-[rgb(242,244,247)] text-[rgb(102,112,133)] border-[rgb(228,231,236)]"}`}
                       data-testid={`status-rfq-${rfq.id}`}
                     >
-                      {rfq.status}
+                      {rfq.status?.replace(/_/g, " ")}
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-[rgb(102,112,133)] hidden sm:table-cell" data-testid={`text-rfq-date-${rfq.id}`}>
                     {rfq.created_at ? new Date(rfq.created_at).toLocaleDateString("en-SA", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                   </td>
                   <td className="px-5 py-3.5 text-right">
-                    <button
-                      onClick={() => setLocation(`/rfqs/${rfq.id}`)}
-                      className="text-xs font-medium text-[rgb(102,112,133)] hover:text-[rgb(16,24,40)] transition-colors"
-                      data-testid={`button-view-rfq-${rfq.id}`}
-                    >
-                      View →
-                    </button>
+                    <span className="text-xs font-medium text-[rgb(102,112,133)]">View →</span>
                   </td>
                 </tr>
               ))}
