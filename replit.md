@@ -54,7 +54,10 @@ lib/
 
 ## Portal Routes
 
-### Client Portal (/)
+### Landing Page (/landing/)
+Public marketing site (Webflow template, mwrd-rebranded). **Statically pre-rendered** at build time — `index.html` ships with mwrd content (no runtime text replacement, no Webflow flash). The runtime bundle (`public/assets/index-Bqpk3iU2.js`) only handles interactivity (language switcher, mobile menu, accordions). Edits to the bundle or template require running `pnpm --filter @workspace/landing-page run prerender` (also runs automatically as part of `build`). Source template lives at `index.template.html`; never edit `index.html` directly — it is regenerated.
+
+### Client Portal (/client/)
 Login, Register, Dashboard, Catalog, Cart, RFQs, RFQ Detail, Orders, Order Detail, Notifications, Account
 
 ### Supplier Portal (/supplier/)
@@ -95,3 +98,13 @@ All list pages (supplier portal: RFQs/Offers/Quotes/Orders/Notifications/Account
 - **Tabs (AccountPage)**: WAI-ARIA `role="tablist"`/`role="tab"`/`aria-selected` + arrow-key navigation
 - **Dates**: always render via `safeFormat` / `safeFromNow` / `safeLocaleDate` helpers in each portal's `src/lib/utils.ts` (returns `"—"` for null/invalid timestamps; never throws)
 - Icons come from `@untitledui/icons` (the only Untitled UI package installed); other primitives are custom Tailwind, not shadcn `Button`/`Table`
+
+## Pre-launch Checklist
+
+Run before each `suggest_deploy`:
+
+1. **Landing page** (`/landing/`): `curl -s http://localhost:80/landing/ | grep -ciE 'grovia'` should print `2` (only `data-wf-domain` attr + Webflow CDN URL — both invisible). View-source must show "Procure for your business" hero copy directly in HTML.
+2. **Auth round-trip**: all three demo logins return a token via `POST /api/auth/login` with the credentials from the table above.
+3. **Artifact paths**: `/landing/`, `/client/`, `/supplier/`, `/backoffice/`, `/api/healthz` all return 200.
+4. **Cross-links**: client/supplier login pages link logo back to `/landing/`. Landing "Sign in" injection points to the correct portal.
+5. **Backoffice isolation**: backoffice is reachable ONLY at `/backoffice/login` — never linked from landing/client/supplier surfaces.
