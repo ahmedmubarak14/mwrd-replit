@@ -164,14 +164,32 @@ async function main() {
   // fails to load — slow CDN, ad-blocker, corp proxy, network hiccup — the entire hero
   // stays invisible and the page reads as a blank white screen.
   //
-  // Inject a fallback timer that adds `w-mod-ix` after 1500ms if IX2 hasn't already done
-  // so. The page always becomes visible; animations still play normally when IX2 loads
-  // in time (the typical case). Placed at the very end of <head> so it runs before any
-  // animation gate could matter and after the inline `w-mod-js` adder so the order is
-  // deterministic.
+  // We can't add `w-mod-ix` ourselves: IX2 looks at that class to decide whether
+  // interactions are already bound, and skips initialization if it sees it — that kills
+  // every scroll/hover animation on the page (the bug the user reported as "motion is
+  // not working"). Instead, extend the gate selector to also release on our own
+  // `.mwrd-shown` class, then set `.mwrd-shown` after a short timeout. IX2 only ever
+  // sees its own `w-mod-ix` and behaves normally; if it never loads we still reveal
+  // the content.
+  let gateRewrites = 0;
+  for (const styleEl of document.querySelectorAll("style")) {
+    const css = styleEl.textContent || "";
+    if (!css.includes(":not(.w-mod-ix)")) continue;
+    const rewritten = css.replaceAll(
+      ":not(.w-mod-ix)",
+      ":not(.w-mod-ix):not(.mwrd-shown)",
+    );
+    if (rewritten !== css) {
+      styleEl.textContent = rewritten;
+      gateRewrites++;
+    }
+  }
+  if (gateRewrites > 0) {
+    console.log(`[prerender] extended w-mod-ix gate with .mwrd-shown in ${gateRewrites} <style> block(s)`);
+  }
   const fallback = document.createElement("script");
   fallback.textContent =
-    "(function(d){var h=d.documentElement,t=setTimeout(function(){if(!h.classList.contains('w-mod-ix'))h.classList.add('w-mod-ix');},1500);var o=new MutationObserver(function(){if(h.classList.contains('w-mod-ix')){clearTimeout(t);o.disconnect();}});o.observe(h,{attributes:true,attributeFilter:['class']});})(document);";
+    "(function(d){setTimeout(function(){d.documentElement.classList.add('mwrd-shown');},1500);})(document);";
   document.head.appendChild(fallback);
 
   // Defer all synchronous external <script src="…"> tags so they don't block the HTML
