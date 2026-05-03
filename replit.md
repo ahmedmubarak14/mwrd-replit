@@ -55,7 +55,7 @@ lib/
 ## Portal Routes
 
 ### Landing Page (/landing/)
-Public marketing site (Webflow template, mwrd-rebranded). **Statically pre-rendered** at build time — `index.html` ships with mwrd content (no runtime text replacement, no Webflow flash). The runtime bundle (`public/assets/index-Bqpk3iU2.js`) only handles interactivity (language switcher, mobile menu, accordions). Edits to the bundle or template require running `pnpm --filter @workspace/landing-page run prerender` (also runs automatically as part of `build`). Source template lives at `index.template.html`; never edit `index.html` directly — it is regenerated.
+Public marketing site (Webflow template, mwrd-rebranded). **Statically pre-rendered** at build time — `index.html` ships with mwrd content (no runtime text replacement, no Webflow flash). The runtime bundle (`public/assets/index-*.js`) only handles interactivity (language switcher, mobile menu, accordions). The bundle is ESM with top-level `await` (i18next init); we cannot load it as `<script type="module">` from `/public` (Vite refuses to transform it) nor as a classic `<script defer>` (top-level await is a syntax error in classic scripts). Workaround: prerender writes a sibling `index-*.classic.js` that wraps the original bundle in an `(async function(){…})()` IIFE and references that as a classic deferred script. Edits to the bundle or template require running `pnpm --filter @workspace/landing-page run prerender` (also runs automatically as part of `build`). Source template lives at `index.template.html`; never edit `index.html` directly — it is regenerated.
 
 ### Client Portal (/client/)
 Login, Register, Dashboard, Catalog, Cart, RFQs, RFQ Detail, Orders, Order Detail, Notifications, Account

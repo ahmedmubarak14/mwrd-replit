@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { JSDOM, VirtualConsole } from "jsdom";
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, unlinkSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,10 +13,26 @@ const ASSETS_DIR = join(ROOT, "public", "assets");
 
 function findBundle() {
   const files = readdirSync(ASSETS_DIR);
-  const js = files.find((f) => /^index-.*\.js$/.test(f));
+  // Exclude `.classic.js` siblings (those are wrappers we emit ourselves).
+  const js = files.find((f) => /^index-[^.]+\.js$/.test(f) && !f.endsWith(".classic.js"));
   const css = files.find((f) => /^index-.*\.css$/.test(f));
   if (!js) throw new Error("Could not find bundled JS in public/assets");
+  if (js.includes(".classic.")) {
+    throw new Error(`[prerender] refusing to use wrapper as source: ${js}`);
+  }
   return { js, css };
+}
+
+function cleanupStaleWrappers(currentBundleName) {
+  const expected = currentBundleName.replace(/\.js$/, ".classic.js");
+  let removed = 0;
+  for (const f of readdirSync(ASSETS_DIR)) {
+    if (/^index-.*\.classic\.js$/.test(f) && f !== expected) {
+      unlinkSync(join(ASSETS_DIR, f));
+      removed++;
+    }
+  }
+  if (removed > 0) console.log(`[prerender] removed ${removed} stale .classic.js wrapper(s)`);
 }
 
 async function main() {
@@ -100,9 +116,24 @@ async function main() {
   // cartographer plugin script right after our tag — that injected script contains a
   // literal `</script>` inside its source and breaks HTML parsing, producing a phantom
   // `<body>` and dumping the rest of the bundle as visible text on the page.
+  // The bundle is ESM with top-level `await` (i18next init), so it cannot be
+  // loaded as a classic `<script defer>`. We also can't load it as
+  // `<script type="module">` from /public — Vite's HTML import-analysis pipeline
+  // tries to transform a public asset and fails ("can only be referenced via
+  // HTML tags"), and (in earlier setups) cartographer would inject a script
+  // containing a literal `</script>` right after our tag and corrupt the HTML.
+  // Workaround: emit a sibling file that wraps the bundle in an async IIFE and
+  // reference that as a classic `defer` script. Top-level awaits become awaits
+  // inside an async function; the file is plain JS, no module graph involved.
+  const wrappedBundleName = bundleName.replace(/\.js$/, ".classic.js");
+  cleanupStaleWrappers(bundleName);
+  // Force strict mode inside the wrapper to preserve the original ESM bundle's
+  // strict-mode semantics (modules are always strict; classic scripts are not).
+  const wrappedSrc = `/* wrapped by prerender.mjs — async IIFE so top-level await works as classic script */\n(async function mwrdLandingBundle(){\n"use strict";\n${bundleSrc}\n})();\n`;
+  writeFileSync(join(ASSETS_DIR, wrappedBundleName), wrappedSrc, "utf8");
   const liveScript = document.createElement("script");
   liveScript.setAttribute("defer", "");
-  liveScript.setAttribute("src", `./assets/${bundleName}`);
+  liveScript.setAttribute("src", `./assets/${wrappedBundleName}`);
   document.head.appendChild(liveScript);
 
   // Strip Webflow template attribution attributes from <html> (data-wf-domain="grovia-…",
@@ -129,6 +160,11 @@ async function main() {
     if (type === "module") continue; // already deferred
     if (s.hasAttribute("defer") || s.hasAttribute("async")) continue;
     if (s.id === "replit-dev-banner") continue; // dev-only injected by vite plugin
+    // Skip the WebFont loader: the inline `WebFont.load(...)` call sits right
+    // after it in the head and runs synchronously. Deferring the loader would
+    // make `WebFont` undefined when that inline call executes.
+    const src = s.getAttribute("src") || "";
+    if (src.includes("webfont.js")) continue;
     s.setAttribute("defer", "");
     deferred++;
   }
