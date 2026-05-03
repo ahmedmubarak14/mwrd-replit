@@ -1,5 +1,5 @@
 kind = "web"
-previewPath = "/"
+previewPath = "/client/"
 title = "MWRD Client Portal"
 version = "1.0.0"
 id = "artifacts/client-portal"
@@ -11,7 +11,7 @@ version = "1.0.0"
 
 [[services]]
 name = "web"
-paths = [ "/" ]
+paths = [ "/client/" ]
 localPort = 25516
 
 [services.development]
@@ -28,4 +28,4 @@ to = "/index.html"
 
 [services.env]
 PORT = "25516"
-BASE_PATH = "/"
+BASE_PATH = "/client/"
