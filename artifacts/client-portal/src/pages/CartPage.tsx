@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { 
-  useGetCart, 
-  useUpdateCartItem, 
-  useRemoveCartItem, 
-  useSaveCart, 
+import { Link } from "wouter";
+import {
+  useGetCart,
+  useUpdateCartItem,
+  useRemoveCartItem,
+  useSaveCart,
   useSubmitCartAsRFQ,
   getGetCartQueryKey,
+  getListSavedCartsQueryKey,
 } from "@workspace/api-client-react";
 import { 
   Card, 
@@ -35,6 +37,8 @@ export default function CartPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [savedCartName, setSavedCartName] = useState("");
   const [rfqTitle, setRfqTitle] = useState("");
   const [deliveryCity, setDeliveryCity] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -69,11 +73,29 @@ export default function CartPage() {
     });
   };
 
+  const handleOpenSave = () => {
+    setSavedCartName(`Saved Cart ${new Date().toLocaleDateString()}`);
+    setIsSaveModalOpen(true);
+  };
+
   const handleSaveCart = () => {
-    saveCart.mutate({ data: { name: `Saved Cart ${new Date().toLocaleDateString()}` } }, {
+    if (!savedCartName.trim()) {
+      toast({ variant: "destructive", title: "Name required", description: "Give your saved cart a name to find it later." });
+      return;
+    }
+    saveCart.mutate({ data: { name: savedCartName.trim() } }, {
       onSuccess: () => {
-        toast({ title: "Cart saved successfully" });
-      }
+        queryClient.invalidateQueries({ queryKey: getGetCartQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListSavedCartsQueryKey() });
+        setIsSaveModalOpen(false);
+        toast({
+          title: "Cart saved",
+          description: "Find it under Saved carts. Expires in 7 days.",
+        });
+      },
+      onError: (err: any) => {
+        toast({ variant: "destructive", title: "Failed to save", description: err.message });
+      },
     });
   };
 
@@ -191,16 +213,21 @@ export default function CartPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-              <Button 
-                className="w-full gap-2" 
-                variant="outline" 
-                onClick={handleSaveCart}
+              <Button
+                className="w-full gap-2"
+                variant="outline"
+                onClick={handleOpenSave}
                 disabled={items.length === 0 || saveCart.isPending}
                 data-testid="button-save-cart"
               >
                 <Save01 className="h-4 w-4" />
                 Save for Later
               </Button>
+              <Link href="/cart/saved" className="w-full">
+                <Button variant="ghost" className="w-full text-xs" data-testid="link-view-saved-carts">
+                  View saved carts
+                </Button>
+              </Link>
               <Button 
                 className="w-full gap-2" 
                 size="lg"
@@ -271,6 +298,35 @@ export default function CartPage() {
               data-testid="button-confirm-submit"
             >
               Confirm Submission
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSaveModalOpen} onOpenChange={setIsSaveModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save cart for later</DialogTitle>
+            <DialogDescription>
+              Park this basket so you can resume or submit it later. Saved carts expire 7 days from creation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="saved-cart-name">Cart name</Label>
+            <Input
+              id="saved-cart-name"
+              value={savedCartName}
+              onChange={(e) => setSavedCartName(e.target.value)}
+              placeholder="e.g. Q3 office restock"
+              data-testid="input-saved-cart-name"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSaveModalOpen(false)} data-testid="button-cancel-save">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveCart} disabled={saveCart.isPending} data-testid="button-confirm-save">
+              {saveCart.isPending ? "Saving…" : "Save cart"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -31,6 +31,7 @@ const navConfig: NavItem[] = [
   { href: "/catalog", icon: ShoppingBag01, label: "Catalog" },
   { href: "/catalog/bundles", icon: Package, label: "Bundles" },
   { href: "/cart", icon: ShoppingCart01, label: "Cart" },
+  { href: "/cart/saved", icon: ShoppingCart01, label: "Saved carts" },
   { divider: true },
   { href: "/rfqs", icon: File06, label: "RFQs" },
   { href: "/orders", icon: Package, label: "Orders" },

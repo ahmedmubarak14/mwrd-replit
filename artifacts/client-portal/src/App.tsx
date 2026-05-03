@@ -13,6 +13,7 @@ import CatalogPage from "@/pages/CatalogPage";
 import BundlesPage from "@/pages/BundlesPage";
 import BundleDetailPage from "@/pages/BundleDetailPage";
 import CartPage from "@/pages/CartPage";
+import SavedCartsPage from "@/pages/SavedCartsPage";
 import RFQsPage from "@/pages/RFQsPage";
 import RFQDetailPage from "@/pages/RFQDetailPage";
 import RFQComparePage from "@/pages/RFQComparePage";
@@ -64,6 +65,9 @@ function Router() {
       </Route>
       <Route path="/catalog">
         {(params) => <ProtectedRoute component={CatalogPage} path="/catalog" {...params} />}
+      </Route>
+      <Route path="/cart/saved">
+        {(params) => <ProtectedRoute component={SavedCartsPage} path="/cart/saved" {...params} />}
       </Route>
       <Route path="/cart">
         {(params) => <ProtectedRoute component={CartPage} path="/cart" {...params} />}
