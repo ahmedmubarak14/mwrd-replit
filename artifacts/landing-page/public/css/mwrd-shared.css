@@ -7220,3 +7220,57 @@ figure {
     animation: none;
   }
 }
+
+/* ============================================================
+   mwrd process-cards interactive expand
+   --------------------------------------------------------------
+   The Webflow IX2 actions a-51 / a-53 / a-55 ("Process card 02 on
+   hover", "Process card 03 on hover", "Process card hover out")
+   used selector-based triggers to expand the hovered card to 50%
+   while shrinking siblings to 25% and toggling which
+   .process-image-wrap is shown. Those selector triggers don't
+   bind in our embedded preview environment (same root cause as
+   the ticker marquee), so the cards just sit there static.
+   We replace it with pure CSS using :has() for hover and a
+   data attribute set by a tiny click handler for touch devices.
+   ============================================================ */
+.process-card {
+  transition:
+    border .4s ease,
+    box-shadow .4s ease,
+    background-color .4s ease,
+    width .45s cubic-bezier(.4, 0, .2, 1);
+}
+.process-image-wrap {
+  transition: opacity .35s ease;
+}
+/* --- hover card 2 --- */
+.process:has(> .process-card._2:hover) > .process-card._1,
+.process[data-mwrd-active="2"] > .process-card._1 { width: 25%; }
+.process:has(> .process-card._2:hover) > .process-card._2,
+.process[data-mwrd-active="2"] > .process-card._2 { width: 50%; }
+.process:has(> .process-card._2:hover) > .process-card._3,
+.process[data-mwrd-active="2"] > .process-card._3 { width: 25%; }
+.process:has(> .process-card._2:hover) .process-image-wrap._1,
+.process[data-mwrd-active="2"] .process-image-wrap._1 { display: none; }
+.process:has(> .process-card._2:hover) .process-image-wrap._2,
+.process[data-mwrd-active="2"] .process-image-wrap._2 { display: flex; opacity: 1; }
+.process:has(> .process-card._2:hover) .process-image-wrap._3,
+.process[data-mwrd-active="2"] .process-image-wrap._3 { display: none; }
+/* --- hover card 3 --- */
+.process:has(> .process-card._3:hover) > .process-card._1,
+.process[data-mwrd-active="3"] > .process-card._1 { width: 25%; }
+.process:has(> .process-card._3:hover) > .process-card._2,
+.process[data-mwrd-active="3"] > .process-card._2 { width: 25%; }
+.process:has(> .process-card._3:hover) > .process-card._3,
+.process[data-mwrd-active="3"] > .process-card._3 { width: 50%; }
+.process:has(> .process-card._3:hover) .process-image-wrap._1,
+.process[data-mwrd-active="3"] .process-image-wrap._1 { display: none; }
+.process:has(> .process-card._3:hover) .process-image-wrap._2,
+.process[data-mwrd-active="3"] .process-image-wrap._2 { display: none; }
+.process:has(> .process-card._3:hover) .process-image-wrap._3,
+.process[data-mwrd-active="3"] .process-image-wrap._3 { display: flex; opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .process-card { transition: none; }
+  .process-image-wrap { transition: none; }
+}

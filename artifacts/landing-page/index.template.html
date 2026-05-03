@@ -101,6 +101,37 @@
   }
   setTimeout(ensureSignIn,500);
   setTimeout(ensureSignIn,2000);
+  // Process-card click toggle for touch devices. The CSS uses :has() for
+  // hover (desktop), but touch devices have no hover state, so we set a
+  // data-mwrd-active attribute on the .process container that the CSS
+  // also keys off of. Click again on the same card (or anywhere outside)
+  // to reset to the default (card 1) state.
+  function bindProcessCards(){
+    var process=document.querySelector('.process');
+    if(!process||process.dataset.mwrdProcessBound) return;
+    process.dataset.mwrdProcessBound='1';
+    var cards=process.querySelectorAll('.process-card');
+    cards.forEach(function(card){
+      var idx=card.classList.contains('_2')?'2':card.classList.contains('_3')?'3':'1';
+      card.style.cursor='pointer';
+      // Capture phase + stopImmediatePropagation so any future document-level
+      // click handlers don't accidentally clear our state.
+      card.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+        if(idx==='1'){
+          process.removeAttribute('data-mwrd-active');
+        }else{
+          process.setAttribute('data-mwrd-active',idx);
+        }
+      },true);
+    });
+  }
+  bindProcessCards();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',bindProcessCards,{once:true});
+  }
+  setTimeout(bindProcessCards,500);
   // Language switcher updates: re-run when the body lang class flips so the label
   // re-localizes. Listen for our own custom event if dispatched, fall back to a
   // single short observer scoped to the body's class attribute only (cheap, no subtree).
