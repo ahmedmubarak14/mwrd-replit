@@ -237,6 +237,16 @@ async function main() {
     console.log(`[prerender] repaired ${attrFixed} attrs with trailing '/' (XHTML self-close artifact)`);
   }
 
+  // Fix portal CTAs that the bundle renders with generic anchors.
+  // "Request a walkthrough" → /client/register (bundle emits href="#contact")
+  for (const a of document.querySelectorAll("a.primary-button, a.outline-button")) {
+    const text = a.querySelector("p.button-text")?.textContent?.trim() ?? "";
+    if (text === "Request a walkthrough" && a.getAttribute("href") === "#contact") {
+      a.setAttribute("href", "/client/register");
+      console.log('[prerender] patched "Request a walkthrough" href → /client/register');
+    }
+  }
+
   // Serialize
   let out = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
 
