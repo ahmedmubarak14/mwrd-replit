@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>MWRD invite teammates</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://rsms.me/"/><link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+<style>
+  html,body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;background:#F4F1EC;}
+  .stage{width:1120px;height:840px;display:flex;align-items:center;justify-content:center;}
+  .card{box-shadow:0 32px 80px -24px rgba(16,24,40,.18),0 8px 24px -8px rgba(16,24,40,.10);}
+  .ring{box-shadow:0 0 0 4px #fff;}
+  .chip{font-feature-settings:"cv11","ss01";}
+</style></head>
+<body class="m-0 p-0">
+<div class="stage">
+  <div class="card relative w-[760px] rounded-[28px] bg-white p-7 ring-1 ring-[rgba(16,24,40,.06)]">
+    <!-- subtle MWRD glow -->
+    <div class="absolute -top-24 -right-24 h-72 w-72 rounded-full" style="background:radial-gradient(closest-side,rgba(255,109,67,.32),rgba(255,109,67,0))"></div>
+    <div class="absolute -bottom-20 -left-16 h-64 w-64 rounded-full" style="background:radial-gradient(closest-side,rgba(255,176,140,.28),rgba(255,176,140,0))"></div>
+
+    <!-- header -->
+    <div class="relative flex items-start justify-between">
+      <div>
+        <div class="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#FF6D43]">
+          <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-[#FFE7DD] text-[10px]">+</span>
+          Team access
+        </div>
+        <h2 class="mt-2 text-[26px] font-semibold tracking-tight text-[#0E1116]">Invite your procurement team</h2>
+        <p class="mt-1 max-w-[420px] text-[14px] leading-[1.55] text-[#5A6270]">Bring buyers, approvers, and finance into one workspace. Permissions are role-based and audit-logged.</p>
+      </div>
+      <span class="rounded-full bg-[#0E1116] px-3 py-1.5 text-[11px] font-semibold text-white">3 seats left</span>
+    </div>
+
+    <!-- input row -->
+    <div class="relative mt-6 flex items-center gap-2 rounded-2xl border border-[rgba(16,24,40,.08)] bg-[#F8F7F4] p-2 pl-4">
+      <svg class="h-4 w-4 text-[#8A93A2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16v12H4z"/><path d="m4 6 8 7 8-7"/></svg>
+      <input class="flex-1 bg-transparent text-[14px] text-[#0E1116] placeholder-[#8A93A2] outline-none" placeholder="ahmad@company.sa, sara@company.sa…"/>
+      <div class="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[12px] font-medium text-[#0E1116] ring-1 ring-[rgba(16,24,40,.08)]">
+        <span class="h-1.5 w-1.5 rounded-full bg-[#FF6D43]"></span> Buyer <svg class="h-3 w-3 text-[#5A6270]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <button class="rounded-xl bg-[#FF6D43] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_8px_18px_-6px_rgba(255,109,67,.55)]">Send invites</button>
+    </div>
+
+    <!-- existing members -->
+    <div class="relative mt-6 overflow-hidden rounded-2xl border border-[rgba(16,24,40,.08)] bg-white">
+      <div class="grid grid-cols-[1fr_120px_120px_28px] gap-3 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[#8A93A2]">
+        <div>Member</div><div>Role</div><div>Status</div><div></div>
+      </div>
+      <div class="divide-y divide-[rgba(16,24,40,.06)]">
+
+        <div class="grid grid-cols-[1fr_120px_120px_28px] items-center gap-3 px-5 py-3.5">
+          <div class="flex items-center gap-3">
+            <div class="ring grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[#FF8E6B] to-[#FF6D43] text-[12px] font-semibold text-white">AH</div>
+            <div><div class="text-[13.5px] font-semibold text-[#0E1116]">Ahmed Hassan</div><div class="text-[12px] text-[#5A6270]">ahmed@al-rajhi.sa · Owner</div></div>
+          </div>
+          <div><span class="rounded-full bg-[#FFE7DD] px-2.5 py-1 text-[11px] font-semibold text-[#B5431F]">Admin</span></div>
+          <div><span class="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#0E1116]"><span class="h-1.5 w-1.5 rounded-full bg-[#079455]"></span>Active</span></div>
+          <div class="text-[#8A93A2]">⋯</div>
+        </div>
+
+        <div class="grid grid-cols-[1fr_120px_120px_28px] items-center gap-3 px-5 py-3.5">
+          <div class="flex items-center gap-3">
+            <div class="ring grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[#7C8DFF] to-[#3D5BFF] text-[12px] font-semibold text-white">SK</div>
+            <div><div class="text-[13.5px] font-semibold text-[#0E1116]">Sara Khaled</div><div class="text-[12px] text-[#5A6270]">sara@al-rajhi.sa · Procurement lead</div></div>
+          </div>
+          <div><span class="rounded-full bg-[#EAF4FF] px-2.5 py-1 text-[11px] font-semibold text-[#1D4ED8]">Buyer</span></div>
+          <div><span class="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#0E1116]"><span class="h-1.5 w-1.5 rounded-full bg-[#079455]"></span>Active</span></div>
+          <div class="text-[#8A93A2]">⋯</div>
+        </div>
+
+        <div class="grid grid-cols-[1fr_120px_120px_28px] items-center gap-3 px-5 py-3.5">
+          <div class="flex items-center gap-3">
+            <div class="ring grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[#33C481] to-[#079455] text-[12px] font-semibold text-white">MA</div>
+            <div><div class="text-[13.5px] font-semibold text-[#0E1116]">Mohammed Al-Otaibi</div><div class="text-[12px] text-[#5A6270]">m.alotaibi@al-rajhi.sa · CFO</div></div>
+          </div>
+          <div><span class="rounded-full bg-[#E7F7EE] px-2.5 py-1 text-[11px] font-semibold text-[#0F7A45]">Approver</span></div>
+          <div><span class="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#0E1116]"><span class="h-1.5 w-1.5 rounded-full bg-[#079455]"></span>Active</span></div>
+          <div class="text-[#8A93A2]">⋯</div>
+        </div>
+
+        <div class="grid grid-cols-[1fr_120px_120px_28px] items-center gap-3 px-5 py-3.5 bg-[#FFFAF6]">
+          <div class="flex items-center gap-3">
+            <div class="ring grid h-9 w-9 place-items-center rounded-full border border-dashed border-[#FF6D43] text-[12px] font-semibold text-[#FF6D43]">NR</div>
+            <div><div class="text-[13.5px] font-semibold text-[#0E1116]">noura@al-rajhi.sa</div><div class="text-[12px] text-[#5A6270]">Invite sent · expires in 6 days</div></div>
+          </div>
+          <div><span class="rounded-full bg-[#EAF4FF] px-2.5 py-1 text-[11px] font-semibold text-[#1D4ED8]">Buyer</span></div>
+          <div><span class="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#C17B11]"><span class="h-1.5 w-1.5 rounded-full bg-[#F5A623]"></span>Pending</span></div>
+          <div class="text-[#8A93A2]">⋯</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- footer -->
+    <div class="relative mt-5 flex items-center justify-between text-[12px] text-[#5A6270]">
+      <div class="flex items-center gap-1.5"><svg class="h-3.5 w-3.5 text-[#079455]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l4 4 10-10"/></svg> Single sign-on enabled · SAML 2.0</div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex h-6 items-center rounded-md bg-[#F1EFEA] px-2 font-medium text-[#0E1116]">SOC 2</span>
+        <span class="inline-flex h-6 items-center rounded-md bg-[#F1EFEA] px-2 font-medium text-[#0E1116]">ZATCA-ready</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>
