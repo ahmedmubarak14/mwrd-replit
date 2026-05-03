@@ -42,6 +42,12 @@ uri = "file://artifacts/landing-page/public/images/step-3.png"
 type = "image"
 title = "step-3-deliver"
 
+[[generated]]
+id = "Tc0AUQQy8Y3rZ8VEQ6guq"
+uri = "file://artifacts/landing-page/public/images/dashboard.png"
+type = "image"
+title = "mwrd buyer dashboard special request top"
+
 [[outputs]]
 id = "T9yvCLr1TYarAURRWpYEj"
 uri = "file://screenshots/client-login.jpg"
