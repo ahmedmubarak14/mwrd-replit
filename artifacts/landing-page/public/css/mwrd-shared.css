@@ -7163,3 +7163,60 @@ figure {
     grid-area: span 1 / span 2 / span 1 / span 2;
   }
 }
+
+/* ============================================================
+   mwrd ticker animations
+   --------------------------------------------------------------
+   The Webflow IX2 runtime defines marquee animations a-42 / a-56 /
+   a-57 (Ticker H / Ticker V Up / Ticker V Down) that target
+   .ticker-content-h, .ticker-content-v-up, and .ticker-content-v-down
+   via class selectors and translate them by -100% over 20s on
+   PAGE_START. Empirically those PAGE_START → selector triggers do
+   not bind in our embedded preview environment (IX2 loads, sets
+   `w-mod-ix`, but never applies any inline transform to the
+   ticker children). The DOM already ships three duplicate copies
+   of each .ticker-content-* track precisely so a plain CSS
+   keyframe animation can loop seamlessly without IX2.
+   Keep these here so the marquees keep working even if Webflow's
+   CDN chunks are blocked entirely.
+   ============================================================ */
+@keyframes mwrd-ticker-h {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+@keyframes mwrd-ticker-h-rtl {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+@keyframes mwrd-ticker-v-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+@keyframes mwrd-ticker-v-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+.ticker-h .ticker-content-h {
+  animation: mwrd-ticker-h 30s linear infinite;
+  will-change: transform;
+}
+[dir="rtl"] .ticker-h .ticker-content-h {
+  animation-name: mwrd-ticker-h-rtl;
+}
+.ticker-v-up .ticker-content-v-up,
+.integration-logo-ticker .ticker-content-v-up {
+  animation: mwrd-ticker-v-up 30s linear infinite;
+  will-change: transform;
+}
+.ticker-v-down .ticker-content-v-down {
+  animation: mwrd-ticker-v-down 30s linear infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-h .ticker-content-h,
+  .ticker-v-up .ticker-content-v-up,
+  .integration-logo-ticker .ticker-content-v-up,
+  .ticker-v-down .ticker-content-v-down {
+    animation: none;
+  }
+}
