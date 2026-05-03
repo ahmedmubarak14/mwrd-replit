@@ -103,7 +103,7 @@ All list pages (supplier portal: RFQs/Offers/Quotes/Orders/Notifications/Account
 
 Run before each `suggest_deploy`:
 
-1. **Landing page** (`/landing/`): `curl -s http://localhost:80/landing/ | grep -ciE 'grovia'` should print `2` (only `data-wf-domain` attr + Webflow CDN URL — both invisible). View-source must show "Procure for your business" hero copy directly in HTML.
+1. **Landing page** (`/landing/`): `curl -s http://localhost:80/landing/ | grep -ciE 'grovia|MWRD|mwrd-enhanced|http://localhost|replit\.dev'` should print `0`. View-source must show "Procure for your business" hero copy and lowercase `mwrd` brand directly in HTML. Title tag must read `mwrd — AI-powered procurement…`.
 2. **Auth round-trip**: all three demo logins return a token via `POST /api/auth/login` with the credentials from the table above.
 3. **Artifact paths**: `/landing/`, `/client/`, `/supplier/`, `/backoffice/`, `/api/healthz` all return 200.
 4. **Cross-links**: client/supplier login pages link logo back to `/landing/`. Landing "Sign in" injection points to the correct portal.
