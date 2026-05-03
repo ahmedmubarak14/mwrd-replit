@@ -212,7 +212,7 @@ export function Sidebar() {
     if (clickTimerRef.current !== null) {
       clearTimeout(clickTimerRef.current);
       clickTimerRef.current = null;
-      window.location.href = "/landing/";
+      window.location.href = "/";
     } else {
       clickTimerRef.current = setTimeout(() => {
         clickTimerRef.current = null;

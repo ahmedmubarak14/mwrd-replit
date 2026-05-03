@@ -48,7 +48,7 @@ async function main() {
   virtualConsole.on("jsdomError", (e) => console.error("[jsdom internal]", e?.message ?? e));
 
   const dom = new JSDOM(html, {
-    url: "http://localhost/landing/",
+    url: "http://localhost/",
     runScripts: "outside-only",
     pretendToBeVisual: true,
     virtualConsole,
@@ -241,13 +241,13 @@ async function main() {
   let out = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
 
   // Strip the prerender-time origin baked in by the bundle's `new URL(..., document.baseURI)`
-  // calls. We strip to an empty string (not `/landing/`) so the resulting paths are
-  // document-relative. Vite's HTML transform re-prepends the configured base to absolute
-  // paths starting with `/`, which would otherwise double the prefix to `/landing/landing/…`
-  // for asset URLs that React renders. Document-relative paths resolve correctly under both
-  // the dev server and the published static site (where the document URL ends in `/landing/`).
-  const beforeStrip = (out.match(/http:\/\/localhost\/landing\//g) || []).length;
-  out = out.replaceAll("http://localhost/landing/", "");
+  // calls. We strip to an empty string so the resulting paths are document-relative.
+  // The landing page now lives at `/` (BASE_PATH="/"), so the JSDOM URL is
+  // `http://localhost/` and any baked-in absolute paths start with `http://localhost/`.
+  // Document-relative paths resolve correctly under both the dev server and the published
+  // static site (where the document URL is at the root `/`).
+  const beforeStrip = (out.match(/http:\/\/localhost\//g) || []).length;
+  out = out.replaceAll("http://localhost/", "");
   if (beforeStrip > 0) {
     console.log(`[prerender] stripped ${beforeStrip} baked-in localhost origins`);
   }

@@ -65,7 +65,7 @@ export default function LoginPage() {
       {/* Left — form */}
       <div className="flex flex-col w-full lg:w-1/2 px-6 sm:px-12 lg:px-20 py-8">
         <div className="flex items-center">
-          <a href="/landing/" aria-label="mwrd home" className="inline-flex">
+          <a href="/" aria-label="mwrd home" className="inline-flex">
             <img src={`${import.meta.env.BASE_URL}logo.png`} alt="mwrd" className="h-9 w-auto" />
           </a>
         </div>

@@ -1,5 +1,5 @@
 kind = "web"
-previewPath = "/landing/"
+previewPath = "/"
 title = "MWRD Landing Page"
 version = "1.0.0"
 id = "artifacts/landing-page"
@@ -11,7 +11,7 @@ version = "1.0.0"
 
 [[services]]
 name = "web"
-paths = [ "/landing/" ]
+paths = [ "/" ]
 localPort = 18083
 
 [services.development]
@@ -28,4 +28,4 @@ to = "/index.html"
 
 [services.env]
 PORT = "18083"
-BASE_PATH = "/landing/"
+BASE_PATH = "/"
