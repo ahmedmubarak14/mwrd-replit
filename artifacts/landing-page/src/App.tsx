@@ -9,18 +9,16 @@ type Lang = "en" | "ar";
 
 const COPY = {
   en: {
-    nav: { about: "About", features: "Features", pricing: "Pricing", contact: "Contact" },
+    nav: { about: "About", services: "Services", results: "Results" },
     signIn: "Sign in",
-    register: "Register",
+    contact: "Contact us",
     hero: {
-      eyebrow: "AI-powered B2B procurement",
-      title: "Procure smarter, without the friction",
+      title: ["Procure for your", "business smarter and", "without the friction"],
       subtitle:
         "MWRD connects you with verified suppliers, unlocks competitive pricing, and manages every purchase request from one place.",
       ctaPrimary: "Register your interest",
-      ctaSecondary: "Sign in to your account",
+      ctaSecondary: "Learn more",
     },
-    trusted: "Trusted by procurement teams across Saudi Arabia",
     process: {
       heading: "How MWRD works",
       sub: "From request to delivery in three clean steps.",
@@ -58,18 +56,16 @@ const COPY = {
     footer: { rights: "All rights reserved." },
   },
   ar: {
-    nav: { about: "من نحن", features: "المزايا", pricing: "الأسعار", contact: "تواصل" },
+    nav: { about: "من نحن", services: "خدماتنا", results: "النتائج" },
     signIn: "تسجيل الدخول",
-    register: "سجّل الآن",
+    contact: "تواصل معنا",
     hero: {
-      eyebrow: "منصة مشتريات B2B مدعومة بالذكاء الاصطناعي",
-      title: "اشترِ بذكاء، بدون تعقيد",
+      title: ["اشترِ لأعمالك", "بذكاء أكبر", "وبدون أي تعقيد"],
       subtitle:
         "تربطك مَوْرِد بموردين موثّقين وتفتح لك أسعارًا تنافسية وتدير جميع طلبات الشراء من مكان واحد.",
       ctaPrimary: "سجّل اهتمامك",
-      ctaSecondary: "ادخل إلى حسابك",
+      ctaSecondary: "اعرف المزيد",
     },
-    trusted: "موثوقة من قِبل فرق المشتريات في المملكة العربية السعودية",
     process: {
       heading: "كيف تعمل مَوْرِد",
       sub: "من الطلب إلى التسليم في ثلاث خطوات واضحة.",
@@ -108,7 +104,13 @@ const COPY = {
   },
 };
 
-const PARTNER_LOGOS = ["jaras.svg", "qubit.svg", "salesup.svg", "carsvid.svg", "rakiz.png", "hatif.png", "zid.webp"];
+const PARTNER_LOGOS = ["jaras.svg", "hatif.png", "qubit.svg", "salesup.svg", "rakiz.png", "zid.webp", "carsvid.svg"];
+
+const ArrowIcon = ({ className = "" }: { className?: string }) => (
+  <svg width="18" height="18" viewBox="0 0 32 32" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M28.06 17.06l-9 9a1.5 1.5 0 0 1-2.12-2.12L23.37 17.5H5a1.5 1.5 0 0 1 0-3h18.37l-6.43-6.44a1.5 1.5 0 1 1 2.12-2.12l9 9a1.5 1.5 0 0 1 0 2.12z" />
+  </svg>
+);
 
 function Header({
   lang,
@@ -122,64 +124,62 @@ function Header({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[rgb(228,231,236)]">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 h-16 flex items-center justify-between">
-        <a href="#top" className="flex items-center gap-2">
-          <img src="logo.png" alt="MWRD" className="h-8 w-auto" />
-        </a>
+    <div className="sticky top-4 z-40 px-4">
+      <div className="mx-auto max-w-[1180px]">
+        <div className="bg-white rounded-full shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_rgba(16,24,40,0.06)] border border-black/5 px-3 py-2 flex items-center justify-between gap-3">
+          <a href="#top" className="flex items-center gap-2 px-3 shrink-0">
+            <img src="logo.png" alt="MWRD" className="h-8 w-auto" />
+          </a>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[rgb(52,64,84)]">
-          <a href="#features" className="hover:text-[rgb(255,109,67)] transition-colors">
-            {t.nav.about}
-          </a>
-          <a href="#features" className="hover:text-[rgb(255,109,67)] transition-colors">
-            {t.nav.features}
-          </a>
-          <a href="#pricing" className="hover:text-[rgb(255,109,67)] transition-colors">
-            {t.nav.pricing}
-          </a>
-          <a href="#register" className="hover:text-[rgb(255,109,67)] transition-colors">
-            {t.nav.contact}
-          </a>
-        </nav>
+          <nav className="hidden lg:flex items-center gap-7 text-[15px] font-medium text-neutral-800">
+            <a href="#features" className="hover:text-[rgb(255,109,67)] transition-colors">{t.nav.about}</a>
+            <a href="#process" className="hover:text-[rgb(255,109,67)] transition-colors">{t.nav.services}</a>
+            <a href="#features" className="hover:text-[rgb(255,109,67)] transition-colors">{t.nav.results}</a>
+          </nav>
 
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center rounded-full border border-[rgb(228,231,236)] p-0.5 bg-white text-xs font-semibold">
-            <button
-              onClick={() => setLang("en")}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                lang === "en" ? "bg-[rgb(16,24,40)] text-white" : "text-[rgb(102,112,133)] hover:text-[rgb(16,24,40)]"
-              }`}
-              aria-pressed={lang === "en"}
+          <div className="hidden md:flex items-center gap-2">
+            <div className="flex items-center rounded-full border border-neutral-200 p-0.5 bg-white text-xs font-semibold">
+              <button
+                onClick={() => setLang("ar")}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-colors ${
+                  lang === "ar" ? "bg-neutral-100 text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
+                }`}
+                aria-pressed={lang === "ar"}
+              >
+                <span className="text-base leading-none">🇸🇦</span>
+                <span>العربية</span>
+              </button>
+              <button
+                onClick={() => setLang("en")}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-colors ${
+                  lang === "en" ? "bg-neutral-100 text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
+                }`}
+                aria-pressed={lang === "en"}
+              >
+                <span className="text-base leading-none">🇬🇧</span>
+                <span>English</span>
+              </button>
+            </div>
+
+            <a
+              href="/client/login"
+              className="hidden sm:inline-flex items-center px-4 py-2 text-[15px] font-medium text-neutral-700 hover:text-neutral-900 transition-colors"
             >
-              EN
-            </button>
-            <button
-              onClick={() => setLang("ar")}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                lang === "ar" ? "bg-[rgb(16,24,40)] text-white" : "text-[rgb(102,112,133)] hover:text-[rgb(16,24,40)]"
-              }`}
-              aria-pressed={lang === "ar"}
+              {t.signIn}
+            </a>
+            <a
+              href="#register"
+              className="group inline-flex items-center gap-2 rounded-full bg-neutral-900 text-white pl-5 pr-2 py-2 text-[15px] font-medium hover:bg-neutral-800 transition-colors"
             >
-              ع
-            </button>
+              <span>{t.contact}</span>
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-neutral-900 group-hover:translate-x-0.5 transition-transform">
+                <ArrowIcon />
+              </span>
+            </a>
           </div>
 
-          <a
-            href="/"
-            className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-[rgb(52,64,84)] hover:text-[rgb(16,24,40)] transition-colors"
-          >
-            {t.signIn}
-          </a>
-          <a
-            href="#register"
-            className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg bg-[rgb(16,24,40)] text-white hover:bg-[rgb(52,64,84)] transition-colors"
-          >
-            {t.register}
-          </a>
-
           <button
-            className="md:hidden p-2 -mr-2"
+            className="md:hidden p-2"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
           >
@@ -190,67 +190,109 @@ function Header({
             </svg>
           </button>
         </div>
-      </div>
 
-      {mobileOpen && (
-        <div className="md:hidden border-t border-[rgb(228,231,236)] bg-white px-6 py-4 space-y-3 text-sm font-medium">
-          <a href="#features" className="block py-1.5" onClick={() => setMobileOpen(false)}>{t.nav.features}</a>
-          <a href="#pricing" className="block py-1.5" onClick={() => setMobileOpen(false)}>{t.nav.pricing}</a>
-          <a href="#register" className="block py-1.5" onClick={() => setMobileOpen(false)}>{t.nav.contact}</a>
-          <a href="/" className="block py-1.5">{t.signIn}</a>
-        </div>
-      )}
-    </header>
+        {mobileOpen && (
+          <div className="md:hidden mt-2 bg-white rounded-2xl shadow-lg border border-black/5 px-5 py-4 space-y-3 text-sm font-medium">
+            <a href="#features" className="block py-1.5" onClick={() => setMobileOpen(false)}>{t.nav.about}</a>
+            <a href="#process" className="block py-1.5" onClick={() => setMobileOpen(false)}>{t.nav.services}</a>
+            <a href="#features" className="block py-1.5" onClick={() => setMobileOpen(false)}>{t.nav.results}</a>
+            <a href="/client/login" className="block py-1.5">{t.signIn}</a>
+            <div className="flex gap-2 pt-2 border-t border-neutral-100">
+              <button
+                onClick={() => setLang("ar")}
+                className={`flex-1 px-3 py-2 rounded-full text-xs font-semibold ${lang === "ar" ? "bg-neutral-900 text-white" : "bg-neutral-100"}`}
+              >
+                🇸🇦 العربية
+              </button>
+              <button
+                onClick={() => setLang("en")}
+                className={`flex-1 px-3 py-2 rounded-full text-xs font-semibold ${lang === "en" ? "bg-neutral-900 text-white" : "bg-neutral-100"}`}
+              >
+                🇬🇧 English
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
 function Hero({ t }: { t: typeof COPY.en }) {
   return (
-    <section id="top" className="relative overflow-hidden bg-gradient-to-b from-[rgb(255,247,242)] to-white">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 lg:py-28 grid lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgb(255,228,217)] text-[rgb(193,53,15)] text-xs font-semibold tracking-wide">
-            <span className="w-1.5 h-1.5 rounded-full bg-[rgb(255,109,67)]" />
-            {t.hero.eyebrow}
-          </span>
-          <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[rgb(16,24,40)] leading-[1.05]">
-            {t.hero.title}
-          </h1>
-          <p className="mt-5 text-lg text-[rgb(71,84,103)] max-w-xl">{t.hero.subtitle}</p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <a
-              href="#register"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[rgb(255,109,67)] text-white font-semibold hover:bg-[rgb(229,87,49)] transition-colors shadow-[0_1px_2px_rgba(16,24,40,0.05)]"
-            >
-              {t.hero.ctaPrimary}
-            </a>
-            <a
-              href="/"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white text-[rgb(52,64,84)] font-semibold border border-[rgb(228,231,236)] hover:bg-[rgb(249,250,251)] transition-colors"
-            >
-              {t.hero.ctaSecondary}
-            </a>
+    <section id="top" className="relative">
+      <div className="mx-auto max-w-[1240px] px-6 lg:px-10 pt-16 lg:pt-24 pb-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Hero text */}
+          <div>
+            <h1 className="text-[44px] sm:text-[56px] lg:text-[68px] leading-[1.05] tracking-[-0.02em] font-semibold text-neutral-900">
+              {t.hero.title.map((line, i) => (
+                <span key={i} className="block">{line}</span>
+              ))}
+            </h1>
+            <p className="mt-6 text-[17px] leading-relaxed text-neutral-600 max-w-[520px]">
+              {t.hero.subtitle}
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <a
+                href="#register"
+                className="group inline-flex items-center gap-2 rounded-full bg-neutral-900 text-white pl-6 pr-2 py-2.5 text-[15px] font-medium hover:bg-neutral-800 transition-colors"
+              >
+                <span>{t.hero.ctaPrimary}</span>
+                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-white text-neutral-900 group-hover:translate-x-0.5 transition-transform">
+                  <ArrowIcon />
+                </span>
+              </a>
+              <a
+                href="#process"
+                className="inline-flex items-center px-6 py-3 rounded-full border border-neutral-300 text-[15px] font-medium text-neutral-900 hover:bg-neutral-50 transition-colors"
+              >
+                {t.hero.ctaSecondary}
+              </a>
+            </div>
           </div>
-        </div>
 
-        <div className="relative">
-          <RegisterForm t={t} idSuffix="top" />
+          {/* Hero UI cards */}
+          <div className="relative h-[440px] sm:h-[500px] lg:h-[520px]">
+            <img
+              src="images/hero-card-1.jpg"
+              alt="Customers dashboard"
+              className="absolute top-0 right-0 lg:right-4 w-[88%] sm:w-[78%] rounded-2xl shadow-[0_24px_60px_-20px_rgba(16,24,40,0.18)] border border-black/5"
+            />
+            <img
+              src="images/hero-card-2.jpg"
+              alt="Daily Average chart"
+              className="absolute bottom-0 left-0 lg:left-2 w-[60%] sm:w-[52%] rounded-2xl shadow-[0_24px_60px_-20px_rgba(16,24,40,0.22)] border border-black/5"
+            />
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function PartnerStrip({ t }: { t: typeof COPY.en }) {
+function Marquee() {
+  // duplicate logos for seamless loop
+  const logos = [...PARTNER_LOGOS, ...PARTNER_LOGOS];
   return (
-    <section className="py-12 border-y border-[rgb(228,231,236)] bg-white">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <p className="text-center text-xs font-semibold tracking-widest uppercase text-[rgb(102,112,133)] mb-6">
-          {t.trusted}
-        </p>
-        <div className="flex items-center justify-center gap-10 flex-wrap opacity-70 grayscale">
-          {PARTNER_LOGOS.map((src) => (
-            <img key={src} src={`client-logos/${src}`} alt="" className="h-6 w-auto" />
+    <section className="py-10 overflow-hidden" aria-label="Trusted by partners">
+      <div className="relative">
+        <div
+          className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(to right, rgb(245,242,237), transparent)" }}
+        />
+        <div
+          className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(to left, rgb(245,242,237), transparent)" }}
+        />
+        <div className="flex items-center gap-16 animate-mwrd-marquee whitespace-nowrap">
+          {logos.map((src, i) => (
+            <img
+              key={`${src}-${i}`}
+              src={`client-logos/${src}`}
+              alt=""
+              className="h-9 w-auto opacity-80 grayscale hover:grayscale-0 transition shrink-0"
+            />
           ))}
         </div>
       </div>
@@ -258,25 +300,41 @@ function PartnerStrip({ t }: { t: typeof COPY.en }) {
   );
 }
 
+function DashboardMock() {
+  return (
+    <section className="px-6 lg:px-10 pb-20">
+      <div className="mx-auto max-w-[1180px]">
+        <img
+          src="images/dashboard.jpg"
+          alt="MWRD dashboard preview"
+          className="w-full rounded-3xl shadow-[0_40px_80px_-30px_rgba(16,24,40,0.25)] border border-black/5"
+        />
+      </div>
+    </section>
+  );
+}
+
 function Process({ t }: { t: typeof COPY.en }) {
   return (
-    <section className="py-20 lg:py-24 bg-[rgb(252,252,253)]">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section id="process" className="py-20 lg:py-24 bg-white">
+      <div className="mx-auto max-w-[1180px] px-6 lg:px-10">
         <div className="max-w-2xl">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[rgb(16,24,40)] tracking-tight">{t.process.heading}</h2>
-          <p className="mt-3 text-lg text-[rgb(71,84,103)]">{t.process.sub}</p>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-neutral-900 tracking-[-0.02em]">
+            {t.process.heading}
+          </h2>
+          <p className="mt-4 text-lg text-neutral-600">{t.process.sub}</p>
         </div>
-        <div className="mt-12 grid md:grid-cols-3 gap-6">
+        <div className="mt-12 grid md:grid-cols-3 gap-5">
           {t.process.steps.map((step) => (
             <div
               key={step.n}
-              className="rounded-2xl bg-white border border-[rgb(228,231,236)] p-6 shadow-[0_1px_3px_rgba(16,24,40,0.04)]"
+              className="rounded-2xl bg-[rgb(250,248,244)] border border-black/5 p-7"
             >
-              <div className="w-10 h-10 rounded-lg bg-[rgb(255,228,217)] flex items-center justify-center text-[rgb(193,53,15)] font-bold text-sm">
+              <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-white border border-black/5 text-xs font-semibold text-neutral-700">
                 {step.n}
               </div>
-              <h3 className="mt-5 text-lg font-semibold text-[rgb(16,24,40)]">{step.t}</h3>
-              <p className="mt-2 text-sm text-[rgb(71,84,103)]">{step.d}</p>
+              <h3 className="mt-5 text-xl font-semibold text-neutral-900">{step.t}</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-neutral-600">{step.d}</p>
             </div>
           ))}
         </div>
@@ -287,43 +345,28 @@ function Process({ t }: { t: typeof COPY.en }) {
 
 function Features({ t }: { t: typeof COPY.en }) {
   return (
-    <section id="features" className="py-20 lg:py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section id="features" className="py-20 lg:py-24 bg-[rgb(245,242,237)]">
+      <div className="mx-auto max-w-[1180px] px-6 lg:px-10">
         <div className="max-w-2xl">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[rgb(16,24,40)] tracking-tight">{t.features.heading}</h2>
-          <p className="mt-3 text-lg text-[rgb(71,84,103)]">{t.features.sub}</p>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-neutral-900 tracking-[-0.02em]">
+            {t.features.heading}
+          </h2>
+          <p className="mt-4 text-lg text-neutral-600">{t.features.sub}</p>
         </div>
-        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {t.features.list.map((f) => (
             <div
               key={f.t}
-              className="rounded-2xl border border-[rgb(228,231,236)] p-6 hover:border-[rgb(255,109,67)] hover:shadow-[0_8px_24px_rgba(255,109,67,0.08)] transition-all bg-white"
+              className="rounded-2xl bg-white border border-black/5 p-6 hover:shadow-[0_16px_40px_-12px_rgba(16,24,40,0.12)] transition-shadow"
             >
-              <div className="w-9 h-9 rounded-lg bg-[rgb(255,247,242)] flex items-center justify-center mb-4">
-                <span className="w-2 h-2 rounded-full bg-[rgb(255,109,67)]" />
+              <div className="w-10 h-10 rounded-xl bg-[rgb(255,228,217)] flex items-center justify-center mb-4">
+                <span className="w-2.5 h-2.5 rounded-full bg-[rgb(255,109,67)]" />
               </div>
-              <h3 className="text-base font-semibold text-[rgb(16,24,40)]">{f.t}</h3>
-              <p className="mt-2 text-sm text-[rgb(71,84,103)]">{f.d}</p>
+              <h3 className="text-base font-semibold text-neutral-900">{f.t}</h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-neutral-600">{f.d}</p>
             </div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function Pricing({ t }: { t: typeof COPY.en }) {
-  return (
-    <section id="pricing" className="py-20 lg:py-24 bg-[rgb(16,24,40)] text-white">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-        <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">{t.pricing.heading}</h2>
-        <p className="mt-3 text-lg text-[rgb(208,213,221)] max-w-2xl mx-auto">{t.pricing.sub}</p>
-        <a
-          href="#register"
-          className="inline-flex items-center mt-8 px-6 py-3 rounded-lg bg-[rgb(255,109,67)] text-white font-semibold hover:bg-[rgb(229,87,49)] transition-colors"
-        >
-          {t.pricing.cta}
-        </a>
       </div>
     </section>
   );
@@ -367,13 +410,15 @@ function RegisterForm({ t, idSuffix }: { t: typeof COPY.en; idSuffix: string }) 
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-xl mx-auto rounded-2xl bg-white border border-[rgb(228,231,236)] p-6 lg:p-8 shadow-[0_8px_24px_rgba(16,24,40,0.06)]"
+      className="w-full max-w-2xl mx-auto rounded-3xl bg-white border border-black/5 p-7 lg:p-9 shadow-[0_24px_60px_-20px_rgba(16,24,40,0.12)]"
     >
-      <h3 className="text-2xl font-bold text-[rgb(16,24,40)]">{t.register_form.heading}</h3>
-      <p className="mt-1.5 text-sm text-[rgb(71,84,103)]">{t.register_form.sub}</p>
-      <div className="mt-6 grid gap-4">
+      <h3 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-[-0.01em]">
+        {t.register_form.heading}
+      </h3>
+      <p className="mt-2 text-[15px] text-neutral-600">{t.register_form.sub}</p>
+      <div className="mt-7 grid gap-4">
         <div>
-          <label htmlFor={`name-${idSuffix}`} className="block text-sm font-medium text-[rgb(52,64,84)]">
+          <label htmlFor={`name-${idSuffix}`} className="block text-sm font-medium text-neutral-700">
             {t.register_form.name}
           </label>
           <input
@@ -381,12 +426,12 @@ function RegisterForm({ t, idSuffix }: { t: typeof COPY.en; idSuffix: string }) 
             name="name"
             type="text"
             required
-            className="mt-1.5 block w-full rounded-lg border border-[rgb(228,231,236)] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(255,109,67)]/30 focus:border-[rgb(255,109,67)]"
+            className="mt-1.5 block w-full rounded-xl border border-neutral-200 px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900"
           />
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor={`email-${idSuffix}`} className="block text-sm font-medium text-[rgb(52,64,84)]">
+            <label htmlFor={`email-${idSuffix}`} className="block text-sm font-medium text-neutral-700">
               {t.register_form.email}
             </label>
             <input
@@ -394,11 +439,11 @@ function RegisterForm({ t, idSuffix }: { t: typeof COPY.en; idSuffix: string }) 
               name="email"
               type="email"
               required
-              className="mt-1.5 block w-full rounded-lg border border-[rgb(228,231,236)] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(255,109,67)]/30 focus:border-[rgb(255,109,67)]"
+              className="mt-1.5 block w-full rounded-xl border border-neutral-200 px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900"
             />
           </div>
           <div>
-            <label htmlFor={`company-${idSuffix}`} className="block text-sm font-medium text-[rgb(52,64,84)]">
+            <label htmlFor={`company-${idSuffix}`} className="block text-sm font-medium text-neutral-700">
               {t.register_form.company}
             </label>
             <input
@@ -406,44 +451,69 @@ function RegisterForm({ t, idSuffix }: { t: typeof COPY.en; idSuffix: string }) 
               name="company"
               type="text"
               required
-              className="mt-1.5 block w-full rounded-lg border border-[rgb(228,231,236)] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(255,109,67)]/30 focus:border-[rgb(255,109,67)]"
+              className="mt-1.5 block w-full rounded-xl border border-neutral-200 px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900"
             />
           </div>
         </div>
         <div>
-          <label htmlFor={`message-${idSuffix}`} className="block text-sm font-medium text-[rgb(52,64,84)]">
+          <label htmlFor={`message-${idSuffix}`} className="block text-sm font-medium text-neutral-700">
             {t.register_form.message}
           </label>
           <textarea
             id={`message-${idSuffix}`}
             name="message"
             rows={3}
-            className="mt-1.5 block w-full rounded-lg border border-[rgb(228,231,236)] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(255,109,67)]/30 focus:border-[rgb(255,109,67)]"
+            className="mt-1.5 block w-full rounded-xl border border-neutral-200 px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900"
           />
         </div>
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 inline-flex justify-center items-center px-6 py-3 rounded-lg bg-[rgb(255,109,67)] text-white font-semibold hover:bg-[rgb(229,87,49)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+          className="group mt-2 inline-flex justify-center items-center gap-2 rounded-full bg-neutral-900 text-white pl-6 pr-2 py-2.5 text-[15px] font-medium hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors w-full sm:w-auto sm:self-start"
         >
-          {submitting ? "…" : t.register_form.submit}
+          <span>{submitting ? "…" : t.register_form.submit}</span>
+          <span className="flex items-center justify-center w-9 h-9 rounded-full bg-white text-neutral-900 group-hover:translate-x-0.5 transition-transform">
+            <ArrowIcon />
+          </span>
         </button>
         {done && (
-          <p className="text-sm text-[rgb(7,148,85)]">{t.register_form.success}</p>
+          <p className="text-sm text-emerald-700">{t.register_form.success}</p>
         )}
       </div>
     </form>
   );
 }
 
+function Pricing({ t }: { t: typeof COPY.en }) {
+  return (
+    <section id="pricing" className="py-20 lg:py-28 bg-neutral-900 text-white">
+      <div className="mx-auto max-w-[1180px] px-6 lg:px-10 text-center">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-[-0.02em]">
+          {t.pricing.heading}
+        </h2>
+        <p className="mt-4 text-lg text-neutral-300 max-w-2xl mx-auto">{t.pricing.sub}</p>
+        <a
+          href="#register"
+          className="group inline-flex items-center gap-2 mt-8 rounded-full bg-white text-neutral-900 pl-6 pr-2 py-2.5 text-[15px] font-medium hover:bg-neutral-100 transition-colors"
+        >
+          <span>{t.pricing.cta}</span>
+          <span className="flex items-center justify-center w-9 h-9 rounded-full bg-neutral-900 text-white group-hover:translate-x-0.5 transition-transform">
+            <ArrowIcon />
+          </span>
+        </a>
+      </div>
+    </section>
+  );
+}
+
 function Footer({ t }: { t: typeof COPY.en }) {
   return (
-    <footer className="py-10 border-t border-[rgb(228,231,236)] bg-white">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <footer className="py-10 bg-[rgb(245,242,237)] border-t border-black/5">
+      <div className="mx-auto max-w-[1180px] px-6 lg:px-10 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <img src="logo.png" alt="MWRD" className="h-7 w-auto" />
+          <img src="logo.png" alt="MWRD" className="h-8 w-auto" />
         </div>
-        <p className="text-xs text-[rgb(102,112,133)]">
+        <p className="text-xs text-neutral-500">
           © {new Date().getFullYear()} MWRD. {t.footer.rights}
         </p>
       </div>
@@ -457,15 +527,24 @@ function LandingPage() {
   const dir = lang === "ar" ? "rtl" : "ltr";
 
   return (
-    <div dir={dir} lang={lang} className="min-h-screen bg-white text-[rgb(16,24,40)] antialiased font-[Inter,system-ui,sans-serif]">
+    <div
+      dir={dir}
+      lang={lang}
+      className="min-h-screen text-neutral-900 antialiased"
+      style={{
+        fontFamily: "Inter, system-ui, sans-serif",
+        background: "rgb(245,242,237)",
+      }}
+    >
       <Header lang={lang} setLang={setLang} t={t} />
       <main>
         <Hero t={t} />
-        <PartnerStrip t={t} />
+        <Marquee />
+        <DashboardMock />
         <Process t={t} />
         <Features t={t} />
-        <section id="register" className="py-20 lg:py-24 bg-[rgb(252,252,253)]">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <section id="register" className="py-20 lg:py-24 bg-white">
+          <div className="mx-auto max-w-[1180px] px-6 lg:px-10">
             <RegisterForm t={t} idSuffix="bottom" />
           </div>
         </section>

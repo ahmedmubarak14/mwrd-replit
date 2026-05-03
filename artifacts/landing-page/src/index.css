@@ -252,6 +252,18 @@
   }
 }
 
+@keyframes mwrd-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-mwrd-marquee {
+  animation: mwrd-marquee 38s linear infinite;
+  width: max-content;
+}
+[dir="rtl"] .animate-mwrd-marquee {
+  animation-direction: reverse;
+}
+
 /**
  * Using the elevate system.
  * Automatic contrast adjustment.
