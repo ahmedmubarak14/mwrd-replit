@@ -136,6 +136,28 @@ async function main() {
     console.log(`[prerender] added defer to ${deferred} sync external scripts`);
   }
 
+  // The Webflow source uses XHTML-style self-closing tags with unquoted attributes
+  // (e.g. `<path fill=currentColor/>`). The HTML parser treats the trailing `/` as
+  // part of the unquoted attribute value, so jsdom re-serializes them as
+  // `fill="currentColor/"` — which is invalid CSS color syntax and makes inline SVG
+  // icons fall back to default fill (black on dark backgrounds = invisible icons).
+  // Walk every element and strip a trailing `/` from any attribute value to repair.
+  let attrFixed = 0;
+  const walker = document.createTreeWalker(document.documentElement, 1 /* ELEMENT */);
+  let node = walker.currentNode;
+  while (node) {
+    for (const attr of [...node.attributes]) {
+      if (attr.value.endsWith("/")) {
+        node.setAttribute(attr.name, attr.value.slice(0, -1));
+        attrFixed++;
+      }
+    }
+    node = walker.nextNode();
+  }
+  if (attrFixed > 0) {
+    console.log(`[prerender] repaired ${attrFixed} attrs with trailing '/' (XHTML self-close artifact)`);
+  }
+
   // Serialize
   let out = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
 
