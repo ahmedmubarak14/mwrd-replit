@@ -118,10 +118,11 @@
 /* mwrd landing-specific overrides: replaces Webflow CDN placeholder backgrounds
    on the "How mwrd works" stats cards with custom mwrd mockups.
    Source HTML for each mockup lives in design-sources/__mock_step{1,2,3}.html. */
-.process-image-wrap{background-image:linear-gradient(135deg,#FFE9DF 0%,#FFD1BD 50%,#FFB694 100%) !important}
-.process-image._1{background-image:url("./images/step-card-1.jpg") !important;background-size:cover !important;background-position:center !important}
-.process-image._2{background-image:url("./images/step-card-2.jpg") !important;background-size:cover !important;background-position:center !important}
-.process-image._3{background-image:url("./images/step-card-3.jpg") !important;background-size:cover !important;background-position:center !important}
+.process-image-wrap{background:transparent !important;background-image:none !important;overflow:visible !important}
+.process-image{background-repeat:no-repeat !important;background-size:contain !important;background-position:center center !important;width:100% !important;height:100% !important;transform:none !important;aspect-ratio:4/3 !important}
+.process-image._1{background-image:url("./images/step-card-1.jpg") !important}
+.process-image._2{background-image:url("./images/step-card-2.jpg") !important}
+.process-image._3{background-image:url("./images/step-card-3.jpg") !important}
 .tab-01-image{background-image:url("./images/portal-supplier.jpg?v=3") !important;background-size:cover !important;background-position:center center !important;background-repeat:no-repeat !important}
 .tab-02-image{background-image:url("./images/portal-client.jpg?v=3") !important;background-size:cover !important;background-position:center center !important;background-repeat:no-repeat !important}
 .tab-03-image{background-image:url("./images/portal-backoffice.jpg?v=3") !important;background-size:cover !important;background-position:center center !important;background-repeat:no-repeat !important}
