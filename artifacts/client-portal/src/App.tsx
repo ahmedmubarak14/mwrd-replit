@@ -94,7 +94,22 @@ function Router() {
         {(params) => <ProtectedRoute component={NotificationsPage} path="/notifications" {...params} />}
       </Route>
       <Route path="/account">
-        {(params) => <ProtectedRoute component={AccountPage} path="/account" {...params} />}
+        <Redirect to="/account/users" />
+      </Route>
+      <Route path="/account/users">
+        {(params) => <ProtectedRoute component={AccountPage} path="/account/users" {...params} />}
+      </Route>
+      <Route path="/account/roles">
+        {(params) => <ProtectedRoute component={AccountPage} path="/account/roles" {...params} />}
+      </Route>
+      <Route path="/account/approval-tree">
+        {(params) => <ProtectedRoute component={AccountPage} path="/account/approval-tree" {...params} />}
+      </Route>
+      <Route path="/account/addresses">
+        {(params) => <ProtectedRoute component={AccountPage} path="/account/addresses" {...params} />}
+      </Route>
+      <Route path="/account/billing">
+        {(params) => <ProtectedRoute component={AccountPage} path="/account/billing" {...params} />}
       </Route>
 
       {/* Fallback */}

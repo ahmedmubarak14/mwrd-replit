@@ -37,7 +37,7 @@ const navConfig: NavItem[] = [
   { href: "/orders", icon: Package, label: "Orders" },
   { divider: true },
   { href: "/notifications", icon: Bell01, label: "Notifications" },
-  { href: "/account", icon: User01, label: "Account" },
+  { href: "/account/users", icon: User01, label: "Account" },
 ];
 
 function isDivider(item: NavItem): item is NavDivider {
@@ -45,7 +45,9 @@ function isDivider(item: NavItem): item is NavDivider {
 }
 
 function NavLeafItem({ item, location, collapsed }: { item: NavLeaf; location: string; collapsed: boolean }) {
-  const isActive = location === item.href;
+  const isActive =
+    location === item.href ||
+    (item.href.startsWith("/account/") && location.startsWith("/account"));
   return (
     <Link
       href={item.href}

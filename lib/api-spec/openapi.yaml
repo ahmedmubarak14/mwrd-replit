@@ -3036,6 +3036,10 @@ components:
           type: string
         phone:
           type: string
+        national_address_code:
+          type: string
+        address_code:
+          type: string
         is_default:
           type: boolean
       required: [id, type, label, full_address]

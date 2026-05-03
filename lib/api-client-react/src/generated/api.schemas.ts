@@ -544,6 +544,8 @@ export interface Address {
   label: string;
   full_address: string;
   phone?: string;
+  national_address_code?: string;
+  address_code?: string;
   is_default?: boolean;
 }
 
