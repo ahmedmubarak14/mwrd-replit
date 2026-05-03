@@ -1,72 +1,107 @@
-<!doctype html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>body{font-family:'Inter',ui-sans-serif,system-ui;margin:0;background:linear-gradient(135deg,#FFE9DF 0%,#FFD1BD 50%,#FFB694 100%);}
-.shadow-card{box-shadow:0 32px 64px -12px rgba(16,24,40,.18),0 0 0 1px rgba(16,24,40,.06)}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600}
-.row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #F2F4F7}
-.row:last-child{border-bottom:none}
-.av{width:36px;height:36px;border-radius:10px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Step 2 · Blind bidding</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  html,body{margin:0;padding:0;background:#FAFAF7;font-family:'Inter',system-ui,sans-serif;color:#101828;-webkit-font-smoothing:antialiased}
+  .frame{width:1024px;height:1024px;display:flex;align-items:center;justify-content:center;padding:32px;background:linear-gradient(135deg,#0A0A0A 0%,#1A1410 60%,#2B1408 100%)}
+  .card{width:100%;height:100%;background:#fff;border-radius:24px;box-shadow:0 40px 80px -20px rgba(0,0,0,.45),0 8px 24px -8px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column}
 </style></head>
-<body><div style="width:1120px;height:840px;display:flex;align-items:center;justify-content:center;padding:60px">
-  <div class="shadow-card" style="width:760px;background:#fff;border-radius:20px;overflow:hidden">
-    <div style="padding:24px 28px;border-bottom:1px solid #F2F4F7;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-size:11px;font-weight:600;color:#FF6D43;letter-spacing:.06em">02 · MATCHING</div>
-        <div style="font-size:18px;font-weight:600;color:#101828;margin-top:2px">5 verified suppliers found</div>
+<body>
+<div class="frame"><div class="card">
+  <!-- Header bar -->
+  <div class="px-8 pt-7 pb-5 border-b border-[#EAECF0] flex items-start justify-between">
+    <div>
+      <div class="flex items-center gap-2.5">
+        <div class="text-[11.5px] font-semibold tracking-[0.16em] text-[#FF6D43]">SUPPLIER · INCOMING RFQ</div>
+        <span class="rounded-full bg-[#101010] text-white text-[10.5px] font-bold tracking-wider px-2.5 py-1">⊘ BLIND</span>
       </div>
-      <span class="pill" style="background:#FFF6F1;color:#FF6D43">● AI matched</span>
+      <div class="mt-2.5 text-[24px] font-semibold tracking-tight leading-tight">RQ-2418 · Office supplies · Riyadh</div>
+      <div class="mt-1.5 text-[13.5px] text-[#667085]">From <span class="font-semibold text-[#101828]">Client-7831</span> · respond within 48h · 11 line items</div>
     </div>
-    <div class="row">
-      <div class="av" style="background:linear-gradient(135deg,#FF6D43,#FF8A5C)">AT</div>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;color:#101828">Al-Tamimi Office Solutions</div>
-        <div style="font-size:12px;color:#667085">Riyadh · 8 yrs · 312 deals</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:12px;color:#667085">Match</div>
-        <div style="font-size:14px;font-weight:700;color:#079455">98%</div>
-      </div>
-      <span class="pill" style="background:#ECFDF3;color:#079455">Verified</span>
-    </div>
-    <div class="row">
-      <div class="av" style="background:linear-gradient(135deg,#1D4ED8,#3B82F6)">SF</div>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;color:#101828">Saudi Furniture Co.</div>
-        <div style="font-size:12px;color:#667085">Jeddah · 12 yrs · 540 deals</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:12px;color:#667085">Match</div>
-        <div style="font-size:14px;font-weight:700;color:#079455">94%</div>
-      </div>
-      <span class="pill" style="background:#ECFDF3;color:#079455">Verified</span>
-    </div>
-    <div class="row">
-      <div class="av" style="background:linear-gradient(135deg,#9333EA,#C026D3)">QM</div>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;color:#101828">Qubit MEA Trading</div>
-        <div style="font-size:12px;color:#667085">Dammam · 5 yrs · 187 deals</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:12px;color:#667085">Match</div>
-        <div style="font-size:14px;font-weight:700;color:#C17B11">87%</div>
-      </div>
-      <span class="pill" style="background:#FEF6E7;color:#C17B11">In review</span>
-    </div>
-    <div class="row">
-      <div class="av" style="background:linear-gradient(135deg,#0EA5E9,#06B6D4)">RT</div>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;color:#101828">Rakiz Trading Group</div>
-        <div style="font-size:12px;color:#667085">Riyadh · 6 yrs · 224 deals</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:12px;color:#667085">Match</div>
-        <div style="font-size:14px;font-weight:700;color:#079455">91%</div>
-      </div>
-      <span class="pill" style="background:#ECFDF3;color:#079455">Verified</span>
-    </div>
-    <div style="padding:14px 28px;background:#FAFAFA;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:12px;color:#667085">Avg. response · <strong style="color:#101828">2h 14m</strong></div>
-      <button style="padding:8px 14px;border-radius:8px;background:#FF6D43;color:#fff;border:none;font-weight:600;font-size:12px">Invite all to quote</button>
+    <div class="text-right">
+      <div class="text-[11px] tracking-wider font-semibold text-[#667085]">RESPONSE WINDOW</div>
+      <div class="mt-1.5 text-[22px] font-semibold tracking-tight tabular-nums">23h 48m</div>
     </div>
   </div>
-</div></body></html>
+
+  <!-- Anonymity banner -->
+  <div class="mx-8 mt-5 rounded-[12px] bg-[#0F1117] text-white p-4 flex items-center gap-3">
+    <div class="h-9 w-9 rounded-[10px] bg-[#FF6D43]/20 grid place-items-center text-[#FF8A65] shrink-0">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div class="text-[12.5px] leading-snug">
+      <span class="font-semibold">Bidding is anonymous.</span>
+      <span class="text-[#9CA3AF]"> You won't see other suppliers' prices, count, or names — only your own quote.</span>
+    </div>
+    <span class="ml-auto text-[11px] font-semibold text-[#9CA3AF] tracking-wider">RULE D</span>
+  </div>
+
+  <!-- Line items table -->
+  <div class="px-8 pt-5 pb-3">
+    <div class="text-[15px] font-semibold mb-3 flex items-center justify-between">
+      <span>Your quote · price each line</span>
+      <span class="text-[12px] font-medium text-[#667085]">Auto-quote draft applied · 8 of 11 lines</span>
+    </div>
+  </div>
+
+  <div class="mx-8 rounded-[12px] border border-[#EAECF0] overflow-hidden flex-1">
+    <div class="grid grid-cols-[1.6fr_0.45fr_0.55fr_0.55fr_0.45fr] text-[11.5px] font-semibold tracking-wider text-[#667085] bg-[#FAFAF7] px-4 py-2.5 border-b border-[#EAECF0]">
+      <div>ITEM</div><div class="text-right">QTY</div><div class="text-right">UNIT (SAR)</div><div class="text-right">LEAD</div><div class="text-right">STATUS</div>
+    </div>
+    <div class="text-[13px]">
+      <div class="grid grid-cols-[1.6fr_0.45fr_0.55fr_0.55fr_0.45fr] items-center px-4 py-3 border-b border-[#F2F4F7]">
+        <div><div class="font-semibold">A4 paper · 80gsm · 500 sheets</div><div class="text-[11.5px] text-[#98A2B3] mt-0.5">SKU OFC-A4-80</div></div>
+        <div class="text-right tabular-nums">200</div>
+        <div class="text-right tabular-nums font-semibold">14.50</div>
+        <div class="text-right text-[12px] text-[#667085]">3 days</div>
+        <div class="text-right"><span class="rounded-md bg-[#EFF8FF] text-[#175CD3] text-[10.5px] font-semibold px-2 py-0.5">auto</span></div>
+      </div>
+      <div class="grid grid-cols-[1.6fr_0.45fr_0.55fr_0.55fr_0.45fr] items-center px-4 py-3 border-b border-[#F2F4F7]">
+        <div><div class="font-semibold">Toner cartridge · HP 26A black</div><div class="text-[11.5px] text-[#98A2B3] mt-0.5">SKU TNR-HP26A</div></div>
+        <div class="text-right tabular-nums">24</div>
+        <div class="text-right tabular-nums font-semibold">312.00</div>
+        <div class="text-right text-[12px] text-[#667085]">4 days</div>
+        <div class="text-right"><span class="rounded-md bg-[#EFF8FF] text-[#175CD3] text-[10.5px] font-semibold px-2 py-0.5">auto</span></div>
+      </div>
+      <div class="grid grid-cols-[1.6fr_0.45fr_0.55fr_0.55fr_0.45fr] items-center px-4 py-3 border-b border-[#F2F4F7] bg-[#FFF6F0]">
+        <div><div class="font-semibold">Whiteboard markers · pack 12 · assorted</div><div class="text-[11.5px] text-[#FF6D43] mt-0.5">Manual price needed</div></div>
+        <div class="text-right tabular-nums">40</div>
+        <div class="text-right"><div class="inline-flex items-center justify-end gap-1 rounded-md border border-[#FF6D43] bg-white px-2 py-1 text-[12.5px] font-semibold tabular-nums">28.50</div></div>
+        <div class="text-right text-[12px] text-[#667085]">5 days</div>
+        <div class="text-right"><span class="rounded-md bg-[#FFFAEB] text-[#B54708] text-[10.5px] font-semibold px-2 py-0.5">manual</span></div>
+      </div>
+      <div class="grid grid-cols-[1.6fr_0.45fr_0.55fr_0.55fr_0.45fr] items-center px-4 py-3 border-b border-[#F2F4F7]">
+        <div><div class="font-semibold">Sticky notes · 76×76mm · neon</div><div class="text-[11.5px] text-[#98A2B3] mt-0.5">SKU NOTE-NEON</div></div>
+        <div class="text-right tabular-nums">120</div>
+        <div class="text-right tabular-nums font-semibold">6.20</div>
+        <div class="text-right text-[12px] text-[#667085]">3 days</div>
+        <div class="text-right"><span class="rounded-md bg-[#EFF8FF] text-[#175CD3] text-[10.5px] font-semibold px-2 py-0.5">auto</span></div>
+      </div>
+      <div class="grid grid-cols-[1.6fr_0.45fr_0.55fr_0.55fr_0.45fr] items-center px-4 py-3 border-b border-[#F2F4F7]">
+        <div><div class="font-semibold">Stapler · heavy duty · 50 sheets</div><div class="text-[11.5px] text-[#98A2B3] mt-0.5">SKU STP-HD50</div></div>
+        <div class="text-right tabular-nums">8</div>
+        <div class="text-right tabular-nums font-semibold">94.00</div>
+        <div class="text-right text-[12px] text-[#667085]">4 days</div>
+        <div class="text-right"><span class="rounded-md bg-[#EFF8FF] text-[#175CD3] text-[10.5px] font-semibold px-2 py-0.5">auto</span></div>
+      </div>
+      <div class="grid grid-cols-[1.6fr_0.45fr_0.55fr_0.55fr_0.45fr] items-center px-4 py-3 text-[#98A2B3]">
+        <div class="italic">+ 6 more lines</div><div></div><div></div><div></div><div class="text-right">…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky bottom bar -->
+  <div class="px-8 py-5 border-t border-[#EAECF0] bg-[#FAFAF7] flex items-center justify-between">
+    <div class="flex items-center gap-6">
+      <div><div class="text-[11px] tracking-wider text-[#667085] font-semibold">YOUR SUBTOTAL</div><div class="text-[20px] font-semibold tabular-nums tracking-tight mt-0.5">SAR 18,460</div></div>
+      <div><div class="text-[11px] tracking-wider text-[#667085] font-semibold">VALID UNTIL</div><div class="text-[14px] font-semibold mt-0.5">May 17, 2026</div></div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="rounded-[10px] border border-[#EAECF0] bg-white text-[#344054] text-[13px] font-medium px-4 py-2.5">Decline lines</button>
+      <button class="rounded-[10px] bg-[#FF6D43] text-white text-[13.5px] font-semibold px-5 py-2.5 flex items-center gap-2 shadow-[0_8px_20px_-8px_rgba(255,109,67,.6)]">Submit quote <span>→</span></button>
+    </div>
+  </div>
+</div></div>
+</body></html>
