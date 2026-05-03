@@ -10,7 +10,7 @@ router.post("/backoffice/auth/login", async (req, res) => {
     const result = await signInBackoffice(email, password);
     if (!result) { res.status(401).json({ error: "Invalid credentials" }); return; }
     const { user, sessionToken } = result;
-    res.cookie("mwrd_bo_session", sessionToken, { httpOnly: true, sameSite: "lax", maxAge: 900000 });
+    res.cookie("mwrd_bo_session", sessionToken, { httpOnly: true, sameSite: "lax", maxAge: 86400000 });
     res.json({ token: sessionToken, user: { id: user.id, email: user.email, role: user.role, real_name: user.real_name, platform_alias: user.platform_alias } });
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });

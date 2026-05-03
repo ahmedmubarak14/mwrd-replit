@@ -43,9 +43,20 @@ export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
 }
 
-// Set default getter for web to look in localStorage
+// Set default getter for web to look in localStorage. We check all three known
+// portal token keys so that an artifact which forgets to register its own getter
+// still picks up a usable token — the backoffice key first (most privileged),
+// then the buyer key, then the supplier key. Each portal SHOULD still register
+// its own getter in main.tsx (`setAuthTokenGetter`) to be explicit and to avoid
+// accidentally sending a different portal's token if multiple are signed in
+// simultaneously in the same browser.
 if (typeof window !== "undefined") {
-  setAuthTokenGetter(() => localStorage.getItem("mwrd_bo_token") || localStorage.getItem("mwrd_token"));
+  setAuthTokenGetter(
+    () =>
+      localStorage.getItem("mwrd_bo_token") ||
+      localStorage.getItem("mwrd_token") ||
+      localStorage.getItem("mwrd_supplier_token"),
+  );
 }
 
 function isRequest(input: RequestInfo | URL): input is Request {

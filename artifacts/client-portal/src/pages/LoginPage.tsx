@@ -30,23 +30,27 @@ export default function LoginPage() {
     loginMutation.mutate({ data: values }, {
       onSuccess: (response) => {
         const role = response.user?.role;
-        if (role === "supplier") {
-          localStorage.setItem("mwrd_supplier_token", response.token);
-          toast({ title: "Welcome back", description: "Redirecting to your supplier dashboard." });
-          window.location.replace("/supplier/");
-          return;
-        }
         if (role === "client") {
           localStorage.setItem("mwrd_token", response.token);
           toast({ title: "Welcome back", description: "Redirecting to your dashboard." });
-          window.location.replace("/");
+          window.location.replace("/client/");
+          return;
+        }
+        if (role === "supplier") {
+          localStorage.setItem("mwrd_supplier_token", response.token);
+          toast({
+            title: "Wrong portal",
+            description: "Sending you to the supplier portal — already signed in.",
+          });
+          setTimeout(() => window.location.replace("/supplier/"), 1500);
           return;
         }
         toast({
           variant: "destructive",
-          title: "Access denied",
-          description: "Please use the admin portal to sign in with your staff account.",
+          title: "Wrong portal",
+          description: "Staff accounts must sign in via the operations portal.",
         });
+        setTimeout(() => window.location.replace("/backoffice/login"), 1500);
       },
       onError: (error: any) => {
         toast({

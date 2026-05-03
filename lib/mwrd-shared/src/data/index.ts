@@ -207,8 +207,11 @@ export async function getBackofficeSession(token: string): Promise<User | null> 
   if (!session || !session.is_backoffice) return null;
   const backofficeRoles = ['admin', 'ops', 'finance', 'cs'];
   if (!backofficeRoles.includes(session.role)) return null;
-  const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-  if (session.last_seen < fifteenMinAgo) {
+  // Keep backoffice sessions valid for 24h, matching the public session lifetime.
+  // The previous 15-minute idle window was logging admins out mid-task because the
+  // dashboard's stats / audit-log queries fire less frequently than every 15 min.
+  const idleCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  if (session.last_seen < idleCutoff) {
     sessionTokens.delete(token);
     return null;
   }
