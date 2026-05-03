@@ -10,6 +10,8 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import DashboardPage from "@/pages/DashboardPage";
 import CatalogPage from "@/pages/CatalogPage";
+import BundlesPage from "@/pages/BundlesPage";
+import BundleDetailPage from "@/pages/BundleDetailPage";
 import CartPage from "@/pages/CartPage";
 import RFQsPage from "@/pages/RFQsPage";
 import RFQDetailPage from "@/pages/RFQDetailPage";
@@ -52,6 +54,12 @@ function Router() {
       {/* Protected Routes */}
       <Route path="/">
         {(params) => <ProtectedRoute component={DashboardPage} path="/" {...params} />}
+      </Route>
+      <Route path="/catalog/bundles/:slug">
+        {(params) => <ProtectedRoute component={BundleDetailPage} path="/catalog/bundles/:slug" {...params} />}
+      </Route>
+      <Route path="/catalog/bundles">
+        {(params) => <ProtectedRoute component={BundlesPage} path="/catalog/bundles" {...params} />}
       </Route>
       <Route path="/catalog">
         {(params) => <ProtectedRoute component={CatalogPage} path="/catalog" {...params} />}

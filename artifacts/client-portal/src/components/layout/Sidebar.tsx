@@ -29,6 +29,7 @@ type NavItem = NavDivider | NavLeaf;
 const navConfig: NavItem[] = [
   { href: "/", icon: LayoutGrid01, label: "Dashboard" },
   { href: "/catalog", icon: ShoppingBag01, label: "Catalog" },
+  { href: "/catalog/bundles", icon: Package, label: "Bundles" },
   { href: "/cart", icon: ShoppingCart01, label: "Cart" },
   { divider: true },
   { href: "/rfqs", icon: File06, label: "RFQs" },

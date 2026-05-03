@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { 
-  useListCategories, 
-  useListMasterProducts, 
+import { Link } from "wouter";
+import {
+  useListCategories,
+  useListMasterProducts,
   useAddToCart,
+  useListBundles,
   getListMasterProductsQueryKey,
-  getListCategoriesQueryKey
+  getListCategoriesQueryKey,
+  getListBundlesQueryKey,
 } from "@workspace/api-client-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,6 +43,10 @@ export default function CatalogPage() {
     }
   );
 
+  const { data: bundles } = useListBundles({
+    query: { queryKey: getListBundlesQueryKey() },
+  });
+
   const addToCartMutation = useAddToCart();
 
   const handleAddToCart = (productId: string) => {
@@ -68,6 +75,34 @@ export default function CatalogPage() {
         <h1 className="text-3xl font-bold tracking-tight">Product Catalog</h1>
         <p className="text-muted-foreground">Browse and source products for your RFQs.</p>
       </div>
+
+      {bundles && bundles.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[rgb(16,24,40)]">Bundles</h2>
+            <Link href="/catalog/bundles">
+              <Button variant="ghost" size="sm" data-testid="link-all-bundles">
+                See all bundles
+              </Button>
+            </Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {bundles.slice(0, 5).map((b) => (
+              <Link key={b.id} href={`/catalog/bundles/${b.slug}`}>
+                <Card className="w-[240px] flex-shrink-0 overflow-hidden cursor-pointer hover:shadow-md transition" data-testid={`card-bundle-strip-${b.id}`}>
+                  <div className="aspect-[3/2] bg-muted">
+                    {b.image_url && <img src={b.image_url} alt={b.name_en} className="object-cover w-full h-full" />}
+                  </div>
+                  <CardHeader className="p-3">
+                    <CardTitle className="text-sm">{b.name_en}</CardTitle>
+                    <Badge variant="outline" className="w-fit text-xs">{b.items?.length ?? 0} items</Badge>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar */}
