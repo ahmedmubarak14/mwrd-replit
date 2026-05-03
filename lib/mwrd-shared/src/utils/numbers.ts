@@ -11,7 +11,7 @@ export function generateDocNumber(prefix: DocPrefix): string {
 }
 
 export function generateMasterProductCode(seq: number): string {
-  return `MWRD-PROD-${seq.toString().padStart(5, '0')}`;
+  return `mwrd-PROD-${seq.toString().padStart(5, '0')}`;
 }
 
 export function newId(): string {

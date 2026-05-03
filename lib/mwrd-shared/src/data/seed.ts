@@ -521,7 +521,7 @@ export const seedCompanies: Company[] = [
   },
   {
     id: 'admin-company-001',
-    real_name: 'MWRD Operations',
+    real_name: 'mwrd Operations',
     platform_alias: 'Admin',
     type: 'client',
     cr_number: null,

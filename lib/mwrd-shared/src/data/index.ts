@@ -279,7 +279,7 @@ export async function getMasterProduct(id: string): Promise<MasterProduct | null
 export async function createMasterProduct(actorAdminId: string, input: Omit<MasterProduct, 'id' | 'master_product_code' | 'created_by_admin_id' | 'created_at' | 'updated_at'>): Promise<MasterProduct> {
   const id = newId();
   const seq = masterProducts.size + 1;
-  const product: MasterProduct = { ...input, id, master_product_code: `MWRD-PROD-${seq.toString().padStart(5, '0')}`, created_by_admin_id: actorAdminId, created_at: nowISO(), updated_at: nowISO() };
+  const product: MasterProduct = { ...input, id, master_product_code: `mwrd-PROD-${seq.toString().padStart(5, '0')}`, created_by_admin_id: actorAdminId, created_at: nowISO(), updated_at: nowISO() };
   masterProducts.set(id, product);
   recordAudit(actorAdminId, 'MASTER_PRODUCT_CREATED', 'MasterProduct', id, null, product);
   return product;
@@ -568,7 +568,7 @@ export async function createRFQ(clientUserId: string, input: {
   const runAutoMatch = source === 'catalog' && platformSettings.auto_quote_globally_enabled;
   await runAutoQuoteEngine(rfq, runAutoMatch);
 
-  // Notify MWRD admin / ops staff
+  // Notify mwrd admin / ops staff
   const staff = [...users.values()].filter((u) => u.role === 'admin' || u.role === 'ops');
   for (const s of staff) {
     await sendNotification(

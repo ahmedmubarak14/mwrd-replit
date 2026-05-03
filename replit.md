@@ -1,4 +1,4 @@
-# MWRD B2B Procurement Platform
+# mwrd B2B Procurement Platform
 
 ## Overview
 
