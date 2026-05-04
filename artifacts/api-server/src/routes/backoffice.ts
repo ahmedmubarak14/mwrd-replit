@@ -14,6 +14,7 @@ import {
   getPlatformSettings, updatePlatformSettings,
   inviteInternalUser, adminCreateAccount, getBackofficeUserDetail,
   getBackofficeDashboardStats,
+  getMonthlyRevenueBreakdown,
   listPOsForUser,
   getDashboardStats,
   listThreeWayMatchQueue,
@@ -23,6 +24,17 @@ import { requireBackofficeAuth } from "../middleware/auth.js";
 import { qs, qn, pp } from "../lib/qs.js";
 
 const router = Router();
+
+router.get("/backoffice/revenue-breakdown", requireBackofficeAuth, async (req, res) => {
+  try {
+    const auth = res.locals.auth!;
+    const months = Math.max(1, Math.min(24, qn(req.query.months) ?? 6));
+    const data = await getMonthlyRevenueBreakdown(months, auth.userId);
+    res.json(data);
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
 
 router.get("/backoffice/dashboard-stats", requireBackofficeAuth, async (_req, res) => {
   try {

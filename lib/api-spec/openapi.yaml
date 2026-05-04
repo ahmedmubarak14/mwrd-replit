@@ -1928,6 +1928,28 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
 
+  /backoffice/revenue-breakdown:
+    get:
+      operationId: getMonthlyRevenueBreakdown
+      tags: [backoffice]
+      summary: Monthly sales + margin aggregates for the dashboard chart
+      parameters:
+        - name: months
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 24
+      responses:
+        "200":
+          description: Monthly revenue breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyRevenuePoint"
+
   /backoffice/users/{id}/detail:
     get:
       operationId: getBackofficeUserDetail
@@ -3401,6 +3423,20 @@ components:
           type: number
         auto_quote_globally_enabled:
           type: boolean
+
+    MonthlyRevenuePoint:
+      type: object
+      properties:
+        month:
+          type: string
+          description: YYYY-MM
+        sales_sar:
+          type: number
+        margin_sar:
+          type: number
+        margin_pct:
+          type: number
+      required: [month, sales_sar, margin_sar, margin_pct]
 
     BackofficeDashboardStats:
       type: object

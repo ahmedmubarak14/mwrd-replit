@@ -1528,6 +1528,65 @@ export async function reactivateUser(userId: string, actorAdminId: string): Prom
   return updated;
 }
 
+export interface MonthlyRevenuePoint {
+  month: string; // YYYY-MM
+  sales_sar: number;
+  margin_sar: number;
+  margin_pct: number;
+}
+
+// Aggregates completed CPOs by calendar month and joins back to the source
+// quote to compute realised margin (final_price - supplier_cost) × qty.
+// Returns the last N months in chronological order, with empty buckets so
+// the chart x-axis is continuous even when a month had no orders.
+export async function getMonthlyRevenueBreakdown(
+  monthsBack: number,
+  actorAdminId: string,
+): Promise<MonthlyRevenuePoint[]> {
+  void actorAdminId;
+  const now = new Date();
+  const buckets = new Map<string, { sales_sar: number; margin_sar: number }>();
+  for (let i = monthsBack - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    buckets.set(key, { sales_sar: 0, margin_sar: 0 });
+  }
+
+  const earliest = [...buckets.keys()][0];
+  if (!earliest) return [];
+
+  for (const po of pos.values()) {
+    if (po.type !== 'CPO' || po.status !== 'completed') continue;
+    const monthKey = po.created_at.slice(0, 7);
+    if (!buckets.has(monthKey)) continue; // older than window
+
+    let marginSar = 0;
+    if (po.source_quote_id) {
+      const quote = quotes.get(po.source_quote_id);
+      if (quote) {
+        for (const qi of quote.items) {
+          // Match each PO line to its source quote line so partial-award
+          // orders only count their own slice of the margin.
+          const matched = po.items.some((pi) => pi.master_product_id === qi.rfq_item_id);
+          if (!matched && po.items.length > 0) continue;
+          const perUnit = (qi.final_unit_price_sar ?? 0) - (qi.supplier_unit_price_sar ?? 0);
+          marginSar += perUnit * (qi.qty_available ?? 0);
+        }
+      }
+    }
+    const slot = buckets.get(monthKey)!;
+    slot.sales_sar += po.total_sar;
+    slot.margin_sar += marginSar;
+  }
+
+  return [...buckets.entries()].map(([month, v]) => ({
+    month,
+    sales_sar: v.sales_sar,
+    margin_sar: v.margin_sar,
+    margin_pct: v.sales_sar > 0 ? (v.margin_sar / v.sales_sar) * 100 : 0,
+  }));
+}
+
 export interface BackofficeDashboardStats {
   pending_leads: number;
   pending_kyc: number;

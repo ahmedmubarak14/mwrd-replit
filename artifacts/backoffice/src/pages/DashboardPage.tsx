@@ -1,7 +1,12 @@
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
-import { useGetBackofficeDashboardStats, useListAuditLog } from "@workspace/api-client-react";
+import {
+  useGetBackofficeDashboardStats,
+  useListAuditLog,
+  useGetMonthlyRevenueBreakdown,
+} from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RevenueBreakdownChart } from "@/components/RevenueBreakdownChart";
 import {
   Users01,
   Shield01,
@@ -86,6 +91,7 @@ export default function DashboardPage() {
   const [, setLocation] = useLocation();
   const { data: stats, isLoading: statsLoading } = useGetBackofficeDashboardStats();
   const { data: auditLog, isLoading: logLoading } = useListAuditLog({});
+  const { data: revenue, isLoading: revenueLoading } = useGetMonthlyRevenueBreakdown({ months: 6 });
 
   // Pending Actions panel — every PRD-listed queue with a count + jump link.
   const pendingActions = [
@@ -242,6 +248,23 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* Revenue Breakdown */}
+      <div className="bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgb(228,231,236)]">
+          <div>
+            <h2 className="text-sm font-semibold text-[rgb(16,24,40)]">Revenue breakdown</h2>
+            <p className="mt-0.5 text-xs text-[rgb(102,112,133)]">Last 6 months — sales bars, margin line</p>
+          </div>
+        </div>
+        <div className="p-5">
+          {revenueLoading ? (
+            <Skeleton className="h-60 w-full" />
+          ) : (
+            <RevenueBreakdownChart data={revenue ?? []} />
           )}
         </div>
       </div>

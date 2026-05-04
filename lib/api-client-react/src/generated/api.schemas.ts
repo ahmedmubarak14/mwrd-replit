@@ -671,6 +671,14 @@ export interface UpdatePlatformSettingsBody {
   auto_quote_globally_enabled?: boolean;
 }
 
+export interface MonthlyRevenuePoint {
+  /** YYYY-MM */
+  month: string;
+  sales_sar: number;
+  margin_sar: number;
+  margin_pct: number;
+}
+
 export interface BackofficeDashboardStats {
   pending_leads: number;
   pending_kyc: number;
@@ -904,6 +912,14 @@ export type ListClientsParams = {
 export type ListSuppliersParams = {
   status?: string;
   page?: number;
+};
+
+export type GetMonthlyRevenueBreakdownParams = {
+  /**
+   * @minimum 1
+   * @maximum 24
+   */
+  months?: number;
 };
 
 export type ListAuditLogParams = {

@@ -2467,6 +2467,29 @@ export const InviteInternalUserBody = zod.object({
 });
 
 /**
+ * @summary Monthly sales + margin aggregates for the dashboard chart
+ */
+export const getMonthlyRevenueBreakdownQueryMonthsMax = 24;
+
+export const GetMonthlyRevenueBreakdownQueryParams = zod.object({
+  months: zod.coerce
+    .number()
+    .min(1)
+    .max(getMonthlyRevenueBreakdownQueryMonthsMax)
+    .optional(),
+});
+
+export const GetMonthlyRevenueBreakdownResponseItem = zod.object({
+  month: zod.string().describe("YYYY-MM"),
+  sales_sar: zod.number(),
+  margin_sar: zod.number(),
+  margin_pct: zod.number(),
+});
+export const GetMonthlyRevenueBreakdownResponse = zod.array(
+  GetMonthlyRevenueBreakdownResponseItem,
+);
+
+/**
  * @summary Bundle a user's profile, company, members, and recent audit log
  */
 export const GetBackofficeUserDetailParams = zod.object({

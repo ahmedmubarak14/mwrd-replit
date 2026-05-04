@@ -59,6 +59,7 @@ import type {
   Dn,
   EditQuoteBody,
   FavoriteList,
+  GetMonthlyRevenueBreakdownParams,
   Grn,
   HealthStatus,
   InviteCompanyMemberBody,
@@ -81,6 +82,7 @@ import type {
   MarkAllNotificationsRead200,
   MasterProduct,
   MasterProductListResponse,
+  MonthlyRevenuePoint,
   Notification,
   Offer,
   OfferListResponse,
@@ -8401,6 +8403,115 @@ export const useInviteInternalUser = <
 > => {
   return useMutation(getInviteInternalUserMutationOptions(options));
 };
+
+/**
+ * @summary Monthly sales + margin aggregates for the dashboard chart
+ */
+export const getGetMonthlyRevenueBreakdownUrl = (
+  params?: GetMonthlyRevenueBreakdownParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/backoffice/revenue-breakdown?${stringifiedParams}`
+    : `/api/backoffice/revenue-breakdown`;
+};
+
+export const getMonthlyRevenueBreakdown = async (
+  params?: GetMonthlyRevenueBreakdownParams,
+  options?: RequestInit,
+): Promise<MonthlyRevenuePoint[]> => {
+  return customFetch<MonthlyRevenuePoint[]>(
+    getGetMonthlyRevenueBreakdownUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetMonthlyRevenueBreakdownQueryKey = (
+  params?: GetMonthlyRevenueBreakdownParams,
+) => {
+  return [
+    `/api/backoffice/revenue-breakdown`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetMonthlyRevenueBreakdownQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMonthlyRevenueBreakdown>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetMonthlyRevenueBreakdownParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMonthlyRevenueBreakdown>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetMonthlyRevenueBreakdownQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMonthlyRevenueBreakdown>>
+  > = ({ signal }) =>
+    getMonthlyRevenueBreakdown(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMonthlyRevenueBreakdown>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMonthlyRevenueBreakdownQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMonthlyRevenueBreakdown>>
+>;
+export type GetMonthlyRevenueBreakdownQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Monthly sales + margin aggregates for the dashboard chart
+ */
+
+export function useGetMonthlyRevenueBreakdown<
+  TData = Awaited<ReturnType<typeof getMonthlyRevenueBreakdown>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetMonthlyRevenueBreakdownParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMonthlyRevenueBreakdown>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMonthlyRevenueBreakdownQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Bundle a user's profile, company, members, and recent audit log
