@@ -13,6 +13,7 @@ import {
   listAuditLog,
   getPlatformSettings, updatePlatformSettings,
   inviteInternalUser, adminCreateAccount, getBackofficeUserDetail,
+  getBackofficeDashboardStats,
   listPOsForUser,
   getDashboardStats,
   listThreeWayMatchQueue,
@@ -26,7 +27,7 @@ const router = Router();
 router.get("/backoffice/dashboard-stats", requireBackofficeAuth, async (_req, res) => {
   try {
     const auth = res.locals.auth!;
-    const stats = await getDashboardStats(auth.companyId, "admin");
+    const stats = await getBackofficeDashboardStats(auth.userId);
     res.json(stats);
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });

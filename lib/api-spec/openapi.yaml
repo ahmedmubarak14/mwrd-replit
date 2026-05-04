@@ -3413,17 +3413,37 @@ components:
           type: integer
         held_quotes:
           type: integer
+        pending_product_requests:
+          type: integer
+        three_way_match_pending:
+          type: integer
         active_clients:
           type: integer
         active_suppliers:
           type: integer
         total_rfqs_open:
           type: integer
+        total_orders:
+          type: integer
+        total_sales_sar:
+          type: number
         recent_orders:
           type: array
           items:
             $ref: "#/components/schemas/PO"
-      required: [pending_leads, pending_kyc, pending_offers, held_quotes, active_clients, active_suppliers, total_rfqs_open]
+      required:
+        - pending_leads
+        - pending_kyc
+        - pending_offers
+        - held_quotes
+        - pending_product_requests
+        - three_way_match_pending
+        - active_clients
+        - active_suppliers
+        - total_rfqs_open
+        - total_orders
+        - total_sales_sar
+        - recent_orders
 
     UserListResponse:
       type: object

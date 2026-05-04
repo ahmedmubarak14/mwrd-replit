@@ -1528,6 +1528,68 @@ export async function reactivateUser(userId: string, actorAdminId: string): Prom
   return updated;
 }
 
+export interface BackofficeDashboardStats {
+  pending_leads: number;
+  pending_kyc: number;
+  pending_offers: number;
+  held_quotes: number;
+  pending_product_requests: number;
+  three_way_match_pending: number;
+  active_clients: number;
+  active_suppliers: number;
+  total_rfqs_open: number;
+  total_orders: number;
+  total_sales_sar: number;
+  recent_orders: PO[];
+}
+
+// Admin-side overview for the backoffice dashboard. The previous wiring
+// reused the client/supplier `getDashboardStats` shape, which silently
+// returned the wrong field set — the page rendered zeroes everywhere. This
+// computes the actual queue counts so ops can see what needs attention.
+export async function getBackofficeDashboardStats(actorAdminId: string): Promise<BackofficeDashboardStats> {
+  void actorAdminId;
+  const allUsers = [...users.values()];
+  const allOffers = [...offers.values()];
+  const allQuotes = [...quotes.values()];
+  const allRfqs = [...rfqs.values()];
+  const allPars = [...productAdditionRequests.values()];
+  const allCpos = [...pos.values()].filter((p) => p.type === 'CPO');
+
+  const completedCpos = allCpos.filter((p) => p.status === 'completed');
+  const recent_orders = [...allCpos]
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, 6);
+
+  // Three-way match: any CPO with a GRN that hasn't paid yet.
+  const grnCpoIds = new Set([...grns.values()].map((g) => g.cpo_id));
+  const paidCpoIds = new Set(
+    [...invoices.values()].filter((i) => i.status === 'paid').map((i) => i.cpo_id),
+  );
+  const three_way_match_pending = allCpos.filter(
+    (p) => grnCpoIds.has(p.id) && !paidCpoIds.has(p.id),
+  ).length;
+
+  return {
+    pending_leads: allUsers.filter((u) => u.status === 'pending_callback').length,
+    pending_kyc: allUsers.filter(
+      (u) =>
+        u.status === 'pending_kyc' ||
+        (u.activation_status === 'activated' && u.status === 'callback_completed'),
+    ).length,
+    pending_offers: allOffers.filter((o) => o.approval_status === 'pending').length,
+    held_quotes: allQuotes.filter((q) => q.status === 'pending_admin_review').length,
+    pending_product_requests: allPars.filter((p) => p.status === 'submitted' || p.status === 'under_review').length,
+    three_way_match_pending,
+    active_clients: allUsers.filter((u) => u.role === 'client' && u.status === 'active').length,
+    active_suppliers: allUsers.filter((u) => u.role === 'supplier' && u.status === 'active').length,
+    total_rfqs_open: allRfqs.filter((r) => r.status === 'open' || r.status === 'quoted').length,
+    total_orders: allCpos.length,
+    total_sales_sar: completedCpos.reduce((s, p) => s + p.total_sar, 0),
+    recent_orders,
+  };
+}
+
 export async function getDashboardStats(companyId: string, role: string): Promise<{
   open_rfqs: number;
   pending_quotes: number;

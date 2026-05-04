@@ -1674,61 +1674,63 @@ export const GetBackofficeDashboardStatsResponse = zod.object({
   pending_kyc: zod.number(),
   pending_offers: zod.number(),
   held_quotes: zod.number(),
+  pending_product_requests: zod.number(),
+  three_way_match_pending: zod.number(),
   active_clients: zod.number(),
   active_suppliers: zod.number(),
   total_rfqs_open: zod.number(),
-  recent_orders: zod
-    .array(
-      zod.object({
-        id: zod.string(),
-        po_number: zod.string(),
-        type: zod.string(),
-        transaction_ref: zod.string().optional(),
-        client_company_id: zod.string().optional(),
-        supplier_company_id: zod.string().optional(),
-        status: zod.string(),
-        total_sar: zod.number(),
-        items: zod
-          .array(
-            zod.object({
-              id: zod.string(),
-              master_product_id: zod.string().optional(),
-              name_en: zod.string(),
-              qty: zod.number(),
-              pack_type: zod.string().optional(),
-              unit_price_sar: zod.number(),
-              total_sar: zod.number(),
-            }),
-          )
-          .optional(),
-        delivery_notes: zod
-          .array(
-            zod.object({
-              id: zod.string(),
-              dn_number: zod.string(),
-              spo_id: zod.string(),
-              courier: zod.string().optional(),
-              tracking_number: zod.string().optional(),
-              dispatch_date: zod.string().optional(),
-              expected_delivery_date: zod.string().optional(),
-              items: zod
-                .array(
-                  zod.object({
-                    id: zod.string().optional(),
-                    master_product_id: zod.string().optional(),
-                    name_en: zod.string(),
-                    qty_dispatched: zod.number(),
-                    notes: zod.string().optional(),
-                  }),
-                )
-                .optional(),
-            }),
-          )
-          .optional(),
-        created_at: zod.string().optional(),
-      }),
-    )
-    .optional(),
+  total_orders: zod.number(),
+  total_sales_sar: zod.number(),
+  recent_orders: zod.array(
+    zod.object({
+      id: zod.string(),
+      po_number: zod.string(),
+      type: zod.string(),
+      transaction_ref: zod.string().optional(),
+      client_company_id: zod.string().optional(),
+      supplier_company_id: zod.string().optional(),
+      status: zod.string(),
+      total_sar: zod.number(),
+      items: zod
+        .array(
+          zod.object({
+            id: zod.string(),
+            master_product_id: zod.string().optional(),
+            name_en: zod.string(),
+            qty: zod.number(),
+            pack_type: zod.string().optional(),
+            unit_price_sar: zod.number(),
+            total_sar: zod.number(),
+          }),
+        )
+        .optional(),
+      delivery_notes: zod
+        .array(
+          zod.object({
+            id: zod.string(),
+            dn_number: zod.string(),
+            spo_id: zod.string(),
+            courier: zod.string().optional(),
+            tracking_number: zod.string().optional(),
+            dispatch_date: zod.string().optional(),
+            expected_delivery_date: zod.string().optional(),
+            items: zod
+              .array(
+                zod.object({
+                  id: zod.string().optional(),
+                  master_product_id: zod.string().optional(),
+                  name_en: zod.string(),
+                  qty_dispatched: zod.number(),
+                  notes: zod.string().optional(),
+                }),
+              )
+              .optional(),
+          }),
+        )
+        .optional(),
+      created_at: zod.string().optional(),
+    }),
+  ),
 });
 
 /**

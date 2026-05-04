@@ -12,8 +12,12 @@ export interface BackofficeDashboardStats {
   pending_kyc: number;
   pending_offers: number;
   held_quotes: number;
+  pending_product_requests: number;
+  three_way_match_pending: number;
   active_clients: number;
   active_suppliers: number;
   total_rfqs_open: number;
-  recent_orders?: Po[];
+  total_orders: number;
+  total_sales_sar: number;
+  recent_orders: Po[];
 }
