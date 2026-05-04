@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Plus,
   Users01,
+  UsersPlus,
   Shield01,
   GitBranch01,
   MarkerPin01,
@@ -33,11 +34,12 @@ import {
   Copy01,
 } from "@untitledui/icons";
 
-type Tab = "users" | "roles" | "approval-tree" | "addresses" | "billing";
+type Tab = "users" | "roles" | "user-groups" | "approval-tree" | "addresses" | "billing";
 
 const TABS: { id: Tab; label: string; icon: React.ComponentType<any> }[] = [
   { id: "users", label: "Users", icon: Users01 },
   { id: "roles", label: "Roles", icon: Shield01 },
+  { id: "user-groups", label: "User Groups", icon: UsersPlus },
   { id: "approval-tree", label: "Approval Tree", icon: GitBranch01 },
   { id: "addresses", label: "Addresses", icon: MarkerPin01 },
   { id: "billing", label: "Billing Details", icon: CreditCard01 },
@@ -129,9 +131,15 @@ const inputCls =
   "block w-full rounded-lg border border-[rgb(228,231,236)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(255,109,67)]/30 focus:border-[rgb(255,109,67)]";
 
 function tabFromPath(pathname: string): Tab {
-  const m = pathname.match(/\/account\/?(users|roles|approval-tree|addresses|billing)?/);
+  const m = pathname.match(/\/account\/?(users|roles|user-groups|approval-tree|addresses|billing)?/);
   const slug = m?.[1];
-  if (slug === "roles" || slug === "approval-tree" || slug === "addresses" || slug === "billing") return slug;
+  if (
+    slug === "roles" ||
+    slug === "user-groups" ||
+    slug === "approval-tree" ||
+    slug === "addresses" ||
+    slug === "billing"
+  ) return slug;
   return "users";
 }
 
@@ -149,11 +157,11 @@ export default function AccountPage() {
   });
 
   const { data: members, isLoading: membersLoading } = useListCompanyMembers({
-    query: { enabled: activeTab === "users" || activeTab === "approval-tree", queryKey: getListCompanyMembersQueryKey() },
+    query: { enabled: activeTab === "users" || activeTab === "approval-tree" || activeTab === "user-groups", queryKey: getListCompanyMembersQueryKey() },
   });
 
   const { data: roles, isLoading: rolesLoading } = useListCompanyRoles({
-    query: { enabled: activeTab === "roles" || activeTab === "users", queryKey: getListCompanyRolesQueryKey() },
+    query: { enabled: activeTab === "roles" || activeTab === "users" || activeTab === "user-groups", queryKey: getListCompanyRolesQueryKey() },
   });
 
   const { data: approvalTree, isLoading: approvalLoading } = useListApprovalTree({
@@ -382,6 +390,70 @@ export default function AccountPage() {
               })}
               {(roles ?? []).length === 0 && (
                 <p className="col-span-full text-sm text-[rgb(152,162,179)] text-center py-8">No roles defined yet.</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* User Groups — view-only grouping by role */}
+      {activeTab === "user-groups" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-[rgb(16,24,40)]">User Groups</h2>
+              <p className="mt-0.5 text-xs text-[rgb(102,112,133)]">
+                Users grouped by role. Edit memberships under <Link href="/account/users" className="text-[rgb(255,109,67)] hover:underline">Users</Link>.
+              </p>
+            </div>
+          </div>
+          {membersLoading || rolesLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-xl" />)}
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {(roles ?? []).map((role) => {
+                const groupMembers = (members ?? []).filter((m) => m.company_role_id === role.id);
+                return (
+                  <div key={role.id} className="bg-white rounded-xl border border-[rgb(228,231,236)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-[rgb(16,24,40)]">{role.name}</p>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border bg-[rgb(242,244,247)] text-[rgb(102,112,133)] border-[rgb(228,231,236)]">
+                        {groupMembers.length} {groupMembers.length === 1 ? "user" : "users"}
+                      </span>
+                    </div>
+                    <ul className="mt-3 space-y-1 flex-1">
+                      {groupMembers.length === 0 ? (
+                        <li className="text-xs text-[rgb(152,162,179)] italic">No users in this group yet.</li>
+                      ) : (
+                        groupMembers.slice(0, 8).map((m) => (
+                          <li key={m.id} className="text-sm text-[rgb(52,64,84)] truncate" data-testid={`user-group-member-${m.id}`}>
+                            {m.user_id}
+                          </li>
+                        ))
+                      )}
+                      {groupMembers.length > 8 && (
+                        <li className="text-xs text-[rgb(152,162,179)]">+{groupMembers.length - 8} more</li>
+                      )}
+                    </ul>
+                    {(role.permissions?.length ?? 0) > 0 && (
+                      <div className="mt-3 pt-3 border-t border-[rgb(242,244,247)] flex flex-wrap gap-1">
+                        {role.permissions!.slice(0, 4).map((p, i) => (
+                          <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border bg-[rgb(242,244,247)] text-[rgb(102,112,133)] border-[rgb(228,231,236)]">{p}</span>
+                        ))}
+                        {(role.permissions!.length ?? 0) > 4 && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border bg-[rgb(242,244,247)] text-[rgb(102,112,133)] border-[rgb(228,231,236)]">+{role.permissions!.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {(roles ?? []).length === 0 && (
+                <p className="col-span-full text-sm text-[rgb(152,162,179)] text-center py-8">
+                  No roles defined yet. Create one under Roles to start grouping users.
+                </p>
               )}
             </div>
           )}

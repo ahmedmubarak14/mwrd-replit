@@ -1,22 +1,90 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { useGetMe, useListAddresses } from "@workspace/api-client-react";
+import {
+  useGetMe,
+  useListAddresses,
+  useListCategories,
+  useCompleteOnboarding,
+  getGetMeQueryKey,
+  getListCategoriesQueryKey,
+} from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building02, MarkerPin01 } from "@untitledui/icons";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Building02, MarkerPin01, Tag01 } from "@untitledui/icons";
 
-type Tab = "company" | "addresses";
+type Tab = "company" | "categories" | "addresses";
 
 const TABS: { id: Tab; label: string; icon: React.ComponentType<any> }[] = [
   { id: "company", label: "Company Info", icon: Building02 },
+  { id: "categories", label: "Categories", icon: Tag01 },
   { id: "addresses", label: "Addresses", icon: MarkerPin01 },
 ];
 
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState<Tab>("company");
-  const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({ company: null, addresses: null });
+  const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({ company: null, categories: null, addresses: null });
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: user, isLoading: userLoading } = useGetMe();
   const { data: addresses, isLoading: addressesLoading } = useListAddresses();
+  const { data: categoriesList, isLoading: categoriesLoading } = useListCategories({
+    query: { queryKey: getListCategoriesQueryKey() },
+  });
+  const updateOnboarding = useCompleteOnboarding();
+
+  const rootCategories = useMemo(
+    () => (categoriesList ?? []).filter((c) => !c.parent_id),
+    [categoriesList],
+  );
+
+  const initialCategories = useMemo(
+    () => new Set(user?.company?.categories_served ?? []),
+    [user?.company?.categories_served],
+  );
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<Set<string>>(initialCategories);
+  const [dirty, setDirty] = useState(false);
+
+  // Re-seed when /me refetches (e.g. after a save). Drop the dirty flag too
+  // so the Save button collapses back into a clean state.
+  useEffect(() => {
+    setSelectedCategoryIds(new Set(user?.company?.categories_served ?? []));
+    setDirty(false);
+  }, [user?.company?.categories_served]);
+
+  const toggleCategory = (id: string) => {
+    setSelectedCategoryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+    setDirty(true);
+  };
+
+  const saveCategories = () => {
+    if (selectedCategoryIds.size === 0) {
+      toast({
+        variant: "destructive",
+        title: "Pick at least one category",
+        description: "We use this to route matching RFQs your way.",
+      });
+      return;
+    }
+    updateOnboarding.mutate(
+      { data: { categories_served: [...selectedCategoryIds] } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+          toast({ title: "Categories updated" });
+        },
+        onError: (err: any) =>
+          toast({ variant: "destructive", title: "Could not save", description: err?.message ?? "Please try again." }),
+      },
+    );
+  };
 
   const handleTabKey = (e: React.KeyboardEvent<HTMLButtonElement>, idx: number) => {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Home" && e.key !== "End") return;
@@ -96,6 +164,65 @@ export default function AccountPage() {
                   </p>
                 </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "categories" && (
+          <div role="tabpanel" id="panel-categories" aria-labelledby="tab-categories" className="bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-6">
+            <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+              <div>
+                <h2 className="text-sm font-semibold text-[rgb(16,24,40)]">Categories you serve</h2>
+                <p className="mt-0.5 text-xs text-[rgb(102,112,133)]">
+                  Pick all that apply — we route matching RFQs to suppliers serving the right categories.
+                </p>
+              </div>
+              {dirty && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={saveCategories}
+                  disabled={updateOnboarding.isPending}
+                  data-testid="save-categories"
+                >
+                  {updateOnboarding.isPending ? "Saving…" : "Save changes"}
+                </Button>
+              )}
+            </div>
+            {categoriesLoading ? (
+              <div className="grid grid-cols-2 gap-2">{[...Array(8)].map((_, i) => <Skeleton key={i} className="h-9 w-full" />)}</div>
+            ) : rootCategories.length === 0 ? (
+              <p className="text-sm text-[rgb(152,162,179)] py-6 text-center">No categories available yet.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {rootCategories.map((cat) => {
+                    const checked = selectedCategoryIds.has(cat.id);
+                    return (
+                      <label
+                        key={cat.id}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm transition-colors ${
+                          checked
+                            ? "bg-[rgb(255,109,67)]/10 border-[rgb(255,109,67)] text-[rgb(194,84,28)]"
+                            : "bg-white border-[rgb(228,231,236)] text-[rgb(52,64,84)] hover:border-[rgb(208,213,221)]"
+                        }`}
+                        data-testid={`account-cat-${cat.slug}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleCategory(cat.id)}
+                          className="h-4 w-4 rounded border-[rgb(208,213,221)] text-[rgb(255,109,67)] focus:ring-[rgb(255,109,67)]"
+                        />
+                        <span className="truncate">{cat.name_en}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <p className="mt-3 text-xs text-[rgb(152,162,179)]">
+                  Selected: <span className="font-medium text-[rgb(52,64,84)]">{selectedCategoryIds.size}</span> of {rootCategories.length}
+                </p>
+              </>
             )}
           </div>
         )}

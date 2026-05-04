@@ -129,6 +129,9 @@ function Router() {
       <Route path="/account/roles">
         {(params) => <ProtectedRoute component={AccountPage} path="/account/roles" {...params} />}
       </Route>
+      <Route path="/account/user-groups">
+        {(params) => <ProtectedRoute component={AccountPage} path="/account/user-groups" {...params} />}
+      </Route>
       <Route path="/account/approval-tree">
         {(params) => <ProtectedRoute component={AccountPage} path="/account/approval-tree" {...params} />}
       </Route>
