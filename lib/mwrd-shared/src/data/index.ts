@@ -1374,6 +1374,31 @@ export async function listMargins(): Promise<Margin[]> {
   return [...margins.values()];
 }
 
+export interface BackofficeUserDetail {
+  user: User;
+  company: Company | null;
+  members: CompanyMember[];
+  audit: AuditLog[];
+}
+
+// Single round-trip the backoffice user drawer needs: profile + company +
+// members on the same company + recent audit entries touching the user
+// (either as actor or as the entity acted upon).
+export async function getBackofficeUserDetail(userId: string, actorAdminId: string): Promise<BackofficeUserDetail | null> {
+  void actorAdminId;
+  const user = users.get(userId);
+  if (!user) return null;
+  const company = companies.get(user.company_id) ?? null;
+  const members = company
+    ? [...companyMembers.values()].filter((m) => m.company_id === company.id)
+    : [];
+  const audit = [...auditLogs.values()]
+    .filter((a) => a.entity_id === userId || a.actor_user_id === userId)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, 25);
+  return { user, company, members, audit };
+}
+
 export async function listAuditLog(filters: { actor_user_id?: string; entity_type?: string; page?: number } = {}, actorAdminId: string): Promise<AuditLog[]> {
   void actorAdminId;
   return [...auditLogs.values()].filter((a) => {

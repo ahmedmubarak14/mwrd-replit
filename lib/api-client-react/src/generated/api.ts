@@ -37,6 +37,7 @@ import type {
   AwardFullBasketBody,
   AwardPerLineBody,
   BackofficeDashboardStats,
+  BackofficeUserDetail,
   Bundle,
   CallbackCompleteBody,
   Cart,
@@ -8400,6 +8401,95 @@ export const useInviteInternalUser = <
 > => {
   return useMutation(getInviteInternalUserMutationOptions(options));
 };
+
+/**
+ * @summary Bundle a user's profile, company, members, and recent audit log
+ */
+export const getGetBackofficeUserDetailUrl = (id: string) => {
+  return `/api/backoffice/users/${id}/detail`;
+};
+
+export const getBackofficeUserDetail = async (
+  id: string,
+  options?: RequestInit,
+): Promise<BackofficeUserDetail> => {
+  return customFetch<BackofficeUserDetail>(getGetBackofficeUserDetailUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetBackofficeUserDetailQueryKey = (id: string) => {
+  return [`/api/backoffice/users/${id}/detail`] as const;
+};
+
+export const getGetBackofficeUserDetailQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBackofficeUserDetail>>,
+  TError = ErrorType<unknown>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBackofficeUserDetail>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetBackofficeUserDetailQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getBackofficeUserDetail>>
+  > = ({ signal }) =>
+    getBackofficeUserDetail(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBackofficeUserDetail>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBackofficeUserDetailQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBackofficeUserDetail>>
+>;
+export type GetBackofficeUserDetailQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Bundle a user's profile, company, members, and recent audit log
+ */
+
+export function useGetBackofficeUserDetail<
+  TData = Awaited<ReturnType<typeof getBackofficeUserDetail>>,
+  TError = ErrorType<unknown>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBackofficeUserDetail>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBackofficeUserDetailQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Admin-create a client or supplier account (returns activation link)

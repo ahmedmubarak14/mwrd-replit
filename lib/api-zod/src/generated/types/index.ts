@@ -27,6 +27,7 @@ export * from "./authResponse";
 export * from "./awardFullBasketBody";
 export * from "./awardPerLineBody";
 export * from "./backofficeDashboardStats";
+export * from "./backofficeUserDetail";
 export * from "./bundle";
 export * from "./bundleItem";
 export * from "./callbackCompleteBody";

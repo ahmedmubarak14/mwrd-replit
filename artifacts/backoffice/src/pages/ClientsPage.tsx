@@ -10,11 +10,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Power01, Power02, UserSquare, Plus } from "@untitledui/icons";
 import { CreateAccountDialog } from "@/components/CreateAccountDialog";
+import { UserDetailDrawer } from "@/components/UserDetailDrawer";
 
 export default function ClientsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
+  const [openUserId, setOpenUserId] = useState<string | null>(null);
 
   const { data: clients, isLoading } = useListClients();
   const suspendMutation = useSuspendUser();
@@ -77,7 +79,12 @@ export default function ClientsPage() {
             </thead>
             <tbody className="divide-y divide-[rgb(242,244,247)]">
               {rows.map((client) => (
-                <tr key={client.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
+                <tr
+                  key={client.id}
+                  className="hover:bg-[rgb(249,250,251)] transition-colors cursor-pointer"
+                  onClick={() => setOpenUserId(client.id)}
+                  data-testid={`row-client-${client.id}`}
+                >
                   <td className="px-5 py-3.5">
                     <div className="font-medium text-[rgb(16,24,40)]">{client.real_name}</div>
                     <div className="text-xs text-[rgb(102,112,133)] mt-0.5">{client.email}</div>
@@ -91,7 +98,7 @@ export default function ClientsPage() {
                       {client.status}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-right">
+                  <td className="px-5 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                     {client.status === "active" ? (
                       <button
                         onClick={() => handleSuspend(client.id)}
@@ -120,6 +127,7 @@ export default function ClientsPage() {
       </div>
 
       <CreateAccountDialog open={createOpen} onOpenChange={setCreateOpen} accountType="client" />
+      <UserDetailDrawer userId={openUserId} accountType="client" onOpenChange={(o) => !o && setOpenUserId(null)} />
     </div>
   );
 }

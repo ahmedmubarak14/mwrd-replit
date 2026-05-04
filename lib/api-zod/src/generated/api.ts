@@ -2465,6 +2465,62 @@ export const InviteInternalUserBody = zod.object({
 });
 
 /**
+ * @summary Bundle a user's profile, company, members, and recent audit log
+ */
+export const GetBackofficeUserDetailParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetBackofficeUserDetailResponse = zod.object({
+  user: zod.object({
+    id: zod.string(),
+    email: zod.string(),
+    role: zod.string(),
+    real_name: zod.string(),
+    phone: zod.string().optional(),
+    platform_alias: zod.string(),
+    company_id: zod.string(),
+    status: zod.string(),
+    activation_status: zod.string().optional(),
+    language: zod.string().optional(),
+    onboarding_completed: zod.boolean().optional(),
+    created_at: zod.string().optional(),
+  }),
+  company: zod
+    .object({
+      id: zod.string(),
+      real_name: zod.string(),
+      platform_alias: zod.string(),
+      type: zod.string(),
+      cr_number: zod.string().nullish(),
+      vat_number: zod.string().nullish(),
+      status: zod.string(),
+      onboarding_completed: zod.boolean().optional(),
+      subscription_tier: zod.string().optional(),
+      categories_served: zod.array(zod.string()).optional(),
+    })
+    .nullish(),
+  members: zod.array(
+    zod.object({
+      id: zod.string(),
+      company_id: zod.string(),
+      user_id: zod.string(),
+      company_role_id: zod.string().optional(),
+    }),
+  ),
+  audit: zod.array(
+    zod.object({
+      id: zod.string(),
+      actor_user_id: zod.string(),
+      action: zod.string(),
+      entity_type: zod.string(),
+      entity_id: zod.string(),
+      created_at: zod.string(),
+    }),
+  ),
+});
+
+/**
  * @summary Admin-create a client or supplier account (returns activation link)
  */
 export const AdminCreateAccountBody = zod.object({

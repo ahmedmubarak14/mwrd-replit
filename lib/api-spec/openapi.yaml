@@ -1928,6 +1928,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
 
+  /backoffice/users/{id}/detail:
+    get:
+      operationId: getBackofficeUserDetail
+      tags: [backoffice]
+      summary: Bundle a user's profile, company, members, and recent audit log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User detail bundle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BackofficeUserDetail"
+
   /backoffice/users/create:
     post:
       operationId: adminCreateAccount
@@ -3561,6 +3580,24 @@ components:
           type: string
           enum: [admin, ops, finance, cs]
       required: [email, full_name, role]
+
+    BackofficeUserDetail:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        company:
+          $ref: "#/components/schemas/CompanyResponse"
+          nullable: true
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompanyMember"
+        audit:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+      required: [user, members, audit]
 
     AdminCreateAccountBody:
       type: object

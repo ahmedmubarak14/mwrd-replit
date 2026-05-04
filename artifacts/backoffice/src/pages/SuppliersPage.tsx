@@ -10,11 +10,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Power01, Power02, Building02, Plus } from "@untitledui/icons";
 import { CreateAccountDialog } from "@/components/CreateAccountDialog";
+import { UserDetailDrawer } from "@/components/UserDetailDrawer";
 
 export default function SuppliersPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
+  const [openUserId, setOpenUserId] = useState<string | null>(null);
 
   const { data: suppliers, isLoading } = useListSuppliers();
   const suspendMutation = useSuspendUser();
@@ -77,7 +79,12 @@ export default function SuppliersPage() {
             </thead>
             <tbody className="divide-y divide-[rgb(242,244,247)]">
               {rows.map((supplier) => (
-                <tr key={supplier.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
+                <tr
+                  key={supplier.id}
+                  className="hover:bg-[rgb(249,250,251)] transition-colors cursor-pointer"
+                  onClick={() => setOpenUserId(supplier.id)}
+                  data-testid={`row-supplier-${supplier.id}`}
+                >
                   <td className="px-5 py-3.5">
                     <div className="font-medium text-[rgb(16,24,40)]">{supplier.real_name}</div>
                     <div className="text-xs text-[rgb(102,112,133)] mt-0.5">{supplier.email}</div>
@@ -91,7 +98,7 @@ export default function SuppliersPage() {
                       {supplier.status}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-right">
+                  <td className="px-5 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                     {supplier.status === "active" ? (
                       <button
                         onClick={() => handleSuspend(supplier.id)}
@@ -120,6 +127,7 @@ export default function SuppliersPage() {
       </div>
 
       <CreateAccountDialog open={createOpen} onOpenChange={setCreateOpen} accountType="supplier" />
+      <UserDetailDrawer userId={openUserId} accountType="supplier" onOpenChange={(o) => !o && setOpenUserId(null)} />
     </div>
   );
 }

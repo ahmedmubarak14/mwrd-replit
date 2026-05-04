@@ -780,6 +780,13 @@ export interface InviteInternalUserBody {
   role: InviteInternalUserBodyRole;
 }
 
+export interface BackofficeUserDetail {
+  user: UserResponse;
+  company?: CompanyResponse | null;
+  members: CompanyMember[];
+  audit: AuditLog[];
+}
+
 export type AdminCreateAccountBodyAccountType =
   (typeof AdminCreateAccountBodyAccountType)[keyof typeof AdminCreateAccountBodyAccountType];
 
