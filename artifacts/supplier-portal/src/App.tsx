@@ -17,6 +17,7 @@ import ProductRequestsPage from "@/pages/ProductRequestsPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import AccountPage from "@/pages/AccountPage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import ActivatePage from "@/pages/ActivatePage";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 
 const queryClient = new QueryClient({
@@ -52,6 +53,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={LoginPage} />
+      <Route path="/activate" component={ActivatePage} />
       <Route path="/onboarding" component={OnboardingRoute} />
 
       <Route path="/">

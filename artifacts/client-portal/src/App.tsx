@@ -25,6 +25,7 @@ import OrderDetailPage from "@/pages/OrderDetailPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import AccountPage from "@/pages/AccountPage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import ActivatePage from "@/pages/ActivatePage";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 
 const queryClient = new QueryClient({
@@ -70,6 +71,7 @@ function Router() {
       {/* Public Routes */}
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
+      <Route path="/activate" component={ActivatePage} />
       <Route path="/onboarding" component={OnboardingRoute} />
 
       {/* Protected Routes */}
