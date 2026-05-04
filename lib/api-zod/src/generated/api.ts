@@ -2465,6 +2465,17 @@ export const InviteInternalUserBody = zod.object({
 });
 
 /**
+ * @summary Admin-create a client or supplier account (returns activation link)
+ */
+export const AdminCreateAccountBody = zod.object({
+  full_name: zod.string(),
+  email: zod.string(),
+  phone: zod.string(),
+  account_type: zod.enum(["client", "supplier"]),
+  company_name: zod.string(),
+});
+
+/**
  * @summary Suspend a user
  */
 export const SuspendUserParams = zod.object({

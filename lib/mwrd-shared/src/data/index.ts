@@ -129,6 +129,79 @@ export async function registerPublic(payload: {
   return { user, message: "Registration received. We'll call you within 24 hours to verify your details." };
 }
 
+// Admin-driven account creation. Combines registerPublic + markCallbackComplete
+// in one shot: spins up the company, the user (already callback-completed),
+// and the activation token, then returns the activation link so ops can hand
+// it off out-of-band (no email infra in MVP).
+export async function adminCreateAccount(
+  payload: {
+    full_name: string;
+    email: string;
+    phone: string;
+    account_type: 'client' | 'supplier';
+    company_name: string;
+  },
+  actorAdminId: string,
+): Promise<{ user: User; company: Company; activation_token: string; activation_link: string }> {
+  const existing = [...users.values()].find((u) => u.email === payload.email);
+  if (existing) throw new Error('Email already registered');
+
+  const userId = newId();
+  const companyId = newId();
+  const takenAliases = [...companies.values()].map((c) => c.platform_alias);
+  const alias =
+    payload.account_type === 'client'
+      ? generateClientAlias()
+      : generateSupplierAlias(takenAliases);
+
+  const company: Company = {
+    id: companyId,
+    real_name: payload.company_name,
+    platform_alias: alias,
+    type: payload.account_type,
+    cr_number: null,
+    vat_number: null,
+    status: 'callback_completed',
+    kyc_docs: [],
+    categories_served: payload.account_type === 'supplier' ? [] : undefined,
+    signup_source: 'admin_invited',
+    signup_intent: null,
+    expected_monthly_volume_sar: null,
+    subscription_tier: 'enterprise',
+    onboarding_completed: false,
+    created_at: nowISO(),
+    updated_at: nowISO(),
+  };
+
+  const activation_token = `act_${uuidv4().replace(/-/g, '')}`;
+  const user: User = {
+    id: userId,
+    email: payload.email,
+    password_hash: '',
+    role: payload.account_type,
+    real_name: payload.full_name,
+    phone: payload.phone,
+    platform_alias: alias,
+    company_id: companyId,
+    status: 'callback_completed',
+    activation_status: 'callback_completed',
+    callback_notes: 'Admin-created account',
+    activation_token,
+    language: 'en',
+    onboarding_completed: false,
+    created_at: nowISO(),
+    updated_at: nowISO(),
+  };
+
+  companies.set(companyId, company);
+  users.set(userId, user);
+  recordAudit(actorAdminId, 'ADMIN_CREATED_ACCOUNT', 'User', userId, null, { email: payload.email, role: payload.account_type, company_id: companyId });
+  // eslint-disable-next-line no-console
+  console.log(`[ACTIVATION LINK] /activate?token=${activation_token}`);
+
+  return { user, company, activation_token, activation_link: `/activate?token=${activation_token}` };
+}
+
 export async function markCallbackComplete(userId: string, notes: string, actorAdminId: string): Promise<User> {
   const user = users.get(userId);
   if (!user) throw new Error('User not found');

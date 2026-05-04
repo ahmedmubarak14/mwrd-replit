@@ -12,7 +12,7 @@ import {
   listMargins, setMargin,
   listAuditLog,
   getPlatformSettings, updatePlatformSettings,
-  inviteInternalUser,
+  inviteInternalUser, adminCreateAccount,
   listPOsForUser,
   getDashboardStats,
   listThreeWayMatchQueue,
@@ -121,6 +121,16 @@ router.post("/backoffice/internal-users/invite", requireBackofficeAuth, async (r
     const { email, name, role } = req.body;
     const user = await inviteInternalUser(email, name, role, auth.userId);
     res.status(201).json(user);
+  } catch (e: unknown) {
+    res.status(400).json({ error: (e as Error).message });
+  }
+});
+
+router.post("/backoffice/users/create", requireBackofficeAuth, async (req, res) => {
+  try {
+    const auth = res.locals.auth!;
+    const result = await adminCreateAccount(req.body, auth.userId);
+    res.status(201).json(result);
   } catch (e: unknown) {
     res.status(400).json({ error: (e as Error).message });
   }

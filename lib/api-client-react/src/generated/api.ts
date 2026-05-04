@@ -22,6 +22,8 @@ import type {
   Address,
   AdminApproveProductRequestResponse,
   AdminApproveQuoteBody,
+  AdminCreateAccountBody,
+  AdminCreateAccountResponse,
   AdminListProductRequestsParams,
   AdminListProductsParams,
   ApprovalNode,
@@ -8397,6 +8399,92 @@ export const useInviteInternalUser = <
   TContext
 > => {
   return useMutation(getInviteInternalUserMutationOptions(options));
+};
+
+/**
+ * @summary Admin-create a client or supplier account (returns activation link)
+ */
+export const getAdminCreateAccountUrl = () => {
+  return `/api/backoffice/users/create`;
+};
+
+export const adminCreateAccount = async (
+  adminCreateAccountBody: AdminCreateAccountBody,
+  options?: RequestInit,
+): Promise<AdminCreateAccountResponse> => {
+  return customFetch<AdminCreateAccountResponse>(getAdminCreateAccountUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(adminCreateAccountBody),
+  });
+};
+
+export const getAdminCreateAccountMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminCreateAccount>>,
+    TError,
+    { data: BodyType<AdminCreateAccountBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof adminCreateAccount>>,
+  TError,
+  { data: BodyType<AdminCreateAccountBody> },
+  TContext
+> => {
+  const mutationKey = ["adminCreateAccount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof adminCreateAccount>>,
+    { data: BodyType<AdminCreateAccountBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return adminCreateAccount(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AdminCreateAccountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof adminCreateAccount>>
+>;
+export type AdminCreateAccountMutationBody = BodyType<AdminCreateAccountBody>;
+export type AdminCreateAccountMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Admin-create a client or supplier account (returns activation link)
+ */
+export const useAdminCreateAccount = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminCreateAccount>>,
+    TError,
+    { data: BodyType<AdminCreateAccountBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof adminCreateAccount>>,
+  TError,
+  { data: BodyType<AdminCreateAccountBody> },
+  TContext
+> => {
+  return useMutation(getAdminCreateAccountMutationOptions(options));
 };
 
 /**

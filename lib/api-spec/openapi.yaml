@@ -1928,6 +1928,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
 
+  /backoffice/users/create:
+    post:
+      operationId: adminCreateAccount
+      tags: [backoffice]
+      summary: Admin-create a client or supplier account (returns activation link)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminCreateAccountBody"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCreateAccountResponse"
+
   /backoffice/users/{id}/suspend:
     post:
       operationId: suspendUser
@@ -3542,6 +3561,35 @@ components:
           type: string
           enum: [admin, ops, finance, cs]
       required: [email, full_name, role]
+
+    AdminCreateAccountBody:
+      type: object
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        account_type:
+          type: string
+          enum: [client, supplier]
+        company_name:
+          type: string
+      required: [full_name, email, phone, account_type, company_name]
+
+    AdminCreateAccountResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        company:
+          $ref: "#/components/schemas/CompanyResponse"
+        activation_token:
+          type: string
+        activation_link:
+          type: string
+      required: [user, activation_token, activation_link]
 
     AdminApproveProductRequestResponse:
       type: object

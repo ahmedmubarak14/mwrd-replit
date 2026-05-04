@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
   useListSuppliers,
@@ -7,11 +8,13 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Power01, Power02, Building02 } from "@untitledui/icons";
+import { Power01, Power02, Building02, Plus } from "@untitledui/icons";
+import { CreateAccountDialog } from "@/components/CreateAccountDialog";
 
 export default function SuppliersPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [createOpen, setCreateOpen] = useState(false);
 
   const { data: suppliers, isLoading } = useListSuppliers();
   const suspendMutation = useSuspendUser();
@@ -41,9 +44,18 @@ export default function SuppliersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-[rgb(16,24,40)]">Suppliers</h1>
-        <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">All registered supplier users</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-[rgb(16,24,40)]">Suppliers</h1>
+          <p className="mt-0.5 text-sm text-[rgb(102,112,133)]">All registered supplier users</p>
+        </div>
+        <button
+          onClick={() => setCreateOpen(true)}
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium bg-[rgb(255,109,67)] text-white hover:bg-[rgb(205,56,22)] transition-colors shadow-[0_1px_2px_rgba(16,24,40,0.05)]"
+          data-testid="button-add-supplier"
+        >
+          <Plus className="h-4 w-4" /> Add Supplier
+        </button>
       </div>
 
       <div className="bg-white rounded-xl border border-[rgb(228,231,236)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
@@ -106,6 +118,8 @@ export default function SuppliersPage() {
           </table>
         )}
       </div>
+
+      <CreateAccountDialog open={createOpen} onOpenChange={setCreateOpen} accountType="supplier" />
     </div>
   );
 }

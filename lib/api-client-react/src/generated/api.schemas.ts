@@ -780,6 +780,29 @@ export interface InviteInternalUserBody {
   role: InviteInternalUserBodyRole;
 }
 
+export type AdminCreateAccountBodyAccountType =
+  (typeof AdminCreateAccountBodyAccountType)[keyof typeof AdminCreateAccountBodyAccountType];
+
+export const AdminCreateAccountBodyAccountType = {
+  client: "client",
+  supplier: "supplier",
+} as const;
+
+export interface AdminCreateAccountBody {
+  full_name: string;
+  email: string;
+  phone: string;
+  account_type: AdminCreateAccountBodyAccountType;
+  company_name: string;
+}
+
+export interface AdminCreateAccountResponse {
+  user: UserResponse;
+  company?: CompanyResponse;
+  activation_token: string;
+  activation_link: string;
+}
+
 export interface AdminApproveProductRequestResponse {
   request: ProductAdditionRequest;
   masterProduct: MasterProduct;
